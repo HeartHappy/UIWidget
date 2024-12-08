@@ -4,12 +4,10 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".example.CalendarActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExampleList"
+        android:id="@+id/rvCalendar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,4 +1,4 @@
-package com.social.coco.a_refactor.tools.widget.turntable
+package com.hearthappy.uiwidget.widget.turntable
 
 import android.animation.ObjectAnimator
 import android.content.Context
@@ -14,8 +14,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import com.hearthappy.uiwidget.R
-import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -41,15 +41,13 @@ class TurntableView : View {
     //    private var bitmapRect: RectF? = null
     private val wheelMatrix = Matrix() // 控制转盘的旋转
     private val selectMatrix = Matrix() // 控制转盘的旋转
-    private var currentAngle = 0f // 当前旋转的角度
+    private var offsetAngle=-15f//默认偏移角度
+    private var currentAngle = offsetAngle // 当前旋转的角度
 
-    //记录上次旋转角度
-    private var recordAngle = 0f
-    private var selectDefaultAngle = singleAngle / 2
     private var onSpinEndListener: ((Int) -> Unit)? = null // 回调，返回落脚扇区
-    private val ranges = listOf("")
 
     private var isFinishLottery = false
+    private var lastFinalAngle: Float = 0f  // 新增变量，用于记录上次动画结束的角度
     private val paint = Paint().apply {
         isAntiAlias = true
         style = Paint.Style.FILL
@@ -82,7 +80,7 @@ class TurntableView : View {
 
 
             wheelMatrix.postRotate(currentAngle, centerX, centerY)
-            selectMatrix.postRotate(selectDefaultAngle + currentAngle, centerX, centerY)
+
 
 
             canvas.drawBitmap(bitmap, wheelMatrix, null)
@@ -90,7 +88,10 @@ class TurntableView : View {
                 val textPosition = calculateTextPosition(centerX, centerY, wheelRadius, (i * singleAngle).toFloat() + currentAngle-90, ((i + 1) * singleAngle).toFloat() + currentAngle-90)
                 canvas.drawText("$i", textPosition.first, textPosition.second, paint)
             } //            if (isFinishLottery) {
+            if(isFinishLottery){
+                selectMatrix.postRotate(0f, centerX, centerY)
             canvas.drawBitmap(selectBitmap, selectMatrix, null) //            }
+            }
         }
     }
 
@@ -106,49 +107,56 @@ class TurntableView : View {
 
         return Pair(textX.toFloat(), textY.toFloat())
     }
+    fun startLottery() {
+        isFinishLottery=false
+//        currentAngle=0f
+        val randomIndex = Random.nextInt(12)  // 随机生成抽中的索引，范围0 - 1"
+        println("lastFinalAngle:$lastFinalAngle")
+        val targetAngle = getTargetAngle(randomIndex) +lastFinalAngle-offsetAngle // 获取对应索引的角度
 
-    fun spin() { // 计算随机的旋转角度
-        isFinishLottery = false
-        val randomDegrees = Random.nextInt(360) + 720f // 至少转两圈 //        val randomDegrees = 35 // 至少转两圈
-        val targetAngle = (currentAngle + randomDegrees) % 360 // 动画控制旋转
-        val animator = ObjectAnimator.ofFloat(currentAngle, currentAngle + randomDegrees)
-        animator.duration = 1000
-        animator.addUpdateListener { animation ->
+        // 创建旋转动画，将转盘旋转到对应角度，使得抽中的区域位于12点钟方向
+        val rotateAnimation = ObjectAnimator.ofFloat(currentAngle,targetAngle)
+        rotateAnimation.duration = 1000
+        rotateAnimation.addUpdateListener { animation ->
             currentAngle = animation.animatedValue as Float
             invalidate()
         }
-        animator.doOnEnd { // 动画结束后，计算旋转的最终落脚点
-            val sectorIndex = ceil(currentAngle % 360 / singleAngle).toInt() // 转换到 [0, 360) //            val sectorIndex = calculateSector(finalAngle)
-            val winningSegment = (targetAngle / (360f / equalNumber)).toInt() % equalNumber
-            Log.d(TAG, "spin: $randomDegrees，sectorIndex:$sectorIndex，totalAngle:$currentAngle,winningSegment:$winningSegment")
-            val calculateSectorIndex = calculateSectorIndex(currentAngle, equalNumber)
-            Toast.makeText(context, "选中：$sectorIndex,索引：$calculateSectorIndex", Toast.LENGTH_SHORT).show() //            recordAngle+=spinAngle
-            isFinishLottery = true
-            onSpinEndListener?.invoke(sectorIndex.toInt()) //            currentAngle=0f
-
+        rotateAnimation.doOnEnd {
+            val finalIndex = getIndexFromAngle(targetAngle)
+            isFinishLottery=true
+            lastFinalAngle=targetAngle-offsetAngle
+            val index = getIndexAtTwelveOClock(0, finalIndex)
+            // 这里可以添加逻辑，使用finalIndex和finalAngle去高亮显示对应的扇形区域，比如通过绘制等方式，此处暂未详细实现
+            println("最终在12点钟方向的索引是: ${index}")
+            Toast.makeText(context, "最终在12点钟方向的索引是: ${index}", Toast.LENGTH_SHORT).show()
+            invalidate()
         }
-        animator.start()
-    }
-
-    fun calculateSectorIndex(stopHour: Float, numberOfSectors: Int): Int {
-        // 将小时转换为角度
-        val stopAngle = (stopHour % 12) * 30f // 每个小时间隔30度
-
-        // 计算每个扇形的角度宽度
-        val sectorAngleWidth = 360f / numberOfSectors
-
-        // 计算索引
-        val index = ((stopAngle + 180) % 360 / sectorAngleWidth).toInt() // 加180是为了处理负角度的情况
-
-        return index % numberOfSectors // 确保索引在有效范围内
+        rotateAnimation.interpolator= CustomAccelerateDecelerateInterpolator()
+        rotateAnimation.duration = 7000 // 动画时长，可根据需求调整
+        rotateAnimation.start()
     }
 
 
-    //    private fun calculateSector(angle: Float): Int { // 每个扇区的角度
-    //        val sectorAngle = 360f / equalNumber // 计算角度对应的扇区编号
-    //        val normalizedAngle = (angle + sectorAngle / 2) % 360 // 偏移半个扇区角度对齐12点方向
-    //        return (normalizedAngle / sectorAngle).toInt()
-    //    }
+    // 根据索引获取对应的角度（以圆盘中心为原点，顺时针方向）
+    private fun getTargetAngle(index: Int): Float {
+        return (index * (360f / equalNumber))+3*360
+    }
+
+    // 根据角度反推对应的索引（考虑角度可能存在一定误差，进行适当取整判断）
+    private fun getIndexFromAngle(angle: Float): Int {
+        val normalizedAngle = angle % 360
+        val index = (normalizedAngle / (360f / equalNumber)).roundToInt()
+        return if (index < 0) index + equalNumber else index % equalNumber
+    }
+
+    // 根据已知旋转到某个时钟方向的索引及该时钟方向，获取12点钟方向对应的索引
+    private fun getIndexAtTwelveOClock(currentIndex: Int, clockDirection: Int): Int {
+        val anglePerPiece = 30 // 每一份对应的角度（单位：度）
+        val anglePerHour = 30 // 每个时钟小时对应的角度（单位：度）
+        val rotatedAngle = clockDirection * anglePerHour
+        val offsetIndex = (rotatedAngle / anglePerPiece).toInt()
+        return (currentIndex + (12 - offsetIndex)) % 12
+    }
 
 
     /**
