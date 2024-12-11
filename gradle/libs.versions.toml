@@ -1,19 +1,19 @@
 [versions]
-agp = "8.6.0"
+agp = "7.2.2"
 kotlin = "1.9.0"
 kspVersion = "2.0.10-1.0.24"
-coreKtx = "1.13.1"
+coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.6.1"
-appcompat = "1.7.0"
-material = "1.12.0"
-activity = "1.9.1"
-constraintlayout = "2.1.4"
+appcompat = "1.4.0"
+material = "1.4.0"
+activity = "1.7.0"
+constraintlayout = "2.0.4"
 viewModelAutomation="1.0.4"
 glide = "4.13.2"
 converterGsonVersion = "2.9.0"
-lifecycleVersion = "2.5.0"
+lifecycleVersion = "2.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

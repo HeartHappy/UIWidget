@@ -3,11 +3,10 @@ package com.hearthappy.uiwidget.example.turntable
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.hearthappy.uiwidget.databinding.ActivityTurntableBinding
 import kotlinx.coroutines.CoroutineScope
@@ -15,13 +14,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TurntableActivity : AppCompatActivity() {
-    lateinit var viewBinding: ActivityTurntableBinding
-    val viewModel by viewModels<TurntableViewModel>()
+    private lateinit var viewBinding: ActivityTurntableBinding
+    private lateinit var viewModel: TurntableViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         viewBinding = ActivityTurntableBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -33,7 +32,7 @@ class TurntableActivity : AppCompatActivity() {
                 val titles = it.map { it.title }
                 val prices = it.map { it.price }
                 loadLuckBitmap(it) { bitmaps ->
-                    turntableView.setSourceData(bitmaps.take(10), it.map { it.price.toString() }.take(10))
+                    turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
                 }
 
                 turntableView.onSingleDrawEndListener = { i, s ->

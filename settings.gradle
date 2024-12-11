@@ -20,7 +20,7 @@ dependencyResolutionManagement {
         maven {url("https://jitpack.io")}
     }
 }
-
+enableFeaturePreview('VERSION_CATALOGS')
 rootProject.name = "UIFramework"
 include ':app'
 include ':uiwidget'
