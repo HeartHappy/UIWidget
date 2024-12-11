@@ -5,13 +5,39 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".example.TurntableActivity">
-    <com.hearthappy.uiwidget.widget.turntable.TurntableView
+    tools:context=".example.turntable.TurntableActivity">
+
+    <com.hearthappy.uiwidget.turntable.TurntableView
         android:id="@+id/turntableView"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tv_icon_v_offset="23dp"
+        app:tv_show_highlight="true"
+        app:tv_equal_number="12"
+        app:tv_show_index="true"
+        app:tv_bgr="@mipmap/bg_turntable_default2"
+        app:tv_text_color="@color/color_title"
+        app:tv_text_size="8sp"
+        app:tv_radius_offset="67dp"
+         />
+
+    <Button
+        android:id="@+id/btnSingle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="单抽"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnTen"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="10连抽"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

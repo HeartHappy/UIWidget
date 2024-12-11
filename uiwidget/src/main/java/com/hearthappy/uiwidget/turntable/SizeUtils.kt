@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.widget.turntable
+package com.hearthappy.uiwidget.turntable
 
 import android.content.Context
 

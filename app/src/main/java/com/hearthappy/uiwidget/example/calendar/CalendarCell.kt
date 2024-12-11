@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.widget.gantt
+package com.hearthappy.uiwidget.example.calendar
 
 data class CalendarCell(
     val date: Int,  // 日期数字，比如1号、2号等

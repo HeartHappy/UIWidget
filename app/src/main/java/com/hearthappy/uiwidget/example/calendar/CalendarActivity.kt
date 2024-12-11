@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.example
+package com.hearthappy.uiwidget.example.calendar
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -8,8 +8,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hearthappy.uiwidget.R
 import com.hearthappy.uiwidget.databinding.ActivityCalendarBinding
-import com.hearthappy.uiwidget.widget.gantt.CalendarAdapter
-import com.hearthappy.uiwidget.widget.gantt.CalendarCell
 import java.util.Calendar
 
 class CalendarActivity : AppCompatActivity() {
@@ -20,7 +18,7 @@ class CalendarActivity : AppCompatActivity() {
         enableEdgeToEdge()
         viewBinding=ActivityCalendarBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -41,12 +39,12 @@ class CalendarActivity : AppCompatActivity() {
         val firstDayOfWeek = instance.get(Calendar.DAY_OF_WEEK)
         //add empty white calendar
         for (i in 1 until firstDayOfWeek){
-            cells.add(CalendarCell(0,false,true))
+            cells.add(CalendarCell(0, false, true))
         }
         for ( day in 1..dayInMonth){
             val isCurrentMonth=true
             val isGrayedOut=false
-            cells.add(CalendarCell(day,isCurrentMonth,isGrayedOut))
+            cells.add(CalendarCell(day, isCurrentMonth, isGrayedOut))
         }
         return cells
     }

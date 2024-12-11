@@ -8,7 +8,7 @@ import com.hearthappy.uiwidget.base.KBaseAdapter
 import com.hearthappy.uiwidget.databinding.ItemExampleBinding
 
 
-class ExampleAdapter(private val context:Context):KBaseAdapter<ItemExampleBinding,ExampleBean>() {
+class ExampleAdapter(private val context:Context): KBaseAdapter<ItemExampleBinding, ExampleBean>() {
     override fun initViewBinding(parent: ViewGroup, viewType: Int): ItemExampleBinding {
         return ItemExampleBinding.inflate(LayoutInflater.from(context),parent,false)
     }
