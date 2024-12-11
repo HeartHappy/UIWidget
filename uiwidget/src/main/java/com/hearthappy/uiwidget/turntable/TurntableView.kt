@@ -253,27 +253,71 @@ class TurntableView : View {
         }
     }
 
-    /**
-     * 单抽-  随机生成抽中的索引，范围0 - 11"
-     */
-    fun startSingleDraw(randomIndex: Int = Random.nextInt(12), isMultipleDraw: Boolean = false) {
+    private fun singleStart(index: Int, isMultipleDraw: Boolean = false) {
         this.isFinishLottery = false
         this.isMultipleDraw = isMultipleDraw
-        createRotationAnimator(randomIndex)
+        createRotationAnimator(index)
+    }
+
+    /**
+     * 随机单抽
+     *
+     * 随机生成抽中的索引，范围0 - 11,即numSectors设置数量之间"
+     */
+    fun startSingleDraw() {
+        val randomIndex: Int = Random.nextInt(numSectors)
+        singleStart(randomIndex)
     }
 
 
     /**
-     * 连抽-默认10连
+     * 随机连抽-默认10连
      * @param number Int
      */
-    fun startTenConsecutiveDraws(number: Int = 10) {
+    fun startMultipleDraws(number: Int = 10) {
         handlerMultipleData(number)
+        multipleStart()
+    }
 
-        //根据最大的数量排序
+    /**
+     * 指定单抽
+     * @param index Int
+     */
+    fun specifySingleDraw(index: Int) {
+        singleStart(index)
+    }
+
+    /**
+     * 指定抽中多个
+     */
+    fun specifyMultipleDraws(indexList: List<Int>) {
+        handlerSpecifyMultipleData(indexList)
+        multipleStart()
+    }
+
+    //根据最大的数量排序
+    private fun multipleStart() {
         val multipleLottery = lotteryBoxList.maxBy { it.title.toInt() }
-        startSingleDraw(multipleLottery.index, true)
+        singleStart(multipleLottery.index, true)
+    }
 
+    private fun handlerSpecifyMultipleData(indexList: List<Int>) {
+        lotteryBoxSet.clear()
+        lotteryBoxList.clear()
+
+        for (index in indexList) {
+            val find = lotteryBoxSet.find { it.index == index }
+            find?.apply {
+                val oldNumber = this.number
+                lotteryBoxSet.remove(this)
+                this.number = oldNumber + 1
+                lotteryBoxSet.add(this)
+            } ?: let {
+                lotteryBoxSet.add(MultipleLottery(index, 1, titles[index]))
+            }
+        }
+
+        lotteryBoxList.addAll(lotteryBoxSet.toList())
     }
 
     /**
