@@ -10,7 +10,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -50,7 +49,6 @@ class TurntableView : View {
 
     private var isFinishLottery = false //是否开始抽奖
     private var isMultipleDraw = false //是否连续抽奖
-    private var lastFinalAngle: Float = 0f  // 新增变量，用于记录上次动画结束的角度
     private var centerX = 0f
     private var centerY = 0f
     private var radius = 0f
@@ -99,7 +97,7 @@ class TurntableView : View {
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
         bgrBitmap = BitmapFactory.decodeResource(resources, bgrResourceId)
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResourceId)
-        sectorAngle=360f/numSectors
+        sectorAngle = 360f / numSectors
         initPaint()
         attributes.recycle()
 
@@ -160,7 +158,7 @@ class TurntableView : View {
         //绘制索引
         if (isShowIndex) {
             for (i in 0 until numSectors) {
-                val textPosition = calculateTextPosition(centerX, centerY, radius, (i * sectorAngle) + currentAngle - 90 - sectorAngle/2, ((i + 1) * sectorAngle) + currentAngle - 90 - sectorAngle/2)
+                val textPosition = calculateTextPosition(centerX, centerY, radius, (i * sectorAngle) + currentAngle - 90 - sectorAngle / 2, ((i + 1) * sectorAngle) + currentAngle - 90 - sectorAngle / 2)
                 canvas.drawText("$i", textPosition.first, textPosition.second, indexPaint)
             }
         }
@@ -183,11 +181,9 @@ class TurntableView : View {
         //是选中区域高亮
         if (isFinishLottery && isShowHighlight) { //多抽选中
             if (isMultipleDraw) {
-                Log.d(TAG, "onDraw: =====================================")
                 lotteryBoxList.forEach {
                     mutableSelectMatrix.reset()
                     mutableSelectMatrix.setTranslate((width / 2).toFloat() - selectBitmap.width / 2, 0f)
-                    Log.d(TAG, "onDraw: selectIndex:${selectIndex},index:${it.index},number:${it.number}，${titles[it.index]}")
                     mutableSelectMatrix.postRotate(getRelativeAngle(selectIndex, it.index), centerX, centerY)
                     canvas.drawBitmap(selectBitmap, mutableSelectMatrix, null)
                 }
@@ -203,7 +199,7 @@ class TurntableView : View {
         val rect = RectF(paddingLeft.toFloat() + radiusOffset, paddingTop.toFloat() + radiusOffset, width.toFloat() - paddingEnd - radiusOffset, height.toFloat() - paddingBottom - radiusOffset) //        val startAngle = -105
 
         titles.forEachIndexed { index, text ->
-            val startAngle = index * sectorAngle - 90 + currentAngle - sectorAngle/2
+            val startAngle = index * sectorAngle - 90 + currentAngle - sectorAngle / 2
             val sweepAngle = sectorAngle
             path.reset()
             path.addArc(rect, startAngle, sweepAngle)
@@ -247,7 +243,7 @@ class TurntableView : View {
         val textX = cx + textDistance * cos(midAngleRad).toFloat()
         val textY = cy + textDistance * sin(midAngleRad).toFloat()
 
-        return Pair(textX.toFloat(), textY.toFloat())
+        return Pair(textX, textY)
     }
 
     override fun onDetachedFromWindow() {
@@ -313,7 +309,7 @@ class TurntableView : View {
             val rotationRadianValue = calculateRotationRadian(turnAngle) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
-            startRotationTimer(index){
+            startRotationTimer(index) {
                 if (isMultipleDraw) {
                     onMoreDrawEndListener?.invoke(lotteryBoxList)
                 } else {
@@ -335,28 +331,26 @@ class TurntableView : View {
     }
 
     // 启动定时器，用于定时更新转盘的旋转动画
-    private fun startRotationTimer(i: Int,block:(Int)->Unit) {
+    private fun startRotationTimer(i: Int, block: (Int) -> Unit) {
         timer = Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
-                    post { rotationAnimation(i,block) }
+                    post { rotationAnimation(i, block) }
                 }
             }, 0, (1000 / 60).toLong())
         }
     }
 
     // 定时器每次触发时执行的动画逻辑，用于更新转盘的旋转角度实现旋转及缓慢停止效果
-    private fun rotationAnimation(index: Int,block:(Int)->Unit) {
+    private fun rotationAnimation(index: Int, block: (Int) -> Unit) {
         val progressRatio = rotationRadian / totalRotationRadian
         val perAngle = max(decelerationRate, progressRatio * startSpeed)
         if (rotationRadian >= perAngle) {
             rotationRadian -= perAngle
             updateRotation(perAngle)
         }
-        Log.d("sxx", "index: $index =======rotationAnimation: $rotationRadian")
         if (rotationRadian < perAngle) {
             stopTimer()
-            Log.d(TAG, "rotationAnimation: end")
             isFinishLottery = true
             selectIndex = index //选中index,多抽时根据基准设置其他位置
             invalidate()
@@ -413,7 +407,6 @@ class TurntableView : View {
      */
     private fun scaleBitmapToCircleRadius(bitmap: Bitmap, circleRadius: Float): Bitmap { // 获取原始图片的高度和宽度
         val originalHeight = bitmap.height.toFloat()
-        val originalWidth = bitmap.width.toFloat()
 
         // 确定目标高度（即圆的半径）
         val targetHeight = circleRadius
@@ -434,9 +427,5 @@ class TurntableView : View {
         this.iconBitmaps = iconBitmaps
         this.titles = titles
         invalidate()
-    }
-
-    companion object {
-        private const val TAG = "TurntableView"
     }
 }
