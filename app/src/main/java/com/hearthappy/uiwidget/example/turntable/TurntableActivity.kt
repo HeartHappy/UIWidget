@@ -76,7 +76,7 @@ class TurntableActivity : AppCompatActivity() {
         val iconBitmaps = mutableListOf<Bitmap>()
         CoroutineScope(Dispatchers.IO).launch {
             for (it in list) {
-                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(40, 40).get()
+                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(80, 80).get()
                 val bitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.width, myBitmap.height)
                 iconBitmaps.add(bitmap)
             }

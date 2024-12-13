@@ -15,14 +15,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tv_icon_offset_y="23dp"
         app:tv_show_highlight="true"
         app:tv_equal_number="12"
         app:tv_show_index="true"
+        app:tv_icon_position_percent="0.7"
         app:tv_bgr="@mipmap/bg_turntable_default"
         app:tv_text_color="@color/color_title"
         app:tv_text_size="8sp"
-        app:tv_icon_size="30dp"
+        app:tv_icon_size="20dp"
         app:tv_text_offset_y="67dp"
          />
 
@@ -30,7 +30,7 @@
         android:id="@+id/btnSingle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="单抽"
+        android:text="@string/single_draw"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -38,7 +38,7 @@
         android:id="@+id/btnTen"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="10连抽"
+        android:text="@string/_10_consecutive_draws"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

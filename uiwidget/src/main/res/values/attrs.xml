@@ -10,7 +10,7 @@
         <attr name="tv_show_index" format="boolean"/>
         <attr name="tv_show_highlight" format="boolean"/>
         <attr name="tv_text_offset_y" format="dimension"/>
-        <attr name="tv_icon_offset_y" format="dimension"/>
         <attr name="tv_icon_size" format="dimension"/>
+        <attr name="tv_icon_position_percent" format="float"/>
     </declare-styleable>
 </resources>

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">UIWidget</string>
+    <string name="single_draw">单抽</string>
+    <string name="_10_consecutive_draws">10连抽</string>
 </resources>
