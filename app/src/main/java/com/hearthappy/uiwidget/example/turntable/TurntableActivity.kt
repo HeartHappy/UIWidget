@@ -1,6 +1,8 @@
 package com.hearthappy.uiwidget.example.turntable
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.hearthappy.uiwidget.R
 import com.hearthappy.uiwidget.databinding.ActivityTurntableBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +32,10 @@ class TurntableActivity : AppCompatActivity() {
         }
 
         viewBinding.apply {
+            val rotateBitmap = rotateBitmap(BitmapFactory.decodeResource(resources, R.mipmap.ic_test), 3f)
+            ivTest.setImageBitmap(rotateBitmap)
+
+
             viewModel.getTurntableBean()?.let {
                 val titles = it.map { it.title }
                 val prices = it.map { it.price }
@@ -63,6 +70,12 @@ class TurntableActivity : AppCompatActivity() {
         }
     }
 
+    fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degrees)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+
     /**
      * 图片转bitmap
      */
@@ -70,7 +83,7 @@ class TurntableActivity : AppCompatActivity() {
         val iconBitmaps = mutableListOf<Bitmap>()
         CoroutineScope(Dispatchers.IO).launch {
             for (it in list) {
-                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(100, 100).get()
+                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(90, 90).get()
                 val bitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.width, myBitmap.height)
                 iconBitmaps.add(bitmap)
             }

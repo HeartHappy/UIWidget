@@ -470,6 +470,7 @@ class TurntableView : View {
     fun setSourceData(iconBitmaps: List<Bitmap>, titles: List<String> = emptyList()) {
         this.iconBitmaps = iconBitmaps
         this.titles = titles
+        invalidate()
     }
 
     fun <T> setSourceData(turntableImpl:ITurntableSource) {
