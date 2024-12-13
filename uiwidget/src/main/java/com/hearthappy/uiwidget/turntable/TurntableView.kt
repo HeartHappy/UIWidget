@@ -10,6 +10,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -36,8 +37,10 @@ class TurntableView : View {
     private var isShowIndex = false //是否显示索引
     private var isShowHighlight = true //选中区域高亮
     private var numSectors = 12 //等分数量
-    private var iconVOffset = 0f //图标垂直偏移，正数向外
-    private var radiusOffset = textSize //文本偏移，根据外圆向内偏移距离
+    private var iconOffsetY = 0f //图标垂直偏移，正数向外
+    private var textOffsetY = textSize //文本偏移，根据外圆向内偏移距离
+    private var iconSize = 30f //图标大小
+    private var iconScale = 1 //图标缩放比例
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
     private val lotteryBoxList = mutableListOf<MultipleLottery>()
@@ -90,8 +93,9 @@ class TurntableView : View {
         numSectors = attributes.getInteger(R.styleable.TurntableView_tv_equal_number, numSectors)
         textColor = attributes.getColor(R.styleable.TurntableView_tv_text_color, textColor)
         textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, SizeUtils.sp2px(context, textSize).toFloat())
-        radiusOffset = attributes.getDimension(R.styleable.TurntableView_tv_radius_offset, SizeUtils.dp2px(context, radiusOffset).toFloat())
-        iconVOffset = attributes.getDimension(R.styleable.TurntableView_tv_icon_v_offset, SizeUtils.dp2px(context, iconVOffset).toFloat())
+        textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
+        iconOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_icon_offset_y, SizeUtils.dp2px(context, iconSize).toFloat())
+        iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconOffsetY).toFloat())
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
@@ -110,6 +114,7 @@ class TurntableView : View {
             color = this@TurntableView.textColor
             textSize = this@TurntableView.textSize
             textAlign = Paint.Align.CENTER
+            this.strokeWidth = 8f
         }
         titlePaint.apply {
             isAntiAlias = true
@@ -164,19 +169,22 @@ class TurntableView : View {
         }
 
         //绘制icon
-        var startAngle = -(sectorAngle * 3 + sectorAngle / 2)
-        iconBitmaps.forEachIndexed { index, iconBitmap ->
-            val imageWidth = radius / 10 //计算半边扇形的角度 度=Math.PI/180 弧度=180/Math.PI
-            val angle = ((startAngle + sectorAngle / 2) * Math.PI / 180).toFloat() //计算中心点的坐标
-            val r = (radius / 8.0 * 5.0).toInt() + iconVOffset
-            val x = (centerX + r * cos(angle.toDouble())).toFloat()
-            val y = (centerY + r * sin(angle.toDouble())).toFloat() //设置绘制图片的范围 // 先平移到以转盘中心为原点的对应位置（考虑图标尺寸）
-            iconMatrix.reset()
-            iconMatrix.postTranslate(x - imageWidth, y - imageWidth) // 再根据角度进行旋转，使图标正确朝向扇形中心位置
-            iconMatrix.postRotate(angle + currentAngle, centerX, centerY)
-            canvas.drawBitmap(iconBitmap, iconMatrix, indexPaint)
-            startAngle += sectorAngle
-        }
+        //        var startAngle = -(sectorAngle * 3 + sectorAngle / 2)
+        //        iconBitmaps.forEachIndexed { index, iconBitmap ->
+        //            val imageWidth = radius / 10 //计算半边扇形的角度 度=Math.PI/180 弧度=180/Math.PI
+        //            val angle = ((startAngle + sectorAngle / 2) * Math.PI / 180).toFloat() //计算中心点的坐标
+        //            val r = (radius / 8.0 *4.3).toInt() + iconVOffset
+        //            val x = (centerX + r * cos(angle.toDouble())).toFloat()
+        //            val y = (centerY + r * sin(angle.toDouble())).toFloat() //设置绘制图片的范围 // 先平移到以转盘中心为原点的对应位置（考虑图标尺寸）
+        //
+        //            iconMatrix.reset()
+        //            iconMatrix.postTranslate((x - imageWidth), (y - imageWidth)) // 再根据角度进行旋转，使图标正确朝向扇形中心位置
+        //            iconMatrix.postRotate(angle + currentAngle, centerX, centerY)
+        //            canvas.drawBitmap(iconBitmap, iconMatrix, indexPaint)
+        //            canvas.drawPoint(x,y,indexPaint)
+        //            startAngle += sectorAngle
+        //        }
+        drawIcons(canvas)
 
         //是选中区域高亮
         if (isFinishLottery && isShowHighlight) { //多抽选中
@@ -196,15 +204,40 @@ class TurntableView : View {
     }
 
     private fun drawTexts(canvas: Canvas) {
-        val rect = RectF(paddingLeft.toFloat() + radiusOffset, paddingTop.toFloat() + radiusOffset, width.toFloat() - paddingEnd - radiusOffset, height.toFloat() - paddingBottom - radiusOffset) //        val startAngle = -105
+        val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105
 
         titles.forEachIndexed { index, text ->
             val startAngle = index * sectorAngle - 90 + currentAngle - sectorAngle / 2
-            val sweepAngle = sectorAngle
             path.reset()
-            path.addArc(rect, startAngle, sweepAngle)
+            path.addArc(rect, startAngle, sectorAngle)
             canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
         }
+    }
+
+    private fun drawIcons(canvas: Canvas) {
+
+        var startAngle = -(sectorAngle * 3 + sectorAngle / 2)
+        iconBitmaps.forEachIndexed { index, iconBitmap ->
+            val angle = ((startAngle + sectorAngle / 2) * Math.PI / 180).toFloat() //计算中心点的坐标
+            val r = (radius / 8.0 * 5.0).toInt() + iconOffsetY
+            val x = (centerX + r * cos(angle.toDouble())).toFloat()
+            val y = (centerY + r * sin(angle.toDouble())).toFloat() //设置绘制图片的范围 // 先平移到以转盘中心为原点的对应位置（考虑图标尺寸）
+            iconMatrix.reset()
+            iconMatrix.postTranslate(x - iconBitmap.width / 2, y - iconBitmap.height / 2) // 再根据角度进行旋转，使图标正确朝向扇形中心位置
+            iconMatrix.postRotate(angle + currentAngle, x, y)
+            canvas.drawBitmap(iconBitmap, iconMatrix, indexPaint)
+//            canvas.drawPoint(x, y, indexPaint)
+            startAngle += sectorAngle
+        }
+
+        //        iconBitmaps.forEachIndexed { index, bitmap ->
+        //            val startAngle = index * sectorAngle - 90 + currentAngle - sectorAngle / 2
+        //            path.reset()
+        //            path.addArc(rect, startAngle, sectorAngle)
+        ////            iconMatrix.
+        //            canvas.drawBitmap(bitmap, iconMatrix, indexPaint)
+        ////            canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
+        //        }
     }
 
     /**
@@ -473,8 +506,9 @@ class TurntableView : View {
         invalidate()
     }
 
-    fun <T> setSourceData(turntableImpl:ITurntableSource) {
-        this.iconBitmaps=turntableImpl.icons()
-        this.titles=turntableImpl.prices()
+    fun <T> setSourceData(turntableImpl: ITurntableSource) {
+        this.iconBitmaps = turntableImpl.icons()
+        this.titles = turntableImpl.prices()
+        invalidate()
     }
 }

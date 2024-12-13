@@ -9,7 +9,8 @@
         <attr name="tv_equal_number" format="integer"/>
         <attr name="tv_show_index" format="boolean"/>
         <attr name="tv_show_highlight" format="boolean"/>
-        <attr name="tv_radius_offset" format="dimension"/>
-        <attr name="tv_icon_v_offset" format="dimension"/>
+        <attr name="tv_text_offset_y" format="dimension"/>
+        <attr name="tv_icon_offset_y" format="dimension"/>
+        <attr name="tv_icon_size" format="dimension"/>
     </declare-styleable>
 </resources>

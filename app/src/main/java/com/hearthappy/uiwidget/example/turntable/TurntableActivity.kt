@@ -32,8 +32,6 @@ class TurntableActivity : AppCompatActivity() {
         }
 
         viewBinding.apply {
-            val rotateBitmap = rotateBitmap(BitmapFactory.decodeResource(resources, R.mipmap.ic_test), 3f)
-            ivTest.setImageBitmap(rotateBitmap)
 
 
             viewModel.getTurntableBean()?.let {
@@ -70,11 +68,6 @@ class TurntableActivity : AppCompatActivity() {
         }
     }
 
-    fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(degrees)
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
 
     /**
      * 图片转bitmap
@@ -83,7 +76,8 @@ class TurntableActivity : AppCompatActivity() {
         val iconBitmaps = mutableListOf<Bitmap>()
         CoroutineScope(Dispatchers.IO).launch {
             for (it in list) {
-                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(90, 90).get()
+                Log.d(TAG, "loadLuckBitmap: ${it.img}")
+                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(60, 60).get()
                 val bitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.width, myBitmap.height)
                 iconBitmaps.add(bitmap)
             }

@@ -15,14 +15,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tv_icon_v_offset="23dp"
+        app:tv_icon_offset_y="23dp"
         app:tv_show_highlight="true"
         app:tv_equal_number="12"
         app:tv_show_index="true"
         app:tv_bgr="@mipmap/bg_turntable_default"
         app:tv_text_color="@color/color_title"
         app:tv_text_size="8sp"
-        app:tv_radius_offset="67dp"
+        app:tv_icon_size="30dp"
+        app:tv_text_offset_y="67dp"
          />
 
     <Button
@@ -41,14 +42,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <ImageView
-        android:id="@+id/ivTest"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:rotation="3"
-        android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
