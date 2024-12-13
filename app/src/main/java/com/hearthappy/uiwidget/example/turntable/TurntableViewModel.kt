@@ -2,7 +2,6 @@ package com.hearthappy.uiwidget.example.turntable
 
 import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
-import com.hearthappy.uiwidget.turntable.TurntableBean
 
 class TurntableViewModel : ViewModel() {
 

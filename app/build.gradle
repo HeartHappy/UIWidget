@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'com.hearthappy.uiwidget'
-    compileSdk 34
+    compileSdk 31
 
     defaultConfig {
         applicationId "com.hearthappy.uiwidget"
         minSdk 21
-        targetSdk 34
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 
@@ -53,12 +53,10 @@ dependencies {
     implementation libs.com.github.bumptech.glide.glide
     implementation libs.lifecycle.runtime.ktx
     implementation libs.lifecycle.viewmodel.ktx
-    implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.lifecycle.livedata.core.ktx
+//    implementation libs.androidx.lifecycle.runtime.ktx
+//    implementation libs.androidx.lifecycle.livedata.core.ktx
 
 //    implementation libs.github.viewmodelautomation.annotation
 //    implementation libs.github.viewmodelautomation.ktx
 //    ksp libs.github.viewmodelautomation.processor
-
-    // -------------------- 以上4个库是必须依赖的 ----------------------------
 }

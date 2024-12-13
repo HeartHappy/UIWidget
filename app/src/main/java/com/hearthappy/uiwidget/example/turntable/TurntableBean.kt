@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.turntable
+package com.hearthappy.uiwidget.example.turntable
 
 import android.graphics.Bitmap
 

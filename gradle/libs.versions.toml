@@ -1,19 +1,20 @@
 [versions]
 agp = "7.2.2"
-kotlin = "1.9.0"
+kotlin = "1.7.0"
 kspVersion = "2.0.10-1.0.24"
-coreKtx = "1.10.1"
+kotlinReflectVersion = "1.6.0"
+coreKtx = "1.6.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.6.1"
 appcompat = "1.4.0"
 material = "1.4.0"
-activity = "1.7.0"
+activity = "1.5.0"
 constraintlayout = "2.0.4"
 viewModelAutomation="1.0.4"
 glide = "4.13.2"
 converterGsonVersion = "2.9.0"
-lifecycleVersion = "2.3.0"
+lifecycleVersion = "2.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,13 +28,13 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleVersion" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
-androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-core-ktx", version.ref = "lifecycleVersion" }
+#androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
+#androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-core-ktx", version.ref = "lifecycleVersion" }
 
 github-viewmodelautomation-annotation = { group = "com.github.HeartHappy.ViewModelAutomationX", name = "annotations", version.ref = "viewModelAutomation" }
 github-viewmodelautomation-ktx = { group = "com.github.HeartHappy.ViewModelAutomationX", name = "vma-ktx", version.ref = "viewModelAutomation" }
 github-viewmodelautomation-processor = { group = "com.github.HeartHappy.ViewModelAutomationX", name = "processor", version.ref = "viewModelAutomation" }
-
+kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlinReflectVersion" }
 com-github-bumptech-glide-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 squareup-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converterGsonVersion" }
 

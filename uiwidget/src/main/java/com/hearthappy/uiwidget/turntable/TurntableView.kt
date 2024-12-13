@@ -215,9 +215,9 @@ class TurntableView : View {
     private fun getRelativeAngle(relativeIndex: Int, index: Int): Float {
         val indexDiff = index - relativeIndex
         return when {
+            index == 0 -> (12 + indexDiff) * sectorAngle
             indexDiff >= 0 -> (indexDiff * sectorAngle)
             indexDiff < 0 && index >= 0 -> (indexDiff + 12) * sectorAngle
-            index == 0 -> (12 + indexDiff) * sectorAngle
             else -> throw IllegalArgumentException("无效的索引值")
         }
     }
@@ -470,6 +470,10 @@ class TurntableView : View {
     fun setSourceData(iconBitmaps: List<Bitmap>, titles: List<String> = emptyList()) {
         this.iconBitmaps = iconBitmaps
         this.titles = titles
-        invalidate()
+    }
+
+    fun <T> setSourceData(turntableImpl:ITurntableSource) {
+        this.iconBitmaps=turntableImpl.icons()
+        this.titles=turntableImpl.prices()
     }
 }

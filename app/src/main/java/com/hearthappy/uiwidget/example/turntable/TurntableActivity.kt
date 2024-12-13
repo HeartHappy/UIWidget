@@ -12,6 +12,7 @@ import com.hearthappy.uiwidget.databinding.ActivityTurntableBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TurntableActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityTurntableBinding
@@ -48,17 +49,15 @@ class TurntableActivity : AppCompatActivity() {
             }
 
 
-            btnSingle.setOnClickListener {
-                //随机单抽
-//                turntableView.startSingleDraw()
+            btnSingle.setOnClickListener { //随机单抽
+                //                turntableView.startSingleDraw()
                 //指定单抽
                 turntableView.specifySingleDraw(5)
             }
-            btnTen.setOnClickListener {
-                //随机多抽
-//                turntableView.startMultipleDraws(12)
+            btnTen.setOnClickListener { //随机多抽
+                //                turntableView.startMultipleDraws(12)
                 //指定多抽
-                turntableView.specifyMultipleDraws(listOf(0,1,2,3,4,5,6))
+                turntableView.specifyMultipleDraws(listOf(0, 1, 2, 3, 4, 5, 6))
             }
 
         }
@@ -67,17 +66,15 @@ class TurntableActivity : AppCompatActivity() {
     /**
      * 图片转bitmap
      */
-    private fun loadLuckBitmap(list: com.hearthappy.uiwidget.turntable.TurntableBean, block: (MutableList<Bitmap>) -> Unit) {
+    private fun loadLuckBitmap(list: TurntableBean, block: (MutableList<Bitmap>) -> Unit) {
         val iconBitmaps = mutableListOf<Bitmap>()
         CoroutineScope(Dispatchers.IO).launch {
-            for (it in list) { //                Log.d(TAG, "loadLuckBitmap: ${it.img}")
-
+            for (it in list) {
                 val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(100, 100).get()
                 val bitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.width, myBitmap.height)
                 iconBitmaps.add(bitmap)
             }
-            block(iconBitmaps)
-            Log.d(TAG, "loadLuckBitmap: ${iconBitmaps.size}")
+            withContext(Dispatchers.Main) { block(iconBitmaps) }
         }
     }
 
