@@ -40,6 +40,10 @@ class TurntableView : View {
     private var textOffsetY = textSize //文本偏移，根据外圆向内偏移距离
     private var iconPositionPercent = 0.7f //距离圆心位置 1在最外边缘
     private var iconSize = 30f //图标大小
+    private var startSpeed = 0.35f // 控制转盘开始速度，值越大开始的速度越快
+    private var decelerationRate = 0.001f // 慢下来的速率，值越小停下得越慢
+    private var minRotationNumber = 5
+
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
     private val lotteryBoxList = mutableListOf<MultipleLottery>()
@@ -68,18 +72,12 @@ class TurntableView : View {
     private val iconMatrix = Matrix()
     private var currentAngle = 0f // 当前旋转的角度
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
-    private val minRotationNumber = 5
+
 
     // 旋转剩余的弧度
     private var timer: Timer? = null
     private var rotationRadian: Float = 0f
     private var totalRotationRadian: Float = 0f
-
-    // 控制转盘开始速度，值越大开始的速度越快
-    private var startSpeed = 0.35f
-
-    // 慢下来的速率，值越小停下得越慢
-    private var decelerationRate = 0.001f // 开始转盘动画，传入要旋转到的物品索引
     private val startingPoint = -90 //默认是在3点方向绘制，-90度让起点在12点方向执行
 
 
@@ -99,9 +97,9 @@ class TurntableView : View {
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
-        startSpeed=attributes.getFloat(R.styleable.TurntableView_tv_start_speed,startSpeed)
-        decelerationRate=attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate,decelerationRate)
-
+        startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
+        decelerationRate = attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate, decelerationRate)
+        minRotationNumber = attributes.getInteger(R.styleable.TurntableView_tv_min_rotation_number, minRotationNumber)
         bgrBitmap = BitmapFactory.decodeResource(resources, bgrResourceId)
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResourceId)
         sectorAngle = 360f / numSectors

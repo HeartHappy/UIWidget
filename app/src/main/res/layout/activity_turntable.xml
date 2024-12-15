@@ -24,7 +24,8 @@
         app:tv_text_size="8sp"
         app:tv_icon_size="20dp"
         app:tv_text_offset_y="67dp"
-        app:tv_start_speed="0.8"
+        app:tv_start_speed="0.4"
+        app:tv_min_rotation_number="4"
          />
 
     <Button
