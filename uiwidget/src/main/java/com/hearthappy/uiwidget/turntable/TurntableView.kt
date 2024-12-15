@@ -76,10 +76,10 @@ class TurntableView : View {
     private var totalRotationRadian: Float = 0f
 
     // 控制转盘开始速度，值越大开始的速度越快
-    private val startSpeed = 0.35f
+    private var startSpeed = 0.35f
 
     // 慢下来的速率，值越小停下得越慢
-    private val decelerationRate = 0.001f // 开始转盘动画，传入要旋转到的物品索引
+    private var decelerationRate = 0.001f // 开始转盘动画，传入要旋转到的物品索引
     private val startingPoint = -90 //默认是在3点方向绘制，-90度让起点在12点方向执行
 
 
@@ -99,6 +99,9 @@ class TurntableView : View {
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
+        startSpeed=attributes.getFloat(R.styleable.TurntableView_tv_start_speed,startSpeed)
+        decelerationRate=attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate,decelerationRate)
+
         bgrBitmap = BitmapFactory.decodeResource(resources, bgrResourceId)
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResourceId)
         sectorAngle = 360f / numSectors

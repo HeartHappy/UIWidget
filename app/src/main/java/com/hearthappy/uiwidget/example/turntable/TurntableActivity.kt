@@ -57,7 +57,7 @@ class TurntableActivity : AppCompatActivity() {
             btnSingle.setOnClickListener { //随机单抽
                 //                turntableView.startSingleDraw()
                 //指定单抽
-                turntableView.specifySingleDraw(5)
+                turntableView.startSingleDraw()
             }
             btnTen.setOnClickListener { //随机多抽
                 //                turntableView.startMultipleDraws(12)

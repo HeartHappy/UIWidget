@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="TurntableView">
-        <attr name="tv_bgr" format="reference"/>
-        <attr name="tv_bgr_select" format="reference"/>
-        <attr name="tv_bgr_rotation" format="float"/>
-        <attr name="tv_text_size" format="dimension"/>
-        <attr name="tv_text_color" format="color|reference"/>
-        <attr name="tv_equal_number" format="integer"/>
-        <attr name="tv_show_index" format="boolean"/>
-        <attr name="tv_show_highlight" format="boolean"/>
-        <attr name="tv_text_offset_y" format="dimension"/>
-        <attr name="tv_icon_size" format="dimension"/>
-        <attr name="tv_icon_position_percent" format="float"/>
+        <attr name="tv_bgr" format="reference" />
+        <attr name="tv_bgr_select" format="reference" />
+        <attr name="tv_bgr_rotation" format="float" />
+        <attr name="tv_text_size" format="dimension" />
+        <attr name="tv_text_color" format="color|reference" />
+        <attr name="tv_equal_number" format="integer" />
+        <attr name="tv_show_index" format="boolean" />
+        <attr name="tv_show_highlight" format="boolean" />
+        <attr name="tv_text_offset_y" format="dimension" />
+        <attr name="tv_icon_size" format="dimension" />
+        <attr name="tv_icon_position_percent" format="float" />
+        <attr name="tv_start_speed" format="float" />
+        <attr name="tv_deceleration_rate" format="float" />
     </declare-styleable>
 </resources>
