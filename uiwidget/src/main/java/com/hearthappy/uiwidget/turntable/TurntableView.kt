@@ -3,6 +3,7 @@ package com.hearthappy.uiwidget.turntable
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
@@ -45,6 +46,8 @@ class TurntableView : View {
     private var decelerationRate = 0.001f // 慢下来的速率，值越小停下得越慢
     private var minRotationNumber = 5
     private var isResultCenter = false //转盘结束时居中显示，正对12点方向
+    private var outlineColor: Int = -1 //文本描边颜色
+    private var outlineWidth: Float = 2f //文本描边宽
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -63,6 +66,7 @@ class TurntableView : View {
     private val indexPaint = Paint()
     private val titlePaint = Paint()
     private val pathPaint = Paint()
+    private var outlinePaint: Paint = Paint()
     private val path = Path()
     private var scaleFactor: Float = 1f
     private var scaledWidth: Float = 0f
@@ -93,7 +97,9 @@ class TurntableView : View {
         val bgrSelectResourceId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
         numSectors = attributes.getInteger(R.styleable.TurntableView_tv_equal_number, numSectors)
         textColor = attributes.getColor(R.styleable.TurntableView_tv_text_color, textColor)
+        outlineColor = attributes.getColor(R.styleable.TurntableView_tv_text_outline_color, outlineColor)
         textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, SizeUtils.sp2px(context, textSize).toFloat())
+        outlineWidth = attributes.getDimension(R.styleable.TurntableView_tv_text_outline_width, SizeUtils.sp2px(context, outlineWidth).toFloat())
         textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
@@ -134,6 +140,17 @@ class TurntableView : View {
             style = Paint.Style.STROKE
             this.strokeWidth = 2f
         }
+
+        //描边画笔
+        outlinePaint.apply {
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            strokeWidth = outlineWidth
+            textSize = this@TurntableView.textSize
+            textAlign = Paint.Align.CENTER
+            color = outlineColor
+            maskFilter = BlurMaskFilter(outlineWidth, BlurMaskFilter.Blur.NORMAL)
+        }
     }
 
 
@@ -163,9 +180,6 @@ class TurntableView : View {
         //绘制文本标题
         drawTexts(canvas)
 
-        //绘制索引
-        drawIndex(canvas)
-
         //绘制图标
         drawDefaultIcons(canvas)
 
@@ -177,20 +191,23 @@ class TurntableView : View {
     }
 
     private fun drawDefaultIcons(canvas: Canvas) {
-        if(isShowIcons){
+        if (isShowIcons) {
             val bitmaps = mutableListOf<Bitmap>()
-            for (i in 0 until numSectors){
+            for (i in 0 until numSectors) {
                 bitmaps.add(BitmapFactory.decodeResource(resources, R.mipmap.ic_apple))
             }
-            drawIcons(canvas,bitmaps)
+            drawIcons(canvas, bitmaps)
         }
     }
 
-    private fun drawIndex(canvas: Canvas) {
+    private fun drawIndex(canvas: Canvas, rect: RectF) {
         if (isShowIndex) {
-            for (i in 0 until numSectors) {
-                val textPosition = calculateTextPosition(centerX, centerY, radius, (i * sectorAngle) + currentAngle - 90 - sectorAngle / 2, ((i + 1) * sectorAngle) + currentAngle - 90 - sectorAngle / 2)
-                canvas.drawText("$i", textPosition.first, textPosition.second, indexPaint)
+            for (index in 0 until numSectors) {
+                val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
+                path.reset()
+                path.addArc(rect, startAngle, sectorAngle)
+                if (outlineColor != -1) canvas.drawTextOnPath(index.toString(), path, 0f, 0f, outlinePaint)
+                canvas.drawTextOnPath(index.toString(), path, 0f, 0f, titlePaint)
             }
         }
     }
@@ -215,10 +232,16 @@ class TurntableView : View {
     private fun drawTexts(canvas: Canvas) {
         val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105
 
+        //绘制索引
+        drawIndex(canvas, rect)
         titles.forEachIndexed { index, text ->
             val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
             path.reset()
             path.addArc(rect, startAngle, sectorAngle)
+
+            // 先绘制描边
+            if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
+
             canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
         }
     }

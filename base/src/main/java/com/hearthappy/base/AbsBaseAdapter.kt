@@ -50,6 +50,11 @@ abstract class AbsBaseAdapter<VB : ViewBinding, T>(var list: MutableList<T> = mu
         return null
     }
 
+    fun removeAll(){
+        list.clear()
+        notifyDataSetChanged()
+    }
+
     fun addData(list: List<T>) {
         val oldPosition = this.list.size
         if (list.isEmpty()) return

@@ -22,11 +22,13 @@
         app:tv_min_rotation_number="4"
         app:tv_show_highlight="true"
         app:tv_show_icons="false"
-        app:tv_show_index="false"
+        app:tv_show_index="true"
         app:tv_show_result_center="true"
         app:tv_start_speed="1.0"
-        app:tv_text_color="@color/color_title"
-        app:tv_text_offset_y="55dp"
+        app:tv_text_color="@color/white"
+        app:tv_text_offset_y="70dp"
+        app:tv_text_outline_color="@color/color_title_outline"
+        app:tv_text_outline_width="3dp"
         app:tv_text_size="8sp" />
 
     <ImageView

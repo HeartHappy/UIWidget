@@ -17,5 +17,7 @@
         <attr name="tv_start_speed" format="float" />
         <attr name="tv_deceleration_rate" format="float" />
         <attr name="tv_min_rotation_number" format="integer"/>
+        <attr name="tv_text_outline_color" format="color"/>
+        <attr name="tv_text_outline_width" format="dimension"/> <!--描边宽-->
     </declare-styleable>
 </resources>
