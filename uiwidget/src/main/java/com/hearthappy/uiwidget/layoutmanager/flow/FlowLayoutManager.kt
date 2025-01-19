@@ -1,12 +1,14 @@
-package com.hearthappy.uiwidget.layoutmanager.flow;
+package com.hearthappy.uiwidget.layoutmanager.flow
 
-import android.graphics.Rect;
-import android.util.Log;
-import android.util.SparseArray;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.recyclerview.widget.RecyclerView;
+import android.graphics.Rect
+import android.util.Log
+import android.util.SparseArray
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Recycler
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * 介绍：流式布局LayoutManager
@@ -14,15 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
  * 邮箱：zhangxutong@imcoming.com
  * 时间： 2016/10/26.
  */
+class FlowLayoutManager : RecyclerView.LayoutManager() {
+    private var mVerticalOffset = 0 //竖直偏移量 每次换行时，要根据这个offset判断
+    private var mFirstVisiPos = 0 //屏幕可见的第一个View的Position
+    private var mLastVisiPos = 0 //屏幕可见的最后一个View的Position
 
-public class FlowLayoutManager extends RecyclerView.LayoutManager {
-    private int mVerticalOffset;//竖直偏移量 每次换行时，要根据这个offset判断
-    private int mFirstVisiPos;//屏幕可见的第一个View的Position
-    private int mLastVisiPos;//屏幕可见的最后一个View的Position
+    private val mItemRects: SparseArray<Rect> //key 是View的position，保存View的bounds 和 显示标志，
 
-    private final SparseArray<Rect> mItemRects;//key 是View的position，保存View的bounds 和 显示标志，
-
-/*    private class FlowItem {
+    /*    private class FlowItem {
         public Rect bounds;//View的边界
         public boolean isShow;//View 是否显示
 
@@ -31,38 +32,32 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
             this.isShow = isShow;
         }
     }*/
-
-    public FlowLayoutManager() {
-        setAutoMeasureEnabled(true);
-        mItemRects = new SparseArray<>();
+    init {
+        isAutoMeasureEnabled = true
+        mItemRects = SparseArray()
     }
 
-    @Override
-    public RecyclerView.LayoutParams generateDefaultLayoutParams() {
-        return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
+        return RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    @Override
-    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        if (getItemCount() == 0) {//没有Item，界面空着吧
-            detachAndScrapAttachedViews(recycler);
-            return;
+    override fun onLayoutChildren(recycler: Recycler, state: RecyclerView.State) {
+        if (itemCount == 0) { //没有Item，界面空着吧
+            detachAndScrapAttachedViews(recycler)
+            return
         }
-        if (getChildCount() == 0 && state.isPreLayout()) {//state.isPreLayout()是支持动画的
-            return;
-        }
-        //onLayoutChildren方法在RecyclerView 初始化时 会执行两遍
-        detachAndScrapAttachedViews(recycler);
+        if (childCount == 0 && state.isPreLayout) { //state.isPreLayout()是支持动画的
+            return
+        } //onLayoutChildren方法在RecyclerView 初始化时 会执行两遍
+        detachAndScrapAttachedViews(recycler)
 
         //初始化区域
-        mVerticalOffset = 0;
-        mFirstVisiPos = 0;
-        mLastVisiPos = getItemCount();
+        mVerticalOffset = 0
+        mFirstVisiPos = 0
+        mLastVisiPos = itemCount
 
         //初始化时调用 填充childView
-        fill(recycler, state);
-
-
+        fill(recycler, state)
     }
 
     /**
@@ -71,8 +66,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
      * @param recycler
      * @param state
      */
-    private void fill(RecyclerView.Recycler recycler, RecyclerView.State state) {
-        fill(recycler, state, 0);
+    private fun fill(recycler: Recycler, state: RecyclerView.State) {
+        fill(recycler, state, 0)
     }
 
     /**
@@ -85,181 +80,165 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
      * @param dy       RecyclerView给我们的位移量,+,显示底端， -，显示头部
      * @return 修正以后真正的dy（可能剩余空间不够移动那么多了 所以return <|dy|）
      */
-    private int fill(RecyclerView.Recycler recycler, RecyclerView.State state, int dy) {
-
-        int topOffset = getPaddingTop();
+    private fun fill(recycler: Recycler, state: RecyclerView.State, dy: Int): Int {
+        var dy = dy
+        var topOffset = paddingTop
 
         //回收越界子View
-        if (getChildCount() > 0) {//滑动时进来的
-            for (int i = getChildCount() - 1; i >= 0; i--) {
-                View child = getChildAt(i);
-                if (dy > 0) {//需要回收当前屏幕，上越界的View
-                    if (getDecoratedBottom(child) - dy < topOffset) {
-                        removeAndRecycleView(child, recycler);
-                        mFirstVisiPos++;
-                        continue;
+        if (childCount > 0) { //滑动时进来的
+            for (i in childCount - 1 downTo 0) {
+                val child = getChildAt(i)
+                if (dy > 0) { //需要回收当前屏幕，上越界的View
+                    if (getDecoratedBottom(child!!) - dy < topOffset) {
+                        removeAndRecycleView(child, recycler)
+                        mFirstVisiPos++
+                        continue
                     }
-                } else if (dy < 0) {//回收当前屏幕，下越界的View
-                    if (getDecoratedTop(child) - dy > getHeight() - getPaddingBottom()) {
-                        removeAndRecycleView(child, recycler);
-                        mLastVisiPos--;
-                        continue;
+                } else if (dy < 0) { //回收当前屏幕，下越界的View
+                    if (getDecoratedTop(child!!) - dy > height - paddingBottom) {
+                        removeAndRecycleView(child, recycler)
+                        mLastVisiPos--
+                        continue
                     }
                 }
-            }
-            //detachAndScrapAttachedViews(recycler);
+            } //detachAndScrapAttachedViews(recycler);
         }
 
-        int leftOffset = getPaddingLeft();
-        int lineMaxHeight = 0;
-        //布局子View阶段
+        var leftOffset = paddingLeft
+        var lineMaxHeight = 0 //布局子View阶段
         if (dy >= 0) {
-            int minPos = mFirstVisiPos;
-            mLastVisiPos = getItemCount() - 1;
-            if (getChildCount() > 0) {
-                View lastView = getChildAt(getChildCount() - 1);
-                minPos = getPosition(lastView) + 1;//从最后一个View+1开始吧
-                topOffset = getDecoratedTop(lastView);
-                leftOffset = getDecoratedRight(lastView);
-                lineMaxHeight = Math.max(lineMaxHeight, getDecoratedMeasurementVertical(lastView));
-            }
-            //顺序addChildView
-            for (int i = minPos; i <= mLastVisiPos; i++) {
-                //找recycler要一个childItemView,我们不管它是从scrap里取，还是从RecyclerViewPool里取，亦或是onCreateViewHolder里拿。
-                View child = recycler.getViewForPosition(i);
-                addView(child);
-                measureChildWithMargins(child, 0, 0);
-                //计算宽度 包括margin
-                if (leftOffset + getDecoratedMeasurementHorizontal(child) <= getHorizontalSpace()) {//当前行还排列的下
-                    layoutDecoratedWithMargins(child, leftOffset, topOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child));
+            var minPos = mFirstVisiPos
+            mLastVisiPos = itemCount - 1
+            if (childCount > 0) {
+                val lastView = getChildAt(childCount - 1)
+                minPos = getPosition(lastView!!) + 1 //从最后一个View+1开始吧
+                topOffset = getDecoratedTop(lastView)
+                leftOffset = getDecoratedRight(lastView)
+                lineMaxHeight = max(lineMaxHeight.toDouble(), getDecoratedMeasurementVertical(lastView).toDouble()).toInt()
+            } //顺序addChildView
+            for (i in minPos..mLastVisiPos) { //找recycler要一个childItemView,我们不管它是从scrap里取，还是从RecyclerViewPool里取，亦或是onCreateViewHolder里拿。
+                val child = recycler.getViewForPosition(i)
+                addView(child)
+                measureChildWithMargins(child, 0, 0) //计算宽度 包括margin
+                if (leftOffset + getDecoratedMeasurementHorizontal(child) <= horizontalSpace) { //当前行还排列的下
+                    layoutDecoratedWithMargins(child, leftOffset, topOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child))
 
                     //保存Rect供逆序layout用
-                    Rect rect = new Rect(leftOffset, topOffset + mVerticalOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child) + mVerticalOffset);
-                    mItemRects.put(i, rect);
+                    val rect = Rect(leftOffset, topOffset + mVerticalOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child) + mVerticalOffset)
+                    mItemRects.put(i, rect)
 
                     //改变 left  lineHeight
-                    leftOffset += getDecoratedMeasurementHorizontal(child);
-                    lineMaxHeight = Math.max(lineMaxHeight, getDecoratedMeasurementVertical(child));
-                } else {//当前行排列不下
+                    leftOffset += getDecoratedMeasurementHorizontal(child)
+                    lineMaxHeight = max(lineMaxHeight.toDouble(), getDecoratedMeasurementVertical(child).toDouble()).toInt()
+                } else { //当前行排列不下
                     //改变top  left  lineHeight
-                    leftOffset = getPaddingLeft();
-                    topOffset += lineMaxHeight;
-                    lineMaxHeight = 0;
+                    leftOffset = paddingLeft
+                    topOffset += lineMaxHeight
+                    lineMaxHeight = 0
 
                     //新起一行的时候要判断一下边界
-                    if (topOffset - dy > getHeight() - getPaddingBottom()) {
-                        //越界了 就回收
-                        removeAndRecycleView(child, recycler);
-                        mLastVisiPos = i - 1;
+                    if (topOffset - dy > height - paddingBottom) { //越界了 就回收
+                        removeAndRecycleView(child, recycler)
+                        mLastVisiPos = i - 1
                     } else {
-                        layoutDecoratedWithMargins(child, leftOffset, topOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child));
+                        layoutDecoratedWithMargins(child, leftOffset, topOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child))
 
                         //保存Rect供逆序layout用
-                        Rect rect = new Rect(leftOffset, topOffset + mVerticalOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child) + mVerticalOffset);
-                        mItemRects.put(i, rect);
+                        val rect = Rect(leftOffset, topOffset + mVerticalOffset, leftOffset + getDecoratedMeasurementHorizontal(child), topOffset + getDecoratedMeasurementVertical(child) + mVerticalOffset)
+                        mItemRects.put(i, rect)
 
                         //改变 left  lineHeight
-                        leftOffset += getDecoratedMeasurementHorizontal(child);
-                        lineMaxHeight = Math.max(lineMaxHeight, getDecoratedMeasurementVertical(child));
+                        leftOffset += getDecoratedMeasurementHorizontal(child)
+                        lineMaxHeight = max(lineMaxHeight.toDouble(), getDecoratedMeasurementVertical(child).toDouble()).toInt()
                     }
                 }
-            }
-            //添加完后，判断是否已经没有更多的ItemView，并且此时屏幕仍有空白，则需要修正dy
-            View lastChild = getChildAt(getChildCount() - 1);
-            if (getPosition(lastChild) == getItemCount() - 1) {
-                int gap = getHeight() - getPaddingBottom() - getDecoratedBottom(lastChild);
+            } //添加完后，判断是否已经没有更多的ItemView，并且此时屏幕仍有空白，则需要修正dy
+            val lastChild = getChildAt(childCount - 1)
+            if (getPosition(lastChild!!) == itemCount - 1) {
+                val gap = height - paddingBottom - getDecoratedBottom(lastChild)
                 if (gap > 0) {
-                    dy -= gap;
+                    dy -= gap
                 }
-
             }
-
         } else {
             /**
              * ##  利用Rect保存子View边界
-             正序排列时，保存每个子View的Rect，逆序时，直接拿出来layout。
+             * 正序排列时，保存每个子View的Rect，逆序时，直接拿出来layout。
              */
-            int maxPos = getItemCount() - 1;
-            mFirstVisiPos = 0;
-            if (getChildCount() > 0) {
-                View firstView = getChildAt(0);
-                maxPos = getPosition(firstView) - 1;
+            var maxPos = itemCount - 1
+            mFirstVisiPos = 0
+            if (childCount > 0) {
+                val firstView = getChildAt(0)
+                maxPos = getPosition(firstView!!) - 1
             }
-            for (int i = maxPos; i >= mFirstVisiPos; i--) {
-                Rect rect = mItemRects.get(i);
+            for (i in maxPos downTo mFirstVisiPos) {
+                val rect = mItemRects[i]
 
-                if (rect.bottom - mVerticalOffset - dy < getPaddingTop()) {
-                    mFirstVisiPos = i + 1;
-                    break;
+                if (rect.bottom - mVerticalOffset - dy < paddingTop) {
+                    mFirstVisiPos = i + 1
+                    break
                 } else {
-                    View child = recycler.getViewForPosition(i);
-                    addView(child, 0);//将View添加至RecyclerView中，childIndex为1，但是View的位置还是由layout的位置决定
-                    measureChildWithMargins(child, 0, 0);
+                    val child = recycler.getViewForPosition(i)
+                    addView(child, 0) //将View添加至RecyclerView中，childIndex为1，但是View的位置还是由layout的位置决定
+                    measureChildWithMargins(child, 0, 0)
 
-                    layoutDecoratedWithMargins(child, rect.left, rect.top - mVerticalOffset, rect.right, rect.bottom - mVerticalOffset);
+                    layoutDecoratedWithMargins(child, rect.left, rect.top - mVerticalOffset, rect.right, rect.bottom - mVerticalOffset)
                 }
             }
         }
 
 
-        Log.d("TAG", "count= [" + getChildCount() + "]" + ",[recycler.getScrapList().size():" + recycler.getScrapList().size() + ", dy:" + dy + ",  mVerticalOffset" + mVerticalOffset + ", ");
+        Log.d("TAG", "count= [" + childCount + "]" + ",[recycler.getScrapList().size():" + recycler.scrapList.size + ", dy:" + dy + ",  mVerticalOffset" + mVerticalOffset + ", ")
 
-        return dy;
+        return dy
     }
 
-    @Override
-    public boolean canScrollVertically() {
-        return true;
+    override fun canScrollVertically(): Boolean {
+        return true
     }
 
-    @Override
-    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        //位移0、没有子View 当然不移动
-        if (dy == 0 || getChildCount() == 0) {
-            return 0;
+    override fun scrollVerticallyBy(dy: Int, recycler: Recycler, state: RecyclerView.State): Int { //位移0、没有子View 当然不移动
+        if (dy == 0 || childCount == 0) {
+            return 0
         }
 
-        int realOffset = dy;//实际滑动的距离， 可能会在边界处被修复
-        //边界修复代码
-        if (mVerticalOffset + realOffset < 0) {//上边界
-            realOffset = -mVerticalOffset;
-        } else if (realOffset > 0) {//下边界
+        var realOffset = dy //实际滑动的距离， 可能会在边界处被修复 //边界修复代码
+        if (mVerticalOffset + realOffset < 0) { //上边界
+            realOffset = -mVerticalOffset
+        } else if (realOffset > 0) { //下边界
             //利用最后一个子View比较修正
-            View lastChild = getChildAt(getChildCount() - 1);
-            if (getPosition(lastChild) == getItemCount() - 1) {
-                int gap = getHeight() - getPaddingBottom() - getDecoratedBottom(lastChild);
-                if (gap > 0) {
-                    realOffset = -gap;
+            val lastChild = getChildAt(childCount - 1)
+            if (getPosition(lastChild!!) == itemCount - 1) {
+                val gap = height - paddingBottom - getDecoratedBottom(lastChild)
+                realOffset = if (gap > 0) {
+                    -gap
                 } else if (gap == 0) {
-                    realOffset = 0;
+                    0
                 } else {
-                    realOffset = Math.min(realOffset, -gap);
+                    min(realOffset.toDouble(), -gap.toDouble()).toInt()
                 }
             }
         }
 
-        realOffset = fill(recycler, state, realOffset);//先填充，再位移。
+        realOffset = fill(recycler, state, realOffset) //先填充，再位移。
 
-        mVerticalOffset += realOffset;//累加实际滑动距离
+        mVerticalOffset += realOffset //累加实际滑动距离
 
-        offsetChildrenVertical(-realOffset);//滑动
+        offsetChildrenVertical(-realOffset) //滑动
 
-        return realOffset;
+        return realOffset
     }
 
     //模仿LLM Horizontal 源码
-
     /**
      * 获取某个childView在水平方向所占的空间
      *
      * @param view
      * @return
      */
-    public int getDecoratedMeasurementHorizontal(View view) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams)
-                view.getLayoutParams();
-        return getDecoratedMeasuredWidth(view) + params.leftMargin
-                + params.rightMargin;
+    fun getDecoratedMeasurementHorizontal(view: View): Int {
+        val params = view.layoutParams as RecyclerView.LayoutParams
+        return (getDecoratedMeasuredWidth(view) + params.leftMargin + params.rightMargin)
     }
 
     /**
@@ -268,18 +247,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
      * @param view
      * @return
      */
-    public int getDecoratedMeasurementVertical(View view) {
-        final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams)
-                view.getLayoutParams();
-        return getDecoratedMeasuredHeight(view) + params.topMargin
-                + params.bottomMargin;
+    fun getDecoratedMeasurementVertical(view: View?): Int {
+        val params = view!!.layoutParams as RecyclerView.LayoutParams
+        return (getDecoratedMeasuredHeight(view) + params.topMargin + params.bottomMargin)
     }
 
-    public int getVerticalSpace() {
-        return getHeight() - getPaddingTop() - getPaddingBottom();
-    }
+    val verticalSpace: Int
+        get() = height - paddingTop - paddingBottom
 
-    public int getHorizontalSpace() {
-        return getWidth() - getPaddingLeft() - getPaddingRight();
-    }
+    val horizontalSpace: Int
+        get() = width - paddingLeft - paddingRight
 }
