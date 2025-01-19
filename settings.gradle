@@ -24,3 +24,4 @@ enableFeaturePreview('VERSION_CATALOGS')
 rootProject.name = "UIFramework"
 include ':app'
 include ':uiwidget'
+include ':base'

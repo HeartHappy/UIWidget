@@ -8,7 +8,9 @@
         <attr name="tv_text_color" format="color|reference" />
         <attr name="tv_equal_number" format="integer" />
         <attr name="tv_show_index" format="boolean" />
+        <attr name="tv_show_icons" format="boolean" />
         <attr name="tv_show_highlight" format="boolean" />
+        <attr name="tv_show_result_center" format="boolean"/><!--最终结果居中，正对12点-->
         <attr name="tv_text_offset_y" format="dimension" />
         <attr name="tv_icon_size" format="dimension" />
         <attr name="tv_icon_position_percent" format="float" />

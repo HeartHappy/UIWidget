@@ -1,27 +1,24 @@
 plugins {
-//    alias(libs.plugins.android.application)
+//    alias(libs.plugins.android.library)
 //    alias(libs.plugins.kotlin.android)
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-//    id 'com.google.devtools.ksp'
 }
 
 android {
-    namespace 'com.hearthappy.framework'
+    namespace 'com.hearthappy.base'
     compileSdk 31
 
     defaultConfig {
         minSdk 21
-        targetSdk 31
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -40,23 +37,10 @@ android {
 dependencies {
 
     implementation libs.androidx.core.ktx
+//    implementation platform(libs.kotlin.bom)
     implementation libs.androidx.appcompat
     implementation libs.material
-    implementation libs.androidx.activity
-    implementation libs.androidx.constraintlayout
-    implementation project(':uiwidget')
-    implementation project(':base')
-//    implementation libs.androidx.lifecycle.process
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
-    implementation libs.squareup.converter.gson
-    implementation libs.com.github.bumptech.glide.glide
-    implementation libs.lifecycle.runtime.ktx
-    implementation libs.lifecycle.viewmodel.ktx
-//    implementation libs.lifecycle.livedata.ktx
-
-//    implementation libs.github.viewmodelautomation.annotation
-//    implementation libs.github.viewmodelautomation.ktx
-//    ksp libs.github.viewmodelautomation.processor
 }

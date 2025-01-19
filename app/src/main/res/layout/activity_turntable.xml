@@ -5,28 +5,38 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".example.turntable.TurntableActivity">
+    tools:context="com.hearthappy.framework.example.turntable.TurntableActivity">
 
     <com.hearthappy.uiwidget.turntable.TurntableView
         android:id="@+id/turntableView"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="334dp"
+        android:layout_height="334dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tv_show_highlight="true"
-        app:tv_equal_number="12"
-        app:tv_show_index="true"
-        app:tv_icon_position_percent="0.7"
         app:tv_bgr="@mipmap/bg_turntable_default"
-        app:tv_text_color="@color/color_title"
-        app:tv_text_size="8sp"
-        app:tv_icon_size="20dp"
-        app:tv_text_offset_y="67dp"
-        app:tv_start_speed="0.4"
+        app:tv_equal_number="12"
+        app:tv_icon_position_percent="0.85"
+        app:tv_icon_size="30dp"
         app:tv_min_rotation_number="4"
-         />
+        app:tv_show_highlight="true"
+        app:tv_show_icons="true"
+        app:tv_show_index="true"
+        app:tv_show_result_center="true"
+        app:tv_start_speed="1.8"
+        app:tv_text_color="@color/color_title"
+        app:tv_text_offset_y="55dp"
+        app:tv_text_size="8sp" />
+
+    <ImageView
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:src="@mipmap/icon_dial_5"
+        app:layout_constraintBottom_toBottomOf="@+id/turntableView"
+        app:layout_constraintEnd_toEndOf="@+id/turntableView"
+        app:layout_constraintStart_toStartOf="@+id/turntableView"
+        app:layout_constraintTop_toTopOf="@+id/turntableView" />
 
     <Button
         android:id="@+id/btnSingle"

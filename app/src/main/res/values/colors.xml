@@ -2,7 +2,28 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="luck_rotate_price_color">#C9A070</color>
-    <color name="color_title">#FFDC53</color>
     <color name="gray">#626161</color>
+    <color name="color_today">#F44336</color>
+    <color name="color_blue">#03A9F4</color>
+
+
+    <!-- 白色 -->
+    <color name="white90">#E6FFFFFF</color>
+    <color name="white70">#B3FFFFFF</color>
+    <color name="white60">#99FFFFFF</color>
+    <color name="white50">#80FFFFFF</color>
+    <color name="white40">#66FFFFFF</color>
+    <color name="white30">#4DFFFFFF</color>
+    <color name="white20">#33FFFFFF</color>
+    <color name="white10">#1AFFFFFF</color>
+    <color name="white0">#00FFFFFF</color>
+
+    <!-- 黑色 -->
+    <color name="black_20">#33000000</color>
+    <color name="black_30">#4D000000</color>
+    <color name="black_40">#66000000</color>
+    <color name="black_50">#80000000</color>
+    <color name="black_60">#99000000</color>
+    <color name="black_70">#B3000000</color>
+    <color name="black_80">#CC000000</color>
 </resources>

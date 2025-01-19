@@ -35,6 +35,7 @@ class TurntableView : View {
     private var textSize = 12f
     private var bgrRotation = 0f
     private var isShowIndex = false //是否显示索引
+    private var isShowIcons = false //是否显示索引
     private var isShowHighlight = true //选中区域高亮
     private var numSectors = 12 //等分数量
     private var textOffsetY = textSize //文本偏移，根据外圆向内偏移距离
@@ -43,6 +44,7 @@ class TurntableView : View {
     private var startSpeed = 0.35f // 控制转盘开始速度，值越大开始的速度越快
     private var decelerationRate = 0.001f // 慢下来的速率，值越小停下得越慢
     private var minRotationNumber = 5
+    private var isResultCenter = false //转盘结束时居中显示，正对12点方向
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -72,6 +74,7 @@ class TurntableView : View {
     private val iconMatrix = Matrix()
     private var currentAngle = 0f // 当前旋转的角度
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
+    private var randomOffsetAngle = 0f
 
 
     // 旋转剩余的弧度
@@ -96,7 +99,9 @@ class TurntableView : View {
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
+        isShowIcons = attributes.getBoolean(R.styleable.TurntableView_tv_show_icons, isShowIcons)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
+        isResultCenter = attributes.getBoolean(R.styleable.TurntableView_tv_show_result_center, isResultCenter)
         startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
         decelerationRate = attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate, decelerationRate)
         minRotationNumber = attributes.getInteger(R.styleable.TurntableView_tv_min_rotation_number, minRotationNumber)
@@ -161,11 +166,24 @@ class TurntableView : View {
         //绘制索引
         drawIndex(canvas)
 
+        //绘制图标
+        drawDefaultIcons(canvas)
+
         //绘制Icon
-        drawIcons(canvas)
+        drawIcons(canvas, iconBitmaps)
 
         //是选中区域高亮
         drawHighlight(canvas)
+    }
+
+    private fun drawDefaultIcons(canvas: Canvas) {
+        if(isShowIcons){
+            val bitmaps = mutableListOf<Bitmap>()
+            for (i in 0 until numSectors){
+                bitmaps.add(BitmapFactory.decodeResource(resources, R.mipmap.ic_apple))
+            }
+            drawIcons(canvas,bitmaps)
+        }
     }
 
     private fun drawIndex(canvas: Canvas) {
@@ -183,12 +201,12 @@ class TurntableView : View {
                 lotteryBoxList.forEach {
                     mutableSelectMatrix.reset()
                     mutableSelectMatrix.setTranslate((width / 2).toFloat() - selectBitmap.width / 2, 0f)
-                    mutableSelectMatrix.postRotate(getRelativeAngle(selectIndex, it.index), centerX, centerY)
+                    mutableSelectMatrix.postRotate(getRelativeAngle(selectIndex, it.index) + randomOffsetAngle, centerX, centerY)
                     canvas.drawBitmap(selectBitmap, mutableSelectMatrix, null)
                 }
             } else { //单抽显示选中
                 selectMatrix.setTranslate((width / 2).toFloat() - selectBitmap.width / 2, 0f) // 将Matrix应用到Drawable或Bitmap上
-                selectMatrix.postRotate(0f, centerX, centerY)
+                selectMatrix.postRotate(randomOffsetAngle, centerX, centerY)
                 canvas.drawBitmap(selectBitmap, selectMatrix, null)
             }
         }
@@ -205,12 +223,12 @@ class TurntableView : View {
         }
     }
 
-    private fun drawIcons(canvas: Canvas) {
+    private fun drawIcons(canvas: Canvas, bitmaps: List<Bitmap>) {
 
         canvas.save()
         canvas.rotate(currentAngle, centerX, centerY)
 
-        iconBitmaps.forEachIndexed { index, iconBitmap ->
+        bitmaps.forEachIndexed { index, iconBitmap ->
             val angle = sectorAngle * index + startingPoint
             val x = centerX + (radius * iconPositionPercent) * cos(Math.toRadians(angle.toDouble())).toFloat()
             val y = centerY + (radius * iconPositionPercent) * sin(Math.toRadians(angle.toDouble())).toFloat()
@@ -362,20 +380,18 @@ class TurntableView : View {
 
 
     private fun createRotationAnimator(index: Int) {
-        post {
-            setLayerType(LAYER_TYPE_HARDWARE, null)
+        post { //            setLayerType(LAYER_TYPE_HARDWARE, null)
             currentAngle = 0f
             stopTimer()
-            val turnAngle = calculateTurnAngle(index, sectorAngle)
-            val rotationRadianValue = calculateRotationRadian(turnAngle) // 初始化旋转角度为0，准备开始新的旋转过程
+            val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
+            val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run {
+                randomOffsetAngle = (Math.random() * sectorAngle - sectorAngle / 2).toFloat()
+                plus(randomOffsetAngle)
+            }) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
             startRotationTimer(index) {
-                if (isMultipleDraw) {
-                    onMoreDrawEndListener?.invoke(lotteryBoxList)
-                } else {
-                    onSingleDrawEndListener?.invoke(it, titles[it])
-                }
+                if (isMultipleDraw) onMoreDrawEndListener?.invoke(lotteryBoxList) else onSingleDrawEndListener?.invoke(it, titles[it])
             }
         }
     }
@@ -494,5 +510,9 @@ class TurntableView : View {
         this.iconBitmaps = turntableImpl.icons()
         this.titles = turntableImpl.prices()
         invalidate()
+    }
+
+    companion object {
+        private const val TAG = "TurntableView"
     }
 }

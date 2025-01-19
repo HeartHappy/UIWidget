@@ -15,9 +15,12 @@ viewModelAutomation="1.0.4"
 glide = "4.13.2"
 converterGsonVersion = "2.9.0"
 lifecycleVersion = "2.5.0"
+lifecycleProcess = "2.8.7"
+kotlinBom = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -25,11 +28,11 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleVersion" }
-#androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleVersion" }
-#androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-core-ktx", version.ref = "lifecycleVersion" }
+lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleVersion" }
+#androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleVersion" }
+androidx-lifecycle-livedata-core-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-core-ktx", version.ref = "lifecycleVersion" }
 
 github-viewmodelautomation-annotation = { group = "com.github.HeartHappy.ViewModelAutomationX", name = "annotations", version.ref = "viewModelAutomation" }
 github-viewmodelautomation-ktx = { group = "com.github.HeartHappy.ViewModelAutomationX", name = "vma-ktx", version.ref = "viewModelAutomation" }
@@ -37,6 +40,8 @@ github-viewmodelautomation-processor = { group = "com.github.HeartHappy.ViewMode
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlinReflectVersion" }
 com-github-bumptech-glide-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 squareup-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converterGsonVersion" }
+kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlinBom" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
