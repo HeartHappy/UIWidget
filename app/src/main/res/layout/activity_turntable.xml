@@ -19,7 +19,7 @@
         app:tv_equal_number="12"
         app:tv_icon_position_percent="0.8"
         app:tv_icon_size="30dp"
-        app:tv_min_rotation_number="4"
+        app:tv_min_rotation_number="2"
         app:tv_show_highlight="true"
         app:tv_show_icons="true"
         app:tv_show_index="true"

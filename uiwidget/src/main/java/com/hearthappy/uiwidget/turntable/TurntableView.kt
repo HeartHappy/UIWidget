@@ -11,7 +11,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -418,6 +417,7 @@ class TurntableView : View {
             val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
+//            startSpeed=setupRotationParameters(rotationRadian.toDouble(),6000L)
             startRotationTimer(index) {
                 if (isMultipleDraw) {
                     onMoreDrawEndListener?.invoke(lotteryBoxList)
@@ -462,6 +462,7 @@ class TurntableView : View {
         }
     }
 
+
     // 定时器每次触发时执行的动画逻辑，用于更新转盘的旋转角度实现旋转及缓慢停止效果
     private fun rotationAnimation(index: Int, block: (Int) -> Unit) {
         val progressRatio = rotationRadian / totalRotationRadian
@@ -483,19 +484,6 @@ class TurntableView : View {
     private fun updateRotation(perAngle: Float) {
         currentAngle += perAngle * (180f / PI.toFloat())
         invalidate()
-    }
-
-
-    /**
-     * 获取随机角度
-     * @param max 最大角度
-     * @param min 最小角度
-     * @return 随机角度
-     */
-    fun getRandomAngle(): Int {
-        val array = listOf(11, 9, 7, 7, 5, 2, 0, -2, -5, -7, -7, -9, -9, -11, -11)
-        val index = (array.indices).random()
-        return array[index]
     }
 
 
