@@ -11,6 +11,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -22,6 +23,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.random.Random
+import kotlin.random.nextInt
 
 /**
  * Created Date: 2024/12/3
@@ -34,7 +36,6 @@ class TurntableView : View {
     private var selectBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_select)
     private var textColor = ContextCompat.getColor(context, R.color.color_title)
     private var textSize = 12f
-    private var bgrRotation = 0f
     private var isShowIndex = false //是否显示索引
     private var isShowIcons = false //是否显示索引
     private var isShowHighlight = true //选中区域高亮
@@ -48,6 +49,8 @@ class TurntableView : View {
     private var isResultCenter = false //转盘结束时居中显示，正对12点方向
     private var outlineColor: Int = -1 //文本描边颜色
     private var outlineWidth: Float = 2f //文本描边宽
+    private var angleOffsetArray = intArrayOf()
+    private var angleOffsetRange = intArrayOf()
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -57,6 +60,7 @@ class TurntableView : View {
 
     var onSingleDrawEndListener: ((Int, String?) -> Unit)? = null // 单抽回调，返回：索引，标题
     var onMoreDrawEndListener: ((List<MultipleLottery>) -> Unit)? = null // 多抽回调，返回：索引，和抽中次数的集合
+    var onEndListener: TurntableCallback? = null
 
     private var isFinishLottery = false //是否开始抽奖
     private var isMultipleDraw = false //是否连续抽奖
@@ -103,7 +107,6 @@ class TurntableView : View {
         textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
-        bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
         isShowIcons = attributes.getBoolean(R.styleable.TurntableView_tv_show_icons, isShowIcons)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
@@ -111,6 +114,11 @@ class TurntableView : View {
         startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
         decelerationRate = attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate, decelerationRate)
         minRotationNumber = attributes.getInteger(R.styleable.TurntableView_tv_min_rotation_number, minRotationNumber)
+        val angleOffsetArrayResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_array, 0)
+        val angleOffsetRangeResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_range, 0)
+        if (angleOffsetArrayResId != 0) angleOffsetArray = resources.getIntArray(angleOffsetArrayResId)
+        if (angleOffsetRangeResId != 0) angleOffsetRange = resources.getIntArray(angleOffsetRangeResId)
+
         bgrBitmap = BitmapFactory.decodeResource(resources, bgrResourceId)
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResourceId)
         sectorAngle = 360f / numSectors
@@ -407,21 +415,34 @@ class TurntableView : View {
             currentAngle = 0f
             stopTimer()
             val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
-            val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run {
-                randomOffsetAngle = (Math.random() * sectorAngle - sectorAngle / 2).toFloat()
-                plus(randomOffsetAngle)
-            }) // 初始化旋转角度为0，准备开始新的旋转过程
+            val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
             startRotationTimer(index) {
-                if (isMultipleDraw) onMoreDrawEndListener?.invoke(lotteryBoxList) else onSingleDrawEndListener?.invoke(it, titles[it])
+                if (isMultipleDraw) {
+                    onMoreDrawEndListener?.invoke(lotteryBoxList)
+                    onEndListener?.onMoreDrawEndListener(lotteryBoxList)
+                } else {
+                    onSingleDrawEndListener?.invoke(it, titles[it])
+                    onEndListener?.onSingleDrawEndListener(it, titles[it])
+                }
             }
         }
     }
 
+    //计算结果，随机偏移角度
+    private fun calculateOffsetAngle(): Float {
+        randomOffsetAngle = when {
+            angleOffsetArray.isNotEmpty() -> angleOffsetArray.random().toFloat()
+            angleOffsetRange.isNotEmpty() -> Random.nextInt(IntRange(angleOffsetRange.first(), angleOffsetRange.last())).toFloat()
+            else -> (Math.random() * sectorAngle - sectorAngle / 2).toFloat()
+        }
+        return randomOffsetAngle
+    }
+
 
     // 计算单次旋转角度（考虑了物品索引、每个物品对应的角度以及随机角度）
-    private fun calculateTurnAngle(index: Int, anglePerItem: Float, randomAngle: Float = 360 * 3f): Float {
+    private fun calculateTurnAngle(index: Int, anglePerItem: Float, randomAngle: Float = 360f * minRotationNumber): Float {
         return 360 - (index * anglePerItem) + randomAngle
     }
 

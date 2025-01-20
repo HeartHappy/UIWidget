@@ -1,23 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="TurntableView">
+        <!--背景-->
         <attr name="tv_bgr" format="reference" />
+        <!--选中高亮背景-->
         <attr name="tv_bgr_select" format="reference" />
-        <attr name="tv_bgr_rotation" format="float" />
+        <!--文本字体大小-->
         <attr name="tv_text_size" format="dimension" />
+        <!--文本颜色-->
         <attr name="tv_text_color" format="color|reference" />
+        <!--均分数量-->
         <attr name="tv_equal_number" format="integer" />
+        <!--调试时，显示索引-->
         <attr name="tv_show_index" format="boolean" />
+        <!--调试时，显示icon-->
         <attr name="tv_show_icons" format="boolean" />
+        <!--是否显示高亮结果-->
         <attr name="tv_show_highlight" format="boolean" />
-        <attr name="tv_show_result_center" format="boolean"/><!--最终结果居中，正对12点-->
+        <!--最终结果居中，正对12点-->
+        <attr name="tv_show_result_center" format="boolean" />
+        <!--文本偏移量-->
         <attr name="tv_text_offset_y" format="dimension" />
+        <!--icon大小-->
         <attr name="tv_icon_size" format="dimension" />
+        <!--icon偏移占比，0:圆心，1.0：边缘-->
         <attr name="tv_icon_position_percent" format="float" />
+        <!--控制转盘开始速度，值越大开始的速度越快-->
         <attr name="tv_start_speed" format="float" />
+        <!--慢下来的速率，值越小停下得越慢-->
         <attr name="tv_deceleration_rate" format="float" />
-        <attr name="tv_min_rotation_number" format="integer"/>
-        <attr name="tv_text_outline_color" format="color"/>
-        <attr name="tv_text_outline_width" format="dimension"/> <!--描边宽-->
+        <!--最小旋转圈数-->
+        <attr name="tv_min_rotation_number" format="integer" />
+        <!--文本描边颜色-->
+        <attr name="tv_text_outline_color" format="color" />
+        <!--描边宽-->
+        <attr name="tv_text_outline_width" format="dimension" />
+        <!--指定结果偏移角度范围。例如只随机偏移角度：-14、-13、-12、-11、11、12、13、14-->
+        <attr name="tv_angle_offset_array" format="reference" />
+        <!--指定结果偏移角度范围。例如：-14~14-->
+        <attr name="tv_angle_offset_range" format="reference" />
+
     </declare-styleable>
 </resources>

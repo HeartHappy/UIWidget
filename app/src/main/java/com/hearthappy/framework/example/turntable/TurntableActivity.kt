@@ -10,6 +10,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
+import com.hearthappy.uiwidget.turntable.MultipleLottery
+import com.hearthappy.uiwidget.turntable.TurntableCallback
+import com.hearthappy.uiwidget.turntable.TurntableView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +42,13 @@ class TurntableActivity : AppCompatActivity() {
                     turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
                 }
 
+                turntableView.onEndListener=object : TurntableCallback {
+                    override fun onSingleDrawEndListener(index: Int, text: String?) {
+                    }
+
+                    override fun onMoreDrawEndListener(multipleLottery: List<MultipleLottery>) {
+                    }
+                }
                 turntableView.onSingleDrawEndListener = { i, s ->
                     Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
