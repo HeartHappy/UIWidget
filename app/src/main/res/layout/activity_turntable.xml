@@ -19,11 +19,11 @@
         app:tv_equal_number="12"
         app:tv_icon_position_percent="0.8"
         app:tv_icon_size="30dp"
-        app:tv_min_rotation_number="2"
-        app:tv_show_highlight="true"
+        app:tv_min_rotation_number="3"
+        app:tv_show_highlight="false"
         app:tv_show_icons="true"
         app:tv_show_index="true"
-        app:tv_start_speed="0.6"
+        app:tv_start_speed="0.35"
         app:tv_text_color="@color/white"
         app:tv_text_offset_y="70dp"
         app:tv_angle_offset_array="@array/angle_random_array"
@@ -32,9 +32,9 @@
         app:tv_text_size="8sp" />
 
     <ImageView
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:src="@mipmap/icon_dial_5"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:src="@mipmap/bg_pointer"
         app:layout_constraintBottom_toBottomOf="@+id/turntableView"
         app:layout_constraintEnd_toEndOf="@+id/turntableView"
         app:layout_constraintStart_toStartOf="@+id/turntableView"

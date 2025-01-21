@@ -11,7 +11,9 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
+import android.view.animation.Interpolator
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
 import java.util.Timer
@@ -86,9 +88,10 @@ class TurntableView : View {
 
     // 旋转剩余的弧度
     private var timer: Timer? = null
-    private var rotationRadian: Float = 0f
-    private var totalRotationRadian: Float = 0f
+    private var rotationRadian: Float = 0f //旋转弧度，持续变化
+    private var totalRotationRadian: Float = 0f //旋转总弧度
     private val startingPoint = -90 //默认是在3点方向绘制，-90度让起点在12点方向执行
+
 
 
     constructor(context: Context) : this(context, null)
@@ -288,29 +291,6 @@ class TurntableView : View {
     }
 
 
-    /**
-     * 计算索引绘制位置
-     * @param cx Float
-     * @param cy Float
-     * @param r Float
-     * @param startAngle Float
-     * @param endAngle Float
-     * @param location Float 位置,相对中心得距离
-     * @return Pair<Float, Float>
-     */
-    private fun calculateTextPosition(cx: Float, cy: Float, r: Float, startAngle: Float, endAngle: Float, location: Float = 0.7f): Pair<Float, Float> { // Convert angles from degrees to radians
-        val midAngleRad = Math.toRadians(((startAngle + endAngle) / 2).toDouble())
-
-        // Calculate the distance from the center where we want to place the text
-        val textDistance = r * location // Adjust this ratio as needed
-
-        // Calculate the position of the text based on the middle angle and the chosen distance
-        val textX = cx + textDistance * cos(midAngleRad).toFloat()
-        val textY = cy + textDistance * sin(midAngleRad).toFloat()
-
-        return Pair(textX, textY)
-    }
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow() // 释放Bitmap资源，避免内存泄漏
         for (iconBitmap in iconBitmaps) {
@@ -413,20 +393,22 @@ class TurntableView : View {
         post { //            setLayerType(LAYER_TYPE_HARDWARE, null)
             currentAngle = 0f
             stopTimer()
+            //目标角度
             val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
             val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
-//            startSpeed=setupRotationParameters(rotationRadian.toDouble(),6000L)
-            startRotationTimer(index) {
-                if (isMultipleDraw) {
-                    onMoreDrawEndListener?.invoke(lotteryBoxList)
-                    onEndListener?.onMoreDrawEndListener(lotteryBoxList)
-                } else {
-                    onSingleDrawEndListener?.invoke(it, titles[it])
-                    onEndListener?.onSingleDrawEndListener(it, titles[it])
-                }
-            }
+            startRotationTimer(index) {onEndTask(it)}
+        }
+    }
+
+    private fun onEndTask(it: Int) {
+        if (isMultipleDraw) {
+            onMoreDrawEndListener?.invoke(lotteryBoxList)
+            onEndListener?.onMoreDrawEndListener(lotteryBoxList)
+        } else {
+            onSingleDrawEndListener?.invoke(it, titles[it])
+            onEndListener?.onSingleDrawEndListener(it, titles[it])
         }
     }
 
@@ -461,7 +443,6 @@ class TurntableView : View {
             }, 0, (1000 / 60).toLong())
         }
     }
-
 
     // 定时器每次触发时执行的动画逻辑，用于更新转盘的旋转角度实现旋转及缓慢停止效果
     private fun rotationAnimation(index: Int, block: (Int) -> Unit) {
@@ -543,6 +524,7 @@ class TurntableView : View {
         this.titles = turntableImpl.prices()
         invalidate()
     }
+
 
     companion object {
         private const val TAG = "TurntableView"

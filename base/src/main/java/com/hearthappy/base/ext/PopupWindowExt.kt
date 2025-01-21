@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.transition.Fade
 import android.transition.Transition
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -51,17 +50,8 @@ inline fun <VB : ViewBinding> Fragment.popupWindow(key: String = "default", view
     return requireActivity().handlerPopupWindow(key, viewBinding, width, height, viewEventListener, focusable, isOutsideTouchable, backgroundBlackAlpha, anim)
 }
 
-inline fun <VB : ViewBinding> Activity.handlerPopupWindow(
-    key: String = "default",
-    viewBinding: VB,
-    width: Int = 0,
-    height: Int = 0,
-    viewEventListener: PopupWindow.(VB) -> Unit,
-    focusable: Boolean = true,
-    isOutsideTouchable: Boolean = true, //点击布局外是否消失，true：消失
-    backgroundBlackAlpha: Float = 0.4f,
-    anim: Transition = Fade(),
-): PopupWindow {
+inline fun <VB : ViewBinding> Activity.handlerPopupWindow(key: String, viewBinding: VB, width: Int, height: Int, viewEventListener: PopupWindow.(VB) -> Unit, focusable: Boolean, isOutsideTouchable: Boolean, //点击布局外是否消失，true：消失
+                                                          backgroundBlackAlpha: Float, anim: Transition = Fade()): PopupWindow {
     if (pwMap == null) {
         pwMap = mutableMapOf()
     }
@@ -95,7 +85,6 @@ inline fun <VB : ViewBinding> Activity.handlerPopupWindow(
         setBackgroundBlackAlpha(backgroundBlackAlpha)
     }
     pwMap?.put(key, resultPopup)
-    Log.d("PopupWindowManage", "total:${pwMap?.size},currentKey:$key,map: ${pwMap?.toMap()}")
     return resultPopup
 }
 
@@ -122,9 +111,8 @@ fun PopupWindow.showDropDown(anchor: View, gravity: Int = Gravity.TOP or Gravity
 }
 
 fun Activity.setBackgroundBlackAlpha(backgroundBlackAlpha: Float) {
-    val lp: WindowManager.LayoutParams = window.attributes
+    val lp: WindowManager.LayoutParams = window.attributes //    lp.dimAmount=dim//0:完全透明，1:完全不透明(黑色背景)
     lp.alpha = backgroundBlackAlpha
-    window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
     window.attributes = lp
 }
 

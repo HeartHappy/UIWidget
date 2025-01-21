@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.hearthappy.base.ext.popupWindow
+import com.hearthappy.base.ext.showLocation
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
-import com.hearthappy.uiwidget.turntable.MultipleLottery
-import com.hearthappy.uiwidget.turntable.TurntableCallback
-import com.hearthappy.uiwidget.turntable.TurntableView
+import com.hearthappy.framework.databinding.ItemExampleBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,11 +24,6 @@ class TurntableActivity : AppCompatActivity() {
         viewBinding = ActivityTurntableBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         viewBinding.apply {
 
@@ -42,13 +35,6 @@ class TurntableActivity : AppCompatActivity() {
                     turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
                 }
 
-                turntableView.onEndListener=object : TurntableCallback {
-                    override fun onSingleDrawEndListener(index: Int, text: String?) {
-                    }
-
-                    override fun onMoreDrawEndListener(multipleLottery: List<MultipleLottery>) {
-                    }
-                }
                 turntableView.onSingleDrawEndListener = { i, s ->
                     Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
@@ -67,6 +53,7 @@ class TurntableActivity : AppCompatActivity() {
 
                 //随机单抽
                 turntableView.startSingleDraw()
+
 
                 //指定单抽
 //                turntableView.specifySingleDraw(8)
