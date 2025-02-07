@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.hearthappy.base.ext.popupWindow
 import com.hearthappy.base.ext.showLocation
@@ -13,8 +14,10 @@ import com.hearthappy.framework.databinding.ActivityTurntableBinding
 import com.hearthappy.framework.databinding.ItemExampleBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 class TurntableActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityTurntableBinding
@@ -26,8 +29,21 @@ class TurntableActivity : AppCompatActivity() {
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
 
         viewBinding.apply {
+            var redCount=0f
+            var blueCount=0f
+            pkView.setValues(redCount,blueCount)
 
-
+            lifecycleScope.launch {
+                repeat(Int.MAX_VALUE){
+                    delay(1000)
+                    pkView.post {
+                        redCount+= Random.nextInt(10)
+                        blueCount+=Random.nextInt(10)
+                        pkView.setValues(redCount, blueCount)
+                        Log.d(TAG, "onCreate: redCount:$redCount,blueCount:$blueCount")
+                    }
+                }
+            }
             viewModel.getTurntableBean()?.let {
                 val titles = it.map { it.title }
                 val prices = it.map { it.price }

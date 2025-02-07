@@ -11,11 +11,10 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
-import android.view.animation.Interpolator
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
+import com.hearthappy.uiwidget.utils.SizeUtils
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.PI
@@ -37,8 +36,6 @@ class TurntableView : View {
     private var selectBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_select)
     private var textColor = ContextCompat.getColor(context, R.color.color_title)
     private var textSize = 12f
-    private var isShowIndex = false //是否显示索引
-    private var isShowIcons = false //是否显示索引
     private var isShowHighlight = true //选中区域高亮
     private var numSectors = 12 //等分数量
     private var textOffsetY = textSize //文本偏移，根据外圆向内偏移距离
@@ -109,8 +106,6 @@ class TurntableView : View {
         textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
-        isShowIndex = attributes.getBoolean(R.styleable.TurntableView_tv_show_index, isShowIndex)
-        isShowIcons = attributes.getBoolean(R.styleable.TurntableView_tv_show_icons, isShowIcons)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
         isResultCenter = attributes.getBoolean(R.styleable.TurntableView_tv_show_result_center, isResultCenter)
         startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
@@ -192,32 +187,43 @@ class TurntableView : View {
 
         //绘制图标
         drawDefaultIcons(canvas)
-
-        //绘制Icon
-        drawIcons(canvas, iconBitmaps)
-
         //是选中区域高亮
         drawHighlight(canvas)
     }
 
     private fun drawDefaultIcons(canvas: Canvas) {
-        if (isShowIcons) {
+        //绘制默认图标
+        if (iconBitmaps.isEmpty()) {
             val bitmaps = mutableListOf<Bitmap>()
             for (i in 0 until numSectors) {
                 bitmaps.add(BitmapFactory.decodeResource(resources, R.mipmap.ic_apple))
             }
             drawIcons(canvas, bitmaps)
+        }else{
+            //绘制Icon
+            drawIcons(canvas, iconBitmaps)
         }
     }
 
-    private fun drawIndex(canvas: Canvas, rect: RectF) {
-        if (isShowIndex) {
+    private fun drawTextsOrIndex(canvas: Canvas, rect: RectF) {
+        if (titles.isEmpty()) {
             for (index in 0 until numSectors) {
                 val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
                 path.reset()
                 path.addArc(rect, startAngle, sectorAngle)
                 if (outlineColor != -1) canvas.drawTextOnPath(index.toString(), path, 0f, 0f, outlinePaint)
                 canvas.drawTextOnPath(index.toString(), path, 0f, 0f, titlePaint)
+            }
+        }else{
+            titles.forEachIndexed { index, text ->
+                val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
+                path.reset()
+                path.addArc(rect, startAngle, sectorAngle)
+
+                // 先绘制描边
+                if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
+
+                canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
             }
         }
     }
@@ -241,19 +247,9 @@ class TurntableView : View {
 
     private fun drawTexts(canvas: Canvas) {
         val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105
+        //绘制文本
+        drawTextsOrIndex(canvas, rect)
 
-        //绘制索引
-        drawIndex(canvas, rect)
-        titles.forEachIndexed { index, text ->
-            val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
-            path.reset()
-            path.addArc(rect, startAngle, sectorAngle)
-
-            // 先绘制描边
-            if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
-
-            canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
-        }
     }
 
     private fun drawIcons(canvas: Canvas, bitmaps: List<Bitmap>) {

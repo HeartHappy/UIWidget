@@ -41,4 +41,15 @@
         <attr name="tv_angle_offset_range" format="reference" />
 
     </declare-styleable>
+
+    <declare-styleable name="PkView">
+        <attr name="pk_text_horizontal_padding" format="dimension" />
+        <attr name="pk_text_size" format="dimension" />
+        <attr name="pk_text_color" format="color" />
+        <attr name="pk_red_square_color" format="color" />
+        <attr name="pk_blue_square_color" format="color" />
+        <attr name="pk_progress_height" format="dimension" />
+        <attr name="pk_icon" format="reference" />
+        <attr name="pk_round_radius" format="dimension"/>
+    </declare-styleable>
 </resources>

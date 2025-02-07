@@ -1,11 +1,15 @@
-package com.hearthappy.uiwidget.turntable
+package com.hearthappy.uiwidget.utils
 
 import android.content.Context
+import android.content.res.Resources
+import kotlin.math.roundToInt
+
 
 /**
- *    desc   :
- *    author : W
- *    date   : 2024/1/1020:00
+ * Created Date: 2025/2/7
+ * @author ChenRui
+ * ClassDescription：像素转换
+ *
  */
 
 object SizeUtils {
@@ -30,4 +34,11 @@ object SizeUtils {
     fun sp2px(context: Context, sp: Float): Int {
         return (sp * context.resources.displayMetrics.scaledDensity + 0.5f).toInt()
     }
+}
+fun Int.toPx(): Int {
+    return (Resources.getSystem().displayMetrics.density * this).roundToInt()
+}
+
+fun Float.toDp(): Float {
+    return (this / Resources.getSystem().displayMetrics.density)
 }

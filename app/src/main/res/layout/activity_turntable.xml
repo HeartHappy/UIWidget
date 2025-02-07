@@ -7,6 +7,18 @@
     android:layout_height="match_parent"
     tools:context="com.hearthappy.framework.example.turntable.TurntableActivity">
 
+    <com.hearthappy.uiwidget.pk.PkView
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/pkView"
+        app:pk_icon="@mipmap/ic_pk"
+        app:pk_red_square_color="@color/color_today"
+        app:pk_blue_square_color="@color/color_blue"
+        app:pk_text_color="@color/white"
+        app:pk_text_size="10sp"
+        app:pk_text_horizontal_padding="12dp"
+        app:pk_progress_height="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"/>
     <com.hearthappy.uiwidget.turntable.TurntableView
         android:id="@+id/turntableView"
         android:layout_width="334dp"
@@ -21,8 +33,6 @@
         app:tv_icon_size="30dp"
         app:tv_min_rotation_number="3"
         app:tv_show_highlight="false"
-        app:tv_show_icons="true"
-        app:tv_show_index="true"
         app:tv_start_speed="0.35"
         app:tv_text_color="@color/white"
         app:tv_text_offset_y="70dp"
