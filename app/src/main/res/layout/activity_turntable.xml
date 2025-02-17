@@ -23,6 +23,7 @@
         app:tv_min_rotation_number="3"
         app:tv_show_highlight="false"
         app:tv_start_speed="0.35"
+        app:tv_is_debug="true"
         app:tv_text_color="@color/white"
         app:tv_text_icon_horizontal_spacing="1dp"
         app:tv_text_offset_y="60dp"

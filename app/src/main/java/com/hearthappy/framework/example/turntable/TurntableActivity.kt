@@ -29,25 +29,28 @@ class TurntableActivity : AppCompatActivity() {
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
 
         viewBinding.apply {
-            viewModel.getTurntableBean()?.let {
-                val titles = it.map { it.title }
-                val prices = it.map { it.price }
-                loadLuckBitmap(it) { bitmaps ->
-                    turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
-                }
+            root.postDelayed({
+                viewModel.getTurntableBean()?.let {
+                    val titles = it.map { it.title }
+                    val prices = it.map { it.price }
+                    loadLuckBitmap(it) { bitmaps ->
+                        turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
+                    }
 
-                turntableView.onSingleDrawEndListener = { i, s ->
-                    Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
-                }
-                turntableView.onMoreDrawEndListener = { list ->
-                    val sumOf = list.sumOf { it.number }
-                    Log.d(TAG, "onCreate: total:$sumOf")
-                    for (multipleLottery in list) {
-                        Log.d(TAG, "onCreate onMoreDrawEndListener: index:${multipleLottery.index},number:${multipleLottery.number},title:${titles.get(index = multipleLottery.index)},price:${prices[multipleLottery.index]}")
+                    turntableView.onSingleDrawEndListener = { i, s ->
+                        Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
+                    }
+                    turntableView.onMoreDrawEndListener = { list ->
+                        val sumOf = list.sumOf { it.number }
+                        Log.d(TAG, "onCreate: total:$sumOf")
+                        for (multipleLottery in list) {
+                            Log.d(TAG, "onCreate onMoreDrawEndListener: index:${multipleLottery.index},number:${multipleLottery.number},title:${titles.get(index = multipleLottery.index)},price:${prices[multipleLottery.index]}")
+                        }
                     }
                 }
-            }
+            },2000)
+
 
 
             btnSingle.setOnClickListener {

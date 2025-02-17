@@ -12,7 +12,6 @@ import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -56,6 +55,7 @@ class TurntableView : View {
     private var bgrRotation = -90f //转盘背景旋转角度，初始值-90度，从12点方向开始
     private var contentRotation = -90f //转盘中内容旋转角度
     private var textIconHorizontalSpacing = 8f //小图标水平间距
+    private var isDebug=false//调试模式，默认关闭,开启后可在UI编辑器中看到默认视图
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -92,7 +92,6 @@ class TurntableView : View {
     private var isTextIconStart = true //文本小图标显示在起点
 
 
-    private val iconDefBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_apple)
     private var textIconStartBitmap: Bitmap? = null
     private var textIconEndBitmap: Bitmap? = null
 
@@ -128,6 +127,7 @@ class TurntableView : View {
         startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
         decelerationRate = attributes.getFloat(R.styleable.TurntableView_tv_deceleration_rate, decelerationRate)
         minRotationNumber = attributes.getInteger(R.styleable.TurntableView_tv_min_rotation_number, minRotationNumber)
+        isDebug = attributes.getBoolean(R.styleable.TurntableView_tv_is_debug, isDebug)
         val angleOffsetArrayResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_array, 0)
         val angleOffsetRangeResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_range, 0)
         if (angleOffsetArrayResId != 0) angleOffsetArray = resources.getIntArray(angleOffsetArrayResId)
@@ -200,23 +200,24 @@ class TurntableView : View {
         bgrMatrix.postRotate(currentAngle + bgrRotation, centerX, centerY)
         canvas.drawBitmap(bgrBitmap, bgrMatrix, null)
 
-        //绘制图标
-        drawDefaultIcons(canvas)
+
 
         //绘制文本标题
         drawTexts(canvas)
+
+        //绘制图标
+        drawDefaultIcons(canvas)
 
         //是选中区域高亮
         drawHighlight(canvas)
     }
 
     private fun drawDefaultIcons(canvas: Canvas) { //绘制默认图标
-        if (iconBitmaps.isEmpty()) {
+        if (iconBitmaps.isEmpty() && isDebug) {
             val bitmaps = mutableListOf<Bitmap>()
             for (i in 0 until numSectors) {
-                bitmaps.add(iconDefBitmap)
+                bitmaps.add(BitmapFactory.decodeResource(resources, R.mipmap.ic_apple))
             }
-            iconBitmaps = bitmaps
             drawIcons(canvas, bitmaps)
         } else { //绘制Icon
             drawIcons(canvas, iconBitmaps)
@@ -224,7 +225,7 @@ class TurntableView : View {
     }
 
     private fun drawTextsOrIndex(canvas: Canvas, rect: RectF) {
-        if (titles.isEmpty()) {
+        if (titles.isEmpty() && isDebug) {
             for (index in 0 until numSectors) {
                 val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
                 path.reset()
