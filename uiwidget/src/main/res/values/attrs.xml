@@ -5,6 +5,11 @@
         <attr name="tv_bgr" format="reference" />
         <!--选中高亮背景-->
         <attr name="tv_bgr_select" format="reference" />
+        <!--文本小图标-->
+        <attr name="tv_text_icon_start" format="reference" />
+        <attr name="tv_text_icon_end" format="reference" />
+        <!--文本小图标间距-->
+        <attr name="tv_text_icon_horizontal_spacing" format="dimension" />
         <!--文本字体大小-->
         <attr name="tv_text_size" format="dimension" />
         <!--文本颜色-->

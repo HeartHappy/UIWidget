@@ -39,6 +39,10 @@ fun Int.toPx(): Int {
     return (Resources.getSystem().displayMetrics.density * this).roundToInt()
 }
 
+fun Float.toPx(): Int {
+    return ((Resources.getSystem().displayMetrics.density * this).roundToInt())
+}
+
 fun Float.toDp(): Float {
     return (this / Resources.getSystem().displayMetrics.density)
 }

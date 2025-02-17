@@ -9,15 +9,19 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
 import com.hearthappy.uiwidget.utils.SizeUtils
+import com.hearthappy.uiwidget.utils.toPx
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -49,8 +53,9 @@ class TurntableView : View {
     private var outlineWidth: Float = 2f //文本描边宽
     private var angleOffsetArray = intArrayOf()
     private var angleOffsetRange = intArrayOf()
-    private var bgrRotation=-90f //转盘背景旋转角度，初始值-90度，从12点方向开始
-    private var contentRotation=-90f //转盘中内容旋转角度
+    private var bgrRotation = -90f //转盘背景旋转角度，初始值-90度，从12点方向开始
+    private var contentRotation = -90f //转盘中内容旋转角度
+    private var textIconHorizontalSpacing = 8f //小图标水平间距
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -80,9 +85,16 @@ class TurntableView : View {
     private val selectMatrix = Matrix() // 控制转盘的旋转
     private val mutableSelectMatrix = Matrix()
     private val iconMatrix = Matrix()
+    private val textIconMatrix = Matrix()
     private var currentAngle = 0f // 当前旋转的角度
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
     private var randomOffsetAngle = 0f
+    private var isTextIconStart = true //文本小图标显示在起点
+
+
+    private val iconDefBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_apple)
+    private var textIconStartBitmap: Bitmap? = null
+    private var textIconEndBitmap: Bitmap? = null
 
 
     // 旋转剩余的弧度
@@ -91,20 +103,22 @@ class TurntableView : View {
     private var totalRotationRadian: Float = 0f //旋转总弧度
 
 
-
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
 
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.TurntableView)
-        val bgrResourceId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, R.mipmap.bg_turntable_default)
-        val bgrSelectResourceId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
+        val bgrResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, R.mipmap.bg_turntable_default)
+        val bgrSelectResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
+        val textIconStartResId = attributes.getResourceId(R.styleable.TurntableView_tv_text_icon_start, -1)
+        val textIconEndResId = attributes.getResourceId(R.styleable.TurntableView_tv_text_icon_end, -1)
         numSectors = attributes.getInteger(R.styleable.TurntableView_tv_equal_number, numSectors)
         textColor = attributes.getColor(R.styleable.TurntableView_tv_text_color, textColor)
         outlineColor = attributes.getColor(R.styleable.TurntableView_tv_text_outline_color, outlineColor)
         textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, SizeUtils.sp2px(context, textSize).toFloat())
         outlineWidth = attributes.getDimension(R.styleable.TurntableView_tv_text_outline_width, SizeUtils.sp2px(context, outlineWidth).toFloat())
         textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
+        textIconHorizontalSpacing = attributes.getDimension(R.styleable.TurntableView_tv_text_icon_horizontal_spacing, 0f)
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
@@ -119,8 +133,11 @@ class TurntableView : View {
         if (angleOffsetArrayResId != 0) angleOffsetArray = resources.getIntArray(angleOffsetArrayResId)
         if (angleOffsetRangeResId != 0) angleOffsetRange = resources.getIntArray(angleOffsetRangeResId)
 
-        bgrBitmap = BitmapFactory.decodeResource(resources, bgrResourceId)
-        selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResourceId)
+        bgrBitmap = BitmapFactory.decodeResource(resources, bgrResId)
+        selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResId)
+        textIconStartBitmap = BitmapFactory.decodeResource(resources, textIconStartResId)
+        textIconEndBitmap = BitmapFactory.decodeResource(resources, textIconEndResId)
+        isTextIconStart = textIconStartBitmap?.run { true } ?: false
         sectorAngle = 360f / numSectors
         initPaint()
         attributes.recycle()
@@ -178,32 +195,30 @@ class TurntableView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas) // Draw background
-
-        bgrMatrix.setScale(scaleFactor, scaleFactor)
-        bgrMatrix.postRotate(currentAngle+bgrRotation, centerX, centerY)
-
         //绘制背景
+        bgrMatrix.setScale(scaleFactor, scaleFactor)
+        bgrMatrix.postRotate(currentAngle + bgrRotation, centerX, centerY)
         canvas.drawBitmap(bgrBitmap, bgrMatrix, null)
+
+        //绘制图标
+        drawDefaultIcons(canvas)
 
         //绘制文本标题
         drawTexts(canvas)
 
-        //绘制图标
-        drawDefaultIcons(canvas)
         //是选中区域高亮
         drawHighlight(canvas)
     }
 
-    private fun drawDefaultIcons(canvas: Canvas) {
-        //绘制默认图标
+    private fun drawDefaultIcons(canvas: Canvas) { //绘制默认图标
         if (iconBitmaps.isEmpty()) {
             val bitmaps = mutableListOf<Bitmap>()
             for (i in 0 until numSectors) {
-                bitmaps.add(BitmapFactory.decodeResource(resources, R.mipmap.ic_apple))
+                bitmaps.add(iconDefBitmap)
             }
+            iconBitmaps = bitmaps
             drawIcons(canvas, bitmaps)
-        }else{
-            //绘制Icon
+        } else { //绘制Icon
             drawIcons(canvas, iconBitmaps)
         }
     }
@@ -215,20 +230,46 @@ class TurntableView : View {
                 path.reset()
                 path.addArc(rect, startAngle, sectorAngle)
                 if (outlineColor != -1) canvas.drawTextOnPath(index.toString(), path, 0f, 0f, outlinePaint)
-                canvas.drawTextOnPath(index.toString(), path, 0f, 0f, titlePaint)
+                canvas.drawTextOnPath(index.toString(), path, 0f, 0f, titlePaint) //                drawTextSmallIcon(rect, startAngle, index, index.toString(), canvas)
+                drawTextSmallIcon(canvas, path, index.toString())
             }
-        }else{
+        } else {
             titles.forEachIndexed { index, text ->
                 val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
                 path.reset()
-                path.addArc(rect, startAngle, sectorAngle)
-
-                // 先绘制描边
+                path.addArc(rect, startAngle, sectorAngle) // 先绘制描边
                 if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
-
-                canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
+                canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint) //                drawTextSmallIcon(rect,startAngle,index,text, canvas)
+                drawTextSmallIcon(canvas, path, text)
             }
         }
+    }
+
+    private fun drawTextSmallIcon(canvas: Canvas, path: Path, text: String) {
+        val smallIconBitmap = if (isTextIconStart) textIconStartBitmap else textIconEndBitmap
+        smallIconBitmap?.let {
+            val scaleSmallIconBitmap = scaleBitmapToHeight(it, textSize.toInt())
+            val pathMeasure = PathMeasure(path, false)
+            val textWidth = titlePaint.measureText(text)
+            val textHeight = titlePaint.fontMetrics.bottom - titlePaint.fontMetrics.top
+            val textHorSpacing = if (isTextIconStart) -textIconHorizontalSpacing.toPx() else textIconHorizontalSpacing.toPx()
+            val pos = FloatArray(2)
+            val tan = FloatArray(2)
+            val textPosition = pathMeasure.length / 2 - textWidth / 2
+
+            val iconPosition = if (isTextIconStart) {
+                textPosition - scaleSmallIconBitmap.width
+            } else {
+                textPosition + textWidth
+            }
+            pathMeasure.getPosTan(iconPosition, pos, tan) // 计算切线方向对应的角度
+            val angle = atan2(tan[1].toDouble(), tan[0].toDouble()) * (180 / Math.PI) // 计算图标垂直居中的偏移量
+            textIconMatrix.reset()
+            textIconMatrix.postTranslate(pos[0] + tan[0] + textHorSpacing, pos[1] + tan[1] - (textHeight + scaleSmallIconBitmap.height) / 3)
+            textIconMatrix.postRotate(angle.toFloat(), pos[0], pos[1])
+            canvas.drawBitmap(scaleSmallIconBitmap, textIconMatrix, titlePaint)
+        }
+
     }
 
     private fun drawHighlight(canvas: Canvas) {
@@ -249,8 +290,7 @@ class TurntableView : View {
     }
 
     private fun drawTexts(canvas: Canvas) {
-        val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105
-        //绘制文本
+        val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105 //绘制文本
         drawTextsOrIndex(canvas, rect)
 
     }
@@ -287,6 +327,13 @@ class TurntableView : View {
             indexDiff < 0 && index >= 0 -> (indexDiff + 12) * sectorAngle
             else -> throw IllegalArgumentException("无效的索引值")
         }
+    }
+
+    // 缩放 Bitmap 到指定高度
+    private fun scaleBitmapToHeight(bitmap: Bitmap, newHeight: Int): Bitmap {
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+        val newWidth = (newHeight * aspectRatio).toInt()
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     }
 
 
@@ -391,13 +438,12 @@ class TurntableView : View {
     private fun createRotationAnimator(index: Int) {
         post { //            setLayerType(LAYER_TYPE_HARDWARE, null)
             currentAngle = 0f
-            stopTimer()
-            //目标角度
+            stopTimer() //目标角度
             val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
             val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }) // 初始化旋转角度为0，准备开始新的旋转过程
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
-            startRotationTimer(index) {onEndTask(it)}
+            startRotationTimer(index) { onEndTask(it) }
         }
     }
 

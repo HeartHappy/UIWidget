@@ -24,9 +24,10 @@
         app:tv_show_highlight="false"
         app:tv_start_speed="0.35"
         app:tv_text_color="@color/white"
-        app:tv_text_offset_y="70dp"
+        app:tv_text_icon_horizontal_spacing="1dp"
+        app:tv_text_offset_y="60dp"
+        app:tv_text_icon_start="@mipmap/ic_apple"
         app:tv_angle_offset_array="@array/angle_random_array"
-        app:tv_text_outline_color="@color/color_title_outline"
         app:tv_text_outline_width="3dp"
         app:tv_text_size="8sp" />
 
