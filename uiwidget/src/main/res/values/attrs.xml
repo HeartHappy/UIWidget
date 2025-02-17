@@ -39,6 +39,9 @@
         <attr name="tv_angle_offset_array" format="reference" />
         <!--指定结果偏移角度范围。例如：-14~14-->
         <attr name="tv_angle_offset_range" format="reference" />
+        <!--背景旋转度数-->
+        <attr name="tv_bgr_rotation" format="float" />
+        <attr name="tv_content_rotation" format="float" />
 
     </declare-styleable>
 

@@ -29,21 +29,6 @@ class TurntableActivity : AppCompatActivity() {
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
 
         viewBinding.apply {
-            var redCount=0f
-            var blueCount=0f
-            pkView.setValues(redCount,blueCount)
-
-            lifecycleScope.launch {
-                repeat(Int.MAX_VALUE){
-                    delay(1000)
-                    pkView.post {
-                        redCount+= Random.nextInt(10)
-                        blueCount+=Random.nextInt(10)
-                        pkView.setValues(redCount, blueCount)
-                        Log.d(TAG, "onCreate: redCount:$redCount,blueCount:$blueCount")
-                    }
-                }
-            }
             viewModel.getTurntableBean()?.let {
                 val titles = it.map { it.title }
                 val prices = it.map { it.price }

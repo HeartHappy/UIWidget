@@ -69,6 +69,11 @@ abstract class AbsBaseAdapter<VB : ViewBinding, T>(var list: MutableList<T> = mu
         notifyItemRangeChanged(oldPosition, this.list.size)
     }
 
+    fun updateData(position: Int,data: T){
+        list[position] = data
+        notifyItemChanged(position)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         viewBinding = initViewBinding(parent, viewType)
         return ViewHolder(viewBinding)

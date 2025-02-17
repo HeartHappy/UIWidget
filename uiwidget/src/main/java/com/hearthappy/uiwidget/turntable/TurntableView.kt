@@ -49,6 +49,8 @@ class TurntableView : View {
     private var outlineWidth: Float = 2f //文本描边宽
     private var angleOffsetArray = intArrayOf()
     private var angleOffsetRange = intArrayOf()
+    private var bgrRotation=-90f //转盘背景旋转角度，初始值-90度，从12点方向开始
+    private var contentRotation=-90f //转盘中内容旋转角度
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -87,7 +89,6 @@ class TurntableView : View {
     private var timer: Timer? = null
     private var rotationRadian: Float = 0f //旋转弧度，持续变化
     private var totalRotationRadian: Float = 0f //旋转总弧度
-    private val startingPoint = -90 //默认是在3点方向绘制，-90度让起点在12点方向执行
 
 
 
@@ -106,6 +107,8 @@ class TurntableView : View {
         textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
+        bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
+        contentRotation = attributes.getFloat(R.styleable.TurntableView_tv_content_rotation, contentRotation)
         isShowHighlight = attributes.getBoolean(R.styleable.TurntableView_tv_show_highlight, isShowHighlight)
         isResultCenter = attributes.getBoolean(R.styleable.TurntableView_tv_show_result_center, isResultCenter)
         startSpeed = attributes.getFloat(R.styleable.TurntableView_tv_start_speed, startSpeed)
@@ -177,7 +180,7 @@ class TurntableView : View {
         super.onDraw(canvas) // Draw background
 
         bgrMatrix.setScale(scaleFactor, scaleFactor)
-        bgrMatrix.postRotate(currentAngle, centerX, centerY)
+        bgrMatrix.postRotate(currentAngle+bgrRotation, centerX, centerY)
 
         //绘制背景
         canvas.drawBitmap(bgrBitmap, bgrMatrix, null)
@@ -208,7 +211,7 @@ class TurntableView : View {
     private fun drawTextsOrIndex(canvas: Canvas, rect: RectF) {
         if (titles.isEmpty()) {
             for (index in 0 until numSectors) {
-                val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
+                val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
                 path.reset()
                 path.addArc(rect, startAngle, sectorAngle)
                 if (outlineColor != -1) canvas.drawTextOnPath(index.toString(), path, 0f, 0f, outlinePaint)
@@ -216,7 +219,7 @@ class TurntableView : View {
             }
         }else{
             titles.forEachIndexed { index, text ->
-                val startAngle = index * sectorAngle + startingPoint + currentAngle - sectorAngle / 2
+                val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
                 path.reset()
                 path.addArc(rect, startAngle, sectorAngle)
 
@@ -258,14 +261,14 @@ class TurntableView : View {
         canvas.rotate(currentAngle, centerX, centerY)
 
         bitmaps.forEachIndexed { index, iconBitmap ->
-            val angle = sectorAngle * index + startingPoint
+            val angle = sectorAngle * index + contentRotation
             val x = centerX + (radius * iconPositionPercent) * cos(Math.toRadians(angle.toDouble())).toFloat()
             val y = centerY + (radius * iconPositionPercent) * sin(Math.toRadians(angle.toDouble())).toFloat()
             iconMatrix.reset()
             val scaleFactor = iconSize / max(iconBitmap.width.toFloat(), iconBitmap.height.toFloat())
             iconMatrix.postScale(scaleFactor, scaleFactor, iconBitmap.width / 2f, iconBitmap.height / 2f)
             iconMatrix.postTranslate(x - iconBitmap.width / 2f, y - iconBitmap.height / 2f)
-            iconMatrix.postRotate(angle - startingPoint, x, y)
+            iconMatrix.postRotate(angle - contentRotation, x, y)
             canvas.drawBitmap(iconBitmap, iconMatrix, indexPaint)
         }
         canvas.restore()

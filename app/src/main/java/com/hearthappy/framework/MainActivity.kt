@@ -11,7 +11,7 @@ import com.hearthappy.framework.example.turntable.TurntableActivity
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var viewBinding: ActivityMainBinding
+    private lateinit var viewBinding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         return mutableListOf<ExampleBean>().apply {
             add(ExampleBean(TurntableActivity::class.java, "Turntable"))
             add(ExampleBean(CalendarActivity::class.java, "Calendar"))
+            add(ExampleBean(CalendarActivity::class.java, "PK"))
         }
     }
 }
