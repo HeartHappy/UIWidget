@@ -46,6 +46,7 @@ class TurntableActivity : AppCompatActivity() {
                     turntableView.onMoreDrawEndListener = { list ->
                         val sumOf = list.sumOf { it.number }
                         Log.d(TAG, "onCreate: total:$sumOf")
+                        Toast.makeText(this@TurntableActivity, list.joinToString(separator = "\n"), Toast.LENGTH_SHORT).show()
                         for (multipleLottery in list) {
                             Log.d(TAG, "onCreate onMoreDrawEndListener: index:${multipleLottery.index},number:${multipleLottery.number},title:${titles.get(index = multipleLottery.index)},price:${prices[multipleLottery.index]}")
                         }

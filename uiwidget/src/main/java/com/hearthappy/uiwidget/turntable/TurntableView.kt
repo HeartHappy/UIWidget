@@ -57,7 +57,7 @@ class TurntableView : View {
     private var angleOffsetRange = intArrayOf()
     private var bgrRotation = -90f //转盘背景旋转角度，初始值-90度，从12点方向开始
     private var contentRotation = -90f //转盘中内容旋转角度
-    private var textIconHorizontalSpacing = 8f //小图标水平间距
+    private var textIconHorizontalSpacing = 0f //小图标水平间距
     private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图
 
 
@@ -256,15 +256,18 @@ class TurntableView : View {
     }
 
     private fun drawSmallIcons(it: Bitmap, text: String, canvas: Canvas): Pair<Float, Float> {
-        val scaleBitmap = scaleBitmapToCircleRadius(it, textSize)
+
+        val fontMetrics = titlePaint.fontMetrics
         val textWidth = titlePaint.measureText(text)
+        val textHeight = fontMetrics.bottom -fontMetrics.top
         val textSpacing = textIconHorizontalSpacing.toPx() / 2f
+        val scaleBitmap = scaleBitmapToCircleRadius(it, textHeight)
         val totalWidth = textWidth + scaleBitmap.width + textSpacing
         val pos = FloatArray(2)
         val tan = FloatArray(2) // 获取路径上指定距离处的位置和切线
         pathMeasure.setPath(path, false)
         val iconPosition = (pathMeasure.length - totalWidth) / 2
-        val fontMetrics = titlePaint.fontMetrics
+
         val textVerticalCenterOffset = (fontMetrics.ascent + fontMetrics.descent) / 2 + titlePaint.textSize
         val iconVerticalOffset = textVerticalCenterOffset - scaleBitmap.height / 2
         val iconHorOffset = if (isTextIconStart) 0f else textWidth + textSpacing
