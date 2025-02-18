@@ -6,18 +6,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.hearthappy.base.ext.popupWindow
-import com.hearthappy.base.ext.showLocation
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
-import com.hearthappy.framework.databinding.ItemExampleBinding
+import com.hearthappy.uiwidget.turntable.TurntableSourceAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.random.Random
 
 class TurntableActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityTurntableBinding
@@ -34,7 +29,14 @@ class TurntableActivity : AppCompatActivity() {
                     val titles = it.map { it.title }
                     val prices = it.map { it.price }
                     loadLuckBitmap(it) { bitmaps ->
-                        turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
+
+                        //                        turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
+                        turntableView.setSourceData(object : TurntableSourceAdapter() {
+                            override fun icons(): List<Bitmap> = bitmaps
+
+                            override fun titles(): List<String> = it.map { it.price.toString() }
+
+                        })
                     }
 
                     turntableView.onSingleDrawEndListener = { i, s ->
@@ -49,7 +51,8 @@ class TurntableActivity : AppCompatActivity() {
                         }
                     }
                 }
-            },2000)
+
+            }, 0)
 
 
 
@@ -60,12 +63,12 @@ class TurntableActivity : AppCompatActivity() {
 
 
                 //指定单抽
-//                turntableView.specifySingleDraw(8)
+                //                turntableView.specifySingleDraw(8)
             }
             btnTen.setOnClickListener { //随机多抽
                 //                turntableView.startMultipleDraws(12)
                 //指定多抽
-                turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9,11, 8))
+                turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8))
             }
 
         }

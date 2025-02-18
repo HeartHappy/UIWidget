@@ -31,7 +31,10 @@ import kotlin.random.nextInt
 /**
  * Created Date: 2024/12/3
  * @author ChenRui
- * ClassDescription：自定义转盘 VIEW
+ * ClassDescription：自定义转盘控件
+ * 支持：
+ * 1、自定义背景、图标、文本、文本描边，文本左或右小图标
+ * 2、支持选中高亮
  */
 class TurntableView : View {
 
@@ -55,13 +58,14 @@ class TurntableView : View {
     private var bgrRotation = -90f //转盘背景旋转角度，初始值-90度，从12点方向开始
     private var contentRotation = -90f //转盘中内容旋转角度
     private var textIconHorizontalSpacing = 8f //小图标水平间距
-    private var isDebug=false//调试模式，默认关闭,开启后可在UI编辑器中看到默认视图
+    private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
     private val lotteryBoxList = mutableListOf<MultipleLottery>()
     private var iconBitmaps = listOf<Bitmap>()
     private var titles = listOf<String>()
+    private var smallIcons = emptyList<Bitmap>()
 
     var onSingleDrawEndListener: ((Int, String?) -> Unit)? = null // 单抽回调，返回：索引，标题
     var onMoreDrawEndListener: ((List<MultipleLottery>) -> Unit)? = null // 多抽回调，返回：索引，和抽中次数的集合
@@ -90,7 +94,7 @@ class TurntableView : View {
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
     private var randomOffsetAngle = 0f
     private var isTextIconStart = true //文本小图标显示在起点
-
+    private val pathMeasure = PathMeasure()
 
     private var textIconStartBitmap: Bitmap? = null
     private var textIconEndBitmap: Bitmap? = null
@@ -105,7 +109,7 @@ class TurntableView : View {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-
+        setLayerType(View.LAYER_TYPE_NONE, null)
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.TurntableView)
         val bgrResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, R.mipmap.bg_turntable_default)
         val bgrSelectResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
@@ -156,8 +160,7 @@ class TurntableView : View {
         titlePaint.apply {
             isAntiAlias = true
             color = this@TurntableView.textColor
-            textSize = this@TurntableView.textSize
-            textAlign = Paint.Align.CENTER
+            textSize = this@TurntableView.textSize //            textAlign = Paint.Align.CENTER
         }
         pathPaint.apply {
             isAntiAlias = true
@@ -171,8 +174,7 @@ class TurntableView : View {
             isAntiAlias = true
             style = Paint.Style.STROKE
             strokeWidth = outlineWidth
-            textSize = this@TurntableView.textSize
-            textAlign = Paint.Align.CENTER
+            textSize = this@TurntableView.textSize //            textAlign = Paint.Align.CENTER
             color = outlineColor
             maskFilter = BlurMaskFilter(outlineWidth, BlurMaskFilter.Blur.NORMAL)
         }
@@ -201,7 +203,6 @@ class TurntableView : View {
         canvas.drawBitmap(bgrBitmap, bgrMatrix, null)
 
 
-
         //绘制文本标题
         drawTexts(canvas)
 
@@ -227,50 +228,54 @@ class TurntableView : View {
     private fun drawTextsOrIndex(canvas: Canvas, rect: RectF) {
         if (titles.isEmpty() && isDebug) {
             for (index in 0 until numSectors) {
-                val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
-                path.reset()
-                path.addArc(rect, startAngle, sectorAngle)
-                if (outlineColor != -1) canvas.drawTextOnPath(index.toString(), path, 0f, 0f, outlinePaint)
-                canvas.drawTextOnPath(index.toString(), path, 0f, 0f, titlePaint) //                drawTextSmallIcon(rect, startAngle, index, index.toString(), canvas)
-                drawTextSmallIcon(canvas, path, index.toString())
+                drawTextsAndIcons(canvas, rect, index, index.toString())
             }
         } else {
             titles.forEachIndexed { index, text ->
-                val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
-                path.reset()
-                path.addArc(rect, startAngle, sectorAngle) // 先绘制描边
-                if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
-                canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint) //                drawTextSmallIcon(rect,startAngle,index,text, canvas)
-                drawTextSmallIcon(canvas, path, text)
+                drawTextsAndIcons(canvas, rect, index, text)
             }
         }
     }
 
-    private fun drawTextSmallIcon(canvas: Canvas, path: Path, text: String) {
-        val smallIconBitmap = if (isTextIconStart) textIconStartBitmap else textIconEndBitmap
-        smallIconBitmap?.let {
-            val scaleSmallIconBitmap = scaleBitmapToHeight(it, textSize.toInt())
-            val pathMeasure = PathMeasure(path, false)
-            val textWidth = titlePaint.measureText(text)
-            val textHeight = titlePaint.fontMetrics.bottom - titlePaint.fontMetrics.top
-            val textHorSpacing = if (isTextIconStart) -textIconHorizontalSpacing.toPx() else textIconHorizontalSpacing.toPx()
-            val pos = FloatArray(2)
-            val tan = FloatArray(2)
-            val textPosition = pathMeasure.length / 2 - textWidth / 2
-
-            val iconPosition = if (isTextIconStart) {
-                textPosition - scaleSmallIconBitmap.width
-            } else {
-                textPosition + textWidth
-            }
-            pathMeasure.getPosTan(iconPosition, pos, tan) // 计算切线方向对应的角度
-            val angle = atan2(tan[1].toDouble(), tan[0].toDouble()) * (180 / Math.PI) // 计算图标垂直居中的偏移量
-            textIconMatrix.reset()
-            textIconMatrix.postTranslate(pos[0] + tan[0] + textHorSpacing, pos[1] + tan[1] - (textHeight + scaleSmallIconBitmap.height) / 3)
-            textIconMatrix.postRotate(angle.toFloat(), pos[0], pos[1])
-            canvas.drawBitmap(scaleSmallIconBitmap, textIconMatrix, titlePaint)
+    private fun drawTextsAndIcons(canvas: Canvas, rect: RectF, index: Int, text: String) {
+        val startAngle = index * sectorAngle + contentRotation + currentAngle - sectorAngle / 2
+        path.reset()
+        path.addArc(rect, startAngle, sectorAngle) //绘制文本和小图标的路径
+        //        canvas.drawPath(path,pathPaint)
+        val textIconBitmap = if (isTextIconStart) textIconStartBitmap else textIconEndBitmap
+        textIconBitmap?.let {
+            val (iconPosition, textHorOffset) = drawSmallIcons(it, text, canvas)
+            if (outlineColor != -1) canvas.drawTextOnPath(text, path, iconPosition + textHorOffset, titlePaint.textSize, outlinePaint)
+            canvas.drawTextOnPath(text, path, iconPosition + textHorOffset, titlePaint.textSize, titlePaint)
+        } ?: let {
+            outlinePaint.textAlign = Paint.Align.CENTER
+            titlePaint.textAlign = Paint.Align.CENTER
+            if (outlineColor != -1) canvas.drawTextOnPath(text, path, 0f, 0f, outlinePaint)
+            canvas.drawTextOnPath(text, path, 0f, 0f, titlePaint)
         }
+    }
 
+    private fun drawSmallIcons(it: Bitmap, text: String, canvas: Canvas): Pair<Float, Float> {
+        val scaleBitmap = scaleBitmapToCircleRadius(it, textSize)
+        val textWidth = titlePaint.measureText(text)
+        val textSpacing = textIconHorizontalSpacing.toPx() / 2f
+        val totalWidth = textWidth + scaleBitmap.width + textSpacing
+        val pos = FloatArray(2)
+        val tan = FloatArray(2) // 获取路径上指定距离处的位置和切线
+        pathMeasure.setPath(path, false)
+        val iconPosition = (pathMeasure.length - totalWidth) / 2
+        val fontMetrics = titlePaint.fontMetrics
+        val textVerticalCenterOffset = (fontMetrics.ascent + fontMetrics.descent) / 2 + titlePaint.textSize
+        val iconVerticalOffset = textVerticalCenterOffset - scaleBitmap.height / 2
+        val iconHorOffset = if (isTextIconStart) 0f else textWidth + textSpacing
+        val textHorOffset = if (isTextIconStart) scaleBitmap.width + textSpacing else 0f
+        pathMeasure.getPosTan(iconPosition + iconHorOffset, pos, tan)
+        val angle = atan2(tan[1].toDouble(), tan[0].toDouble()) * (180 / Math.PI) // 重置矩阵并应用变换
+        textIconMatrix.reset()
+        textIconMatrix.postTranslate(pos[0], pos[1] + iconVerticalOffset)
+        textIconMatrix.postRotate(angle.toFloat(), pos[0], pos[1])
+        canvas.drawBitmap(scaleBitmap, textIconMatrix, titlePaint)
+        return Pair(iconPosition, textHorOffset)
     }
 
     private fun drawHighlight(canvas: Canvas) {
@@ -330,13 +335,6 @@ class TurntableView : View {
         }
     }
 
-    // 缩放 Bitmap 到指定高度
-    private fun scaleBitmapToHeight(bitmap: Bitmap, newHeight: Int): Bitmap {
-        val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
-        val newWidth = (newHeight * aspectRatio).toInt()
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
-    }
-
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow() // 释放Bitmap资源，避免内存泄漏
@@ -389,8 +387,13 @@ class TurntableView : View {
 
     //根据最大的数量排序
     private fun multipleStart() {
-        val multipleLottery = lotteryBoxList.maxBy { it.title.toInt() }
-        singleStart(multipleLottery.index, true)
+        val result = lotteryBoxList.first().title.toIntOrNull() ?: -1
+        if (result != -1) {
+            val multipleLottery = lotteryBoxList.maxBy { it.title.toInt() }
+            singleStart(multipleLottery.index, true)
+        } else {
+            singleStart(lotteryBoxList.random().index, true)
+        }
     }
 
     private fun handlerSpecifyMultipleData(indexList: List<Int>) {
@@ -405,7 +408,7 @@ class TurntableView : View {
                 this.number = oldNumber + 1
                 lotteryBoxSet.add(this)
             } ?: let {
-                lotteryBoxSet.add(MultipleLottery(index, 1, titles[index]))
+                lotteryBoxSet.add(MultipleLottery(index, 1, if (titles.isNotEmpty()) titles[index] else index.toString()))
             }
         }
 
@@ -559,18 +562,24 @@ class TurntableView : View {
     }
 
 
-    fun setSourceData(iconBitmaps: List<Bitmap>, titles: List<String> = emptyList()) {
+    fun setSourceData(iconBitmaps: List<Bitmap>, titles: List<String> = emptyList(), smallIcons: List<Bitmap> = emptyList()) {
         this.iconBitmaps = iconBitmaps
         this.titles = titles
+        this.smallIcons = smallIcons
         invalidate()
     }
 
-    fun <T> setSourceData(turntableImpl: ITurntableSource) {
+    fun setSourceData(turntableImpl: ITurntableSource) {
         this.iconBitmaps = turntableImpl.icons()
-        this.titles = turntableImpl.prices()
+        this.titles = turntableImpl.titles()
+        this.smallIcons = turntableImpl.smallIcons()
         invalidate()
     }
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        invalidate()
+    }
 
     companion object {
         private const val TAG = "TurntableView"
