@@ -1,5 +1,6 @@
 [versions]
 agp = "7.2.2"
+colorpickerview = "2.2.4"
 kotlin = "1.7.0"
 kspVersion = "2.0.10-1.0.24"
 kotlinReflectVersion = "1.6.0"
@@ -21,6 +22,7 @@ kotlinBom = "1.8.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
+colorpickerview = { module = "com.github.skydoves:colorpickerview", version.ref = "colorpickerview" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

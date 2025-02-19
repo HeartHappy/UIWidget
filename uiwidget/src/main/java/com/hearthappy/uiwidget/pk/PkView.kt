@@ -10,7 +10,8 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import com.hearthappy.uiwidget.R
-import com.hearthappy.uiwidget.utils.SizeUtils
+import com.hearthappy.uiwidget.utils.dp2px
+import com.hearthappy.uiwidget.utils.sp2px
 import kotlin.properties.Delegates
 
 /**
@@ -50,12 +51,12 @@ class PkView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
         val resourceId = typedArray.getResourceId(R.styleable.PkView_pk_icon, R.mipmap.ic_pk)
         iconBitmap = BitmapFactory.decodeResource(resources, resourceId)
         textHorizontalPadding = typedArray.getDimension(R.styleable.PkView_pk_text_horizontal_padding, 0f).toInt()
-        textSize = typedArray.getDimension(R.styleable.PkView_pk_text_size, SizeUtils.sp2px(context, textSize).toFloat())
+        textSize = typedArray.getDimension(R.styleable.PkView_pk_text_size, textSize.sp2px())
         textColor = typedArray.getColor(R.styleable.PkView_pk_text_color, Color.WHITE)
         redSquareColor = typedArray.getColor(R.styleable.PkView_pk_red_square_color, Color.RED)
         blueSquareColor = typedArray.getColor(R.styleable.PkView_pk_blue_square_color, Color.BLUE)
         progressHeight = typedArray.getDimension(R.styleable.PkView_pk_progress_height, 0f)
-        roundRadius = typedArray.getDimension(R.styleable.PkView_pk_round_radius, SizeUtils.sp2px(context, roundRadius).toFloat())
+        roundRadius = typedArray.getDimension(R.styleable.PkView_pk_round_radius, roundRadius.dp2px())
         typedArray.recycle()
         initPaint()
     }

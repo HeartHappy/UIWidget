@@ -15,8 +15,8 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
-import com.hearthappy.uiwidget.utils.SizeUtils
-import com.hearthappy.uiwidget.utils.toPx
+import com.hearthappy.uiwidget.utils.dp2px
+import com.hearthappy.uiwidget.utils.sp2px
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.PI
@@ -44,7 +44,7 @@ class TurntableView : View {
     private var textSize = 12f
     private var isShowHighlight = true //选中区域高亮
     private var numSectors = 12 //等分数量
-    private var textOffsetY = textSize //文本偏移，根据外圆向内偏移距离
+    private var textOffsetY = 0f //文本偏移，根据外圆向内偏移距离
     private var iconPositionPercent = 0.7f //距离圆心位置 1在最外边缘
     private var iconSize = 30f //图标大小
     private var startSpeed = 0.35f // 控制转盘开始速度，值越大开始的速度越快
@@ -58,7 +58,7 @@ class TurntableView : View {
     private var bgrRotation = -90f //转盘背景旋转角度，初始值-90度，从12点方向开始
     private var contentRotation = -90f //转盘中内容旋转角度
     private var textIconHorizontalSpacing = 0f //小图标水平间距
-    private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图
+    private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图 //帮我将以上私有属性添加set方法
 
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
@@ -118,11 +118,11 @@ class TurntableView : View {
         numSectors = attributes.getInteger(R.styleable.TurntableView_tv_equal_number, numSectors)
         textColor = attributes.getColor(R.styleable.TurntableView_tv_text_color, textColor)
         outlineColor = attributes.getColor(R.styleable.TurntableView_tv_text_outline_color, outlineColor)
-        textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, SizeUtils.sp2px(context, textSize).toFloat())
-        outlineWidth = attributes.getDimension(R.styleable.TurntableView_tv_text_outline_width, SizeUtils.sp2px(context, outlineWidth).toFloat())
-        textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, SizeUtils.dp2px(context, textOffsetY).toFloat())
+        textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, textSize.sp2px())
+        outlineWidth = attributes.getDimension(R.styleable.TurntableView_tv_text_outline_width, outlineWidth.sp2px())
+        textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, textOffsetY.dp2px())
         textIconHorizontalSpacing = attributes.getDimension(R.styleable.TurntableView_tv_text_icon_horizontal_spacing, 0f)
-        iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, SizeUtils.dp2px(context, iconSize).toFloat())
+        iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, iconSize.dp2px())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
         bgrRotation = attributes.getFloat(R.styleable.TurntableView_tv_bgr_rotation, bgrRotation)
         contentRotation = attributes.getFloat(R.styleable.TurntableView_tv_content_rotation, contentRotation)
@@ -259,8 +259,8 @@ class TurntableView : View {
 
         val fontMetrics = titlePaint.fontMetrics
         val textWidth = titlePaint.measureText(text)
-        val textHeight = fontMetrics.bottom -fontMetrics.top
-        val textSpacing = textIconHorizontalSpacing.toPx() / 2f
+        val textHeight = fontMetrics.bottom - fontMetrics.top
+        val textSpacing = textIconHorizontalSpacing.dp2px() / 2f
         val scaleBitmap = scaleBitmapToCircleRadius(it, textHeight)
         val totalWidth = textWidth + scaleBitmap.width + textSpacing
         val pos = FloatArray(2)
@@ -313,12 +313,11 @@ class TurntableView : View {
             val angle = sectorAngle * index + contentRotation
             val x = centerX + (radius * iconPositionPercent) * cos(Math.toRadians(angle.toDouble())).toFloat()
             val y = centerY + (radius * iconPositionPercent) * sin(Math.toRadians(angle.toDouble())).toFloat()
-            iconMatrix.reset()
-            val scaleFactor = iconSize / max(iconBitmap.width.toFloat(), iconBitmap.height.toFloat())
-            iconMatrix.postScale(scaleFactor, scaleFactor, iconBitmap.width / 2f, iconBitmap.height / 2f)
-            iconMatrix.postTranslate(x - iconBitmap.width / 2f, y - iconBitmap.height / 2f)
+            iconMatrix.reset() // 计算缩放比例
+            val scaleBitmap = scaleBitmapToCircleRadius(iconBitmap, iconSize)
+            iconMatrix.postTranslate(x - scaleBitmap.width / 2f, y)
             iconMatrix.postRotate(angle - contentRotation, x, y)
-            canvas.drawBitmap(iconBitmap, iconMatrix, indexPaint)
+            canvas.drawBitmap(scaleBitmap, iconMatrix, indexPaint)
         }
         canvas.restore()
     }
@@ -576,6 +575,136 @@ class TurntableView : View {
         this.iconBitmaps = turntableImpl.icons()
         this.titles = turntableImpl.titles()
         this.smallIcons = turntableImpl.smallIcons()
+        invalidate()
+    }
+
+    // 设置背景位图
+    fun setBgrBitmap(bitmap: Bitmap) {
+        this.bgrBitmap = bitmap
+        invalidate()
+    }
+
+    // 设置选中状态位图
+    fun setSelectBitmap(bitmap: Bitmap) {
+        this.selectBitmap = bitmap
+        invalidate()
+    }
+
+    // 设置文本颜色
+    fun setTextColor(color: Int) {
+        this.textColor = color
+        this.titlePaint.color=color
+        invalidate()
+    }
+
+    // 设置文本大小,文本偏移量依赖于文本大小，也需要更新
+    fun setTextSize(size: Float) {
+        this.textSize = size
+        this.titlePaint.textSize=size.sp2px()
+        invalidate()
+    }
+
+    // 设置是否显示高亮
+    fun setShowHighlight(show: Boolean) {
+        this.isShowHighlight = show
+        invalidate()
+    }
+
+    // 设置等分数量
+    fun setNumSectors(num: Int) {
+        this.numSectors = num
+        invalidate()
+    }
+
+    // 设置文本偏移量
+    fun setTextOffsetY(offset: Float) {
+        this.textOffsetY = offset.dp2px()
+        invalidate()
+    }
+
+    // 设置图标位置百分比
+    fun setIconPositionPercent(percent: Float) {
+        this.iconPositionPercent = percent
+        invalidate()
+    }
+
+    // 设置图标大小
+    fun setIconSize(size: Float) {
+        this.iconSize = size.dp2px()
+        invalidate()
+    }
+
+    // 设置开始速度
+    fun setStartSpeed(speed: Float) {
+        this.startSpeed = speed
+        invalidate()
+    }
+
+    // 设置减速速率
+    fun setDecelerationRate(rate: Float) {
+        this.decelerationRate = rate
+        invalidate()
+    }
+
+    // 设置最小旋转圈数
+    fun setMinRotationNumber(num: Int) {
+        this.minRotationNumber = num
+        invalidate()
+    }
+
+    // 设置结果是否居中显示
+    fun setResultCenter(center: Boolean) {
+        this.isResultCenter = center
+        invalidate()
+    }
+
+    // 设置文本描边颜色
+    fun setOutlineColor(color: Int) {
+        this.outlineColor = color
+        this.outlinePaint.color=color
+        invalidate()
+    }
+
+    // 设置文本描边宽度
+    fun setOutlineWidth(width: Float) {
+        this.outlineWidth = width
+        this.outlinePaint.strokeWidth=width
+        invalidate()
+    }
+
+    // 设置角度偏移数组
+    fun setAngleOffsetArray(array: IntArray) {
+        this.angleOffsetArray = array
+        invalidate()
+    }
+
+    // 设置角度偏移范围数组
+    fun setAngleOffsetRange(array: IntArray) {
+        this.angleOffsetRange = array
+        invalidate()
+    }
+
+    // 设置背景旋转角度
+    fun setBgrRotation(rotation: Float) {
+        this.bgrRotation = rotation
+        invalidate()
+    }
+
+    // 设置内容旋转角度
+    fun setContentRotation(rotation: Float) {
+        this.contentRotation = rotation
+        invalidate()
+    }
+
+    // 设置文本和图标水平间距
+    fun setTextIconHorizontalSpacing(spacing: Float) {
+        this.textIconHorizontalSpacing = spacing
+        invalidate()
+    }
+
+    // 设置是否开启调试模式
+    fun setDebug(debug: Boolean) {
+        this.isDebug = debug
         invalidate()
     }
 

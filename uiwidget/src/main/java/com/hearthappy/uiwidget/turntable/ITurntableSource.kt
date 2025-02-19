@@ -14,10 +14,3 @@ interface ITurntableSource {
     fun smallIcons(): List<Bitmap>
 }
 
-open class TurntableSourceAdapter : ITurntableSource {
-    override fun icons(): List<Bitmap> = emptyList()
-
-    override fun titles(): List<String> = emptyList()
-
-    override fun smallIcons(): List<Bitmap> = emptyList()
-}

@@ -2,5 +2,10 @@
     <string name="app_name">UIWidget</string>
     <string name="single_draw">单抽</string>
     <string name="_10_consecutive_draws">10连抽</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+    <string name="icon_ver_offset">图标垂直偏移量，当前值：</string>
+    <string name="text_ver_offset">文本垂直偏移量，当前值：</string>
+    <string name="text_outline_range">文本描边范围，当前值：</string>
 
 </resources>

@@ -21,7 +21,7 @@ import androidx.viewbinding.ViewBinding
  * ClassDescription： Activity基类
  */
 abstract class AbsBaseActivity<VB : ViewBinding> : AppCompatActivity() {
-    lateinit var binding: VB
+    lateinit var viewBinding: VB
 
     /** 等待对话框 */
 
@@ -29,9 +29,9 @@ abstract class AbsBaseActivity<VB : ViewBinding> : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState) //        AdaptScreenUtils.adaptWidth(resources, 750)
         //        setLightMode()
-        binding = initViewBinding()
-        setContentView(binding.root)
-        binding.apply {
+        viewBinding = initViewBinding()
+        setContentView(viewBinding.root)
+        viewBinding.apply {
             initView()
             initViewModelListener()
             initListener()

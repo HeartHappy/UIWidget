@@ -1,96 +1,119 @@
 package com.hearthappy.framework.example.turntable
 
-import android.graphics.Bitmap
-import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.bumptech.glide.Glide
+import com.hearthappy.base.AbsBaseActivity
+import com.hearthappy.base.ext.addListener
+import com.hearthappy.framework.R
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
-import com.hearthappy.uiwidget.turntable.TurntableSourceAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.skydoves.colorpickerview.ColorEnvelope
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
-class TurntableActivity : AppCompatActivity() {
-    private lateinit var viewBinding: ActivityTurntableBinding
+class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
     private lateinit var viewModel: TurntableViewModel
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewBinding = ActivityTurntableBinding.inflate(layoutInflater)
-        setContentView(viewBinding.root)
+
+    override fun initViewBinding(): ActivityTurntableBinding {
+        return ActivityTurntableBinding.inflate(layoutInflater)
+    }
+
+    override fun ActivityTurntableBinding.initListener() {
+        btnSingle.setOnClickListener {
+
+            //随机单抽
+            turntableView.startSingleDraw()
+
+            //指定单抽
+            //turntableView.specifySingleDraw(8)
+        }
+        btnTen.setOnClickListener {
+
+            //随机多抽
+            //turntableView.startMultipleDraws(12)
+            //指定多抽
+            turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8))
+        }
+        viewTextColor.setOnClickListener {
+            showColorSelector("选择文本颜色") {
+                turntableView.setTextColor(it)
+                viewTextColor.setBackgroundColor(it)
+            }
+        }
+        viewStrokeTextColor.setOnClickListener {
+            showColorSelector("选择文本描边颜色") {
+                turntableView.setOutlineColor(it)
+                viewStrokeTextColor.setBackgroundColor(it)
+            }
+        }
+        seekbarTextVerOffset.addListener({
+            val value = seekbarTextVerOffset.progress.toFloat()
+            tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(value)
+            turntableView.setTextOffsetY(value)
+        })
+
+        seekbarIconVerOffset.addListener({
+            val value = seekbarIconVerOffset.progress.toFloat() / seekbarIconVerOffset.max
+            tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(value)
+            turntableView.setIconPositionPercent(value)
+        })
+
+        seekbarOutlineText.addListener({
+            val value = seekbarOutlineText.progress.toFloat()
+            tvOutlineText.text = getString(R.string.text_outline_range).plus(value)
+            turntableView.setOutlineWidth(value)
+        })
+    }
+
+    override fun ActivityTurntableBinding.initData() {
+        viewModel.getTurntableBean(this@TurntableActivity)
+    }
+
+    override fun ActivityTurntableBinding.initViewModelListener() {
+        viewModel.ldTurntableData.observe(this@TurntableActivity) { items ->
+            turntableView.setSourceData(items.icons, items.prices) //转盘监听
+            initTurntableListener(items.title, items.prices)
+        }
+    }
+
+    override fun ActivityTurntableBinding.initView() {
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
-
-        viewBinding.apply {
-            root.postDelayed({
-                viewModel.getTurntableBean()?.let {
-                    val titles = it.map { it.title }
-                    val prices = it.map { it.price }
-                    loadLuckBitmap(it) { bitmaps ->
-
-                        //                        turntableView.setSourceData(bitmaps, it.map { it.price.toString() })
-                        turntableView.setSourceData(object : TurntableSourceAdapter() {
-                            override fun icons(): List<Bitmap> = bitmaps
-
-                            override fun titles(): List<String> = it.map { it.price.toString() }
-
-                        })
-                    }
-
-                    turntableView.onSingleDrawEndListener = { i, s ->
-                        Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
-                        Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
-                    }
-                    turntableView.onMoreDrawEndListener = { list ->
-                        val sumOf = list.sumOf { it.number }
-                        Log.d(TAG, "onCreate: total:$sumOf")
-                        Toast.makeText(this@TurntableActivity, list.joinToString(separator = "\n"), Toast.LENGTH_SHORT).show()
-                        for (multipleLottery in list) {
-                            Log.d(TAG, "onCreate onMoreDrawEndListener: index:${multipleLottery.index},number:${multipleLottery.number},title:${titles.get(index = multipleLottery.index)},price:${prices[multipleLottery.index]}")
-                        }
-                    }
-                }
-
-            }, 0)
+        seekbarTextVerOffset.max = 100
+        seekbarTextVerOffset.progress = 60
+        seekbarIconVerOffset.max = 100
+        seekbarIconVerOffset.progress = 90
+        seekbarOutlineText.max = 10
+        seekbarOutlineText.progress = 3
+        tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(60)
+        tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(0.9)
+        tvOutlineText.text = getString(R.string.text_outline_range).plus(3)
+    }
 
 
-
-            btnSingle.setOnClickListener {
-
-                //随机单抽
-                turntableView.startSingleDraw()
-
-
-                //指定单抽
-                //                turntableView.specifySingleDraw(8)
+    private fun ActivityTurntableBinding.initTurntableListener(titles: List<String>, prices: List<String>) {
+        turntableView.onSingleDrawEndListener = { i, s ->
+            Toast.makeText(this@TurntableActivity, "index:$i,title:$s", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "onCreate onSingleDrawEndListener: index:$i,title:$s")
+        }
+        turntableView.onMoreDrawEndListener = { list ->
+            val sumOf = list.sumOf { it.number }
+            Log.d(TAG, "onCreate: total:$sumOf")
+            Toast.makeText(this@TurntableActivity, list.joinToString(separator = "\n"), Toast.LENGTH_SHORT).show()
+            for (multipleLottery in list) {
+                Log.d(TAG, "onCreate onMoreDrawEndListener: index:${multipleLottery.index},number:${multipleLottery.number},title:${titles.get(index = multipleLottery.index)},price:${prices[multipleLottery.index]}")
             }
-            btnTen.setOnClickListener { //随机多抽
-                //                turntableView.startMultipleDraws(12)
-                //指定多抽
-                turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8))
-            }
-
         }
     }
 
 
-    /**
-     * 图片转bitmap
-     */
-    private fun loadLuckBitmap(list: TurntableBean, block: (MutableList<Bitmap>) -> Unit) {
-        val iconBitmaps = mutableListOf<Bitmap>()
-        CoroutineScope(Dispatchers.IO).launch {
-            for (it in list) {
-                val myBitmap: Bitmap = Glide.with(this@TurntableActivity).asBitmap().load(it.img).submit(80, 80).get()
-                val bitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.width, myBitmap.height)
-                iconBitmaps.add(bitmap)
+    private fun showColorSelector(title: String, selectColor: (Int) -> Unit) {
+        ColorPickerDialog.Builder(this).setTitle(title).setPositiveButton(getString(R.string.confirm), object : ColorEnvelopeListener {
+            override fun onColorSelected(envelope: ColorEnvelope, fromUser: Boolean) {
+                selectColor(envelope.color)
             }
-            withContext(Dispatchers.Main) { block(iconBitmaps) }
-        }
-    }
+        }).setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog?.dismiss() }.attachAlphaSlideBar(true).attachBrightnessSlideBar(true).setBottomSpace(12).show()
 
+    }
 
     companion object {
         private const val TAG = "TurntableActivity"

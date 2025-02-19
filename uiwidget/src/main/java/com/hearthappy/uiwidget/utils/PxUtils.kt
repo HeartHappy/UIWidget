@@ -1,8 +1,15 @@
-package com.hearthappy.base.ext
+package com.hearthappy.uiwidget.utils
 
+import android.content.Context
 import android.content.res.Resources
-import kotlin.math.roundToInt
 
+
+/**
+ * Created Date: 2025/2/7
+ * @author ChenRui
+ * ClassDescription：像素转换
+ *
+ */
 
 fun Int.sp2px(): Float {
     return this * Resources.getSystem().displayMetrics.scaledDensity + 0.5f
