@@ -17,20 +17,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tv_angle_offset_array="@array/angle_random_array"
-        app:tv_bgr="@mipmap/bg_turntable_default"
+        app:tv_bgr="@mipmap/bg_turntable_default3"
+        app:tv_bgr_select="@mipmap/bg_select"
         app:tv_equal_number="12"
-        app:tv_icon_position_percent="0.9"
+        app:tv_icon_position_percent="0.8"
         app:tv_is_debug="true"
         app:tv_min_rotation_number="3"
-        app:tv_show_highlight="false"
+        app:tv_show_highlight="true"
         app:tv_start_speed="0.35"
         app:tv_text_color="@color/white"
         app:tv_text_icon_end="@mipmap/ic_apple"
         app:tv_text_icon_horizontal_spacing="1dp"
-        app:tv_text_offset_y="60dp"
+        app:tv_text_offset_y="6dp"
         app:tv_text_outline_color="@color/color_title_outline"
         app:tv_text_outline_width="3dp"
-        app:tv_text_size="8sp" />
+        app:tv_text_size="10sp" />
 
     <ImageView
         android:id="@+id/imageView"

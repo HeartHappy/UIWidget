@@ -44,7 +44,7 @@ abstract class AbsBaseAdapter<VB : ViewBinding, T>(var list: MutableList<T> = mu
         if (position >= 0 && position < list.size) {
             val removeAt = this.list.removeAt(position)
             notifyItemRemoved(position)
-            notifyItemRangeChanged(position, list.size - 1)
+            notifyItemRangeChanged(position, list.size - position)
             return removeAt
         }
         return null

@@ -12,6 +12,7 @@ import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -69,7 +70,7 @@ class TurntableView : View {
 
     var onSingleDrawEndListener: ((Int, String?) -> Unit)? = null // 单抽回调，返回：索引，标题
     var onMoreDrawEndListener: ((List<MultipleLottery>) -> Unit)? = null // 多抽回调，返回：索引，和抽中次数的集合
-    var onEndListener: TurntableCallback? = null
+    var turntableListener: TurntableCallback? = null
 
     private var isFinishLottery = false //是否开始抽奖
     private var isMultipleDraw = false //是否连续抽奖
@@ -104,6 +105,7 @@ class TurntableView : View {
     private var timer: Timer? = null
     private var rotationRadian: Float = 0f //旋转弧度，持续变化
     private var totalRotationRadian: Float = 0f //旋转总弧度
+    private var totalAngle = 0f //总旋转角度
 
 
     constructor(context: Context) : this(context, null)
@@ -446,7 +448,9 @@ class TurntableView : View {
             currentAngle = 0f
             stopTimer() //目标角度
             val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
-            val rotationRadianValue = calculateRotationRadian(if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }) // 初始化旋转角度为0，准备开始新的旋转过程
+            totalAngle = if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }
+            val rotationRadianValue = calculateRotationRadian(totalAngle) // 初始化旋转角度为0，准备开始新的旋转过程
+            Log.d(TAG, "createRotationAnimator: $rotationRadianValue,$totalAngle")
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
             startRotationTimer(index) { onEndTask(it) }
@@ -456,10 +460,10 @@ class TurntableView : View {
     private fun onEndTask(it: Int) {
         if (isMultipleDraw) {
             onMoreDrawEndListener?.invoke(lotteryBoxList)
-            onEndListener?.onMoreDrawEndListener(lotteryBoxList)
+            turntableListener?.onMoreDrawEndListener(lotteryBoxList)
         } else {
             onSingleDrawEndListener?.invoke(it, titles[it])
-            onEndListener?.onSingleDrawEndListener(it, titles[it])
+            turntableListener?.onSingleDrawEndListener(it, titles[it])
         }
     }
 
@@ -481,7 +485,7 @@ class TurntableView : View {
 
     // 根据单次旋转角度和总圈数计算总的旋转弧度
     private fun calculateRotationRadian(turnAngle: Float): Float {
-        return (turnAngle + 360 * minRotationNumber) * (PI / 180f).toFloat()
+        return turnAngle * (PI / 180f).toFloat()
     }
 
     // 启动定时器，用于定时更新转盘的旋转动画
@@ -505,6 +509,7 @@ class TurntableView : View {
         }
         if (rotationRadian < perAngle) {
             stopTimer()
+            turntableListener?.onRotationAngleListener(totalAngle, totalAngle)
             isFinishLottery = true
             selectIndex = index //选中index,多抽时根据基准设置其他位置
             invalidate()
@@ -515,6 +520,7 @@ class TurntableView : View {
     // 根据每次的角度增量更新转盘的当前旋转角度
     private fun updateRotation(perAngle: Float) {
         currentAngle += perAngle * (180f / PI.toFloat())
+        turntableListener?.onRotationAngleListener(totalAngle,currentAngle)
         invalidate()
     }
 
@@ -593,14 +599,14 @@ class TurntableView : View {
     // 设置文本颜色
     fun setTextColor(color: Int) {
         this.textColor = color
-        this.titlePaint.color=color
+        this.titlePaint.color = color
         invalidate()
     }
 
     // 设置文本大小,文本偏移量依赖于文本大小，也需要更新
     fun setTextSize(size: Float) {
         this.textSize = size
-        this.titlePaint.textSize=size.sp2px()
+        this.titlePaint.textSize = size.sp2px()
         invalidate()
     }
 
@@ -661,14 +667,14 @@ class TurntableView : View {
     // 设置文本描边颜色
     fun setOutlineColor(color: Int) {
         this.outlineColor = color
-        this.outlinePaint.color=color
+        this.outlinePaint.color = color
         invalidate()
     }
 
     // 设置文本描边宽度
     fun setOutlineWidth(width: Float) {
         this.outlineWidth = width
-        this.outlinePaint.strokeWidth=width
+        this.outlinePaint.strokeWidth = width
         invalidate()
     }
 
