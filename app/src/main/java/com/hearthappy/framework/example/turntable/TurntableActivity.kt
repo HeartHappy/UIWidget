@@ -6,10 +6,11 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.hearthappy.base.AbsBaseActivity
 import com.hearthappy.base.ext.addListener
+import com.hearthappy.base.ext.px2dp
 import com.hearthappy.framework.R
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
 import com.hearthappy.uiwidget.turntable.MultipleLottery
-import com.hearthappy.uiwidget.turntable.TurntableCallback
+import com.hearthappy.uiwidget.turntable.OnTurntableListener
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -18,17 +19,14 @@ import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
     private lateinit var viewModel: TurntableViewModel
 
-    private var playCount = 0
-    private val maxPlays = 8 // 最大播放次数
-    private var anglePerPlay = 0f // 每次播放的角度间隔
     private lateinit var mediaPlayer: MediaPlayer
-    private var lastPlayedAngle = 0f // 上次播放音频的角度
 
     override fun initViewBinding(): ActivityTurntableBinding {
         return ActivityTurntableBinding.inflate(layoutInflater)
     }
 
     override fun ActivityTurntableBinding.initListener() {
+        initTurntableListener()
         btnSingle.setOnClickListener {
 
             //随机单抽
@@ -75,6 +73,8 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
             tvOutlineText.text = getString(R.string.text_outline_range).plus(value)
             turntableView.setOutlineWidth(value)
         })
+        switchShowHighlight.setOnCheckedChangeListener { _, isChecked -> turntableView.setShowHighlight(isChecked) }
+
     }
 
 
@@ -85,48 +85,45 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
     override fun ActivityTurntableBinding.initViewModelListener() {
         viewModel.ldTurntableData.observe(this@TurntableActivity) { items ->
             turntableView.setSourceData(items.icons, items.prices) //转盘监听
-            initTurntableListener(items.title, items.prices)
         }
     }
 
     override fun ActivityTurntableBinding.initView() {
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(TurntableViewModel::class.java)
-        seekbarTextVerOffset.max = 100
-        seekbarTextVerOffset.progress = 60
+
+        //图标垂直偏移量
         seekbarIconVerOffset.max = 100
-        seekbarIconVerOffset.progress = 90
+        val iconPositionPercent = turntableView.getIconPositionPercent()
+        seekbarIconVerOffset.progress =(iconPositionPercent* 100).toInt()
+        tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(iconPositionPercent)
+        //文本垂直偏移量
+        seekbarTextVerOffset.max = 100
+        val textVerticalOffset = turntableView.getTextVerticalOffset().px2dp().toInt()
+        seekbarTextVerOffset.progress = textVerticalOffset
+        tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(textVerticalOffset)
+        //文本描边范围
         seekbarOutlineText.max = 10
-        seekbarOutlineText.progress = 3
-        tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(60)
-        tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(0.9)
-        tvOutlineText.text = getString(R.string.text_outline_range).plus(3)
-        mediaPlayer = MediaPlayer.create(this@TurntableActivity, R.raw.play_turan)
+        val outlineWidth = turntableView.getOutlineWidth().px2dp().toInt()
+        seekbarOutlineText.progress = outlineWidth
+        tvOutlineText.text = getString(R.string.text_outline_range).plus(outlineWidth)
+        mediaPlayer = MediaPlayer.create(this@TurntableActivity, R.raw.play_sound)
     }
 
 
-    private fun ActivityTurntableBinding.initTurntableListener(titles: List<String>, prices: List<String>) {
-        turntableView.turntableListener = object : TurntableCallback {
+    private fun ActivityTurntableBinding.initTurntableListener() {
+        turntableView.onTurntableListener = object : OnTurntableListener {
             override fun onSingleDrawEndListener(index: Int, text: String?) {
                 Toast.makeText(this@TurntableActivity, "index:$index,title:$text", Toast.LENGTH_SHORT).show()
-                Log.d(TAG, "onSingleDrawEndListener: index:$index,title:$text")
             }
 
             override fun onMoreDrawEndListener(multipleLottery: List<MultipleLottery>) {
-                val sumOf = multipleLottery.sumOf { it.number }
-                Log.d(TAG, "onMoreDrawEndListener: total:$sumOf")
                 Toast.makeText(this@TurntableActivity, multipleLottery.joinToString(separator = "\n"), Toast.LENGTH_SHORT).show()
                 for (lottery in multipleLottery) {
-                    Log.d(TAG, "onMoreDrawEndListener onMoreDrawEndListener: index:${lottery.index},number:${lottery.number},title:${titles.get(index = lottery.index)},price:${prices[lottery.index]}")
+                    Log.d(TAG, "onMoreDrawEndListener: ${lottery.index},${lottery.title}")
                 }
-
             }
 
             override fun onRotationAngleListener(totalAngle: Float, currentAngle: Float) {
-                Log.d(TAG, "onRotationAngleListener:totalAngle: $totalAngle,currentAngle:$currentAngle") // 检查是否已经播放了 5 次
-                if (currentAngle.toInt() % 30 == 0 && isFinish && !mediaPlayer.isPlaying) { // 播放音频
-                    mediaPlayer.start()
-                    playCount++
-                }
                 if (totalAngle == currentAngle) {
                     mediaPlayer.start()
                     turntableView.postDelayed({ // 停止音频
@@ -134,8 +131,9 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
                             mediaPlayer.stop()
                             mediaPlayer.reset() // 可选，重置 MediaPlayer
                         }
-                        playCount = 0 // 如果需要重置计数器
-                    }, 1000)
+                    }, mediaPlayer.duration.toLong())
+                }else if(currentAngle.toInt() % 30 == 0 && isFinish && !mediaPlayer.isPlaying){
+                    mediaPlayer.start()
                 }
             }
         }
@@ -153,11 +151,12 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
 
     var isFinish = false
 
-    fun startPlaySoundTask(){
+    fun startPlaySoundTask() {
         isFinish = false
         startMedia()
         startTime()
     }
+
     fun startMedia() {
         if (!isFinish) {
             mediaPlayer.start()

@@ -25,7 +25,7 @@
         <!--最终结果居中，正对12点-->
         <attr name="tv_show_result_center" format="boolean" />
         <!--文本偏移量-->
-        <attr name="tv_text_offset_y" format="dimension" />
+        <attr name="tv_text_vertical_offset" format="dimension" />
         <!--icon大小-->
         <attr name="tv_icon_size" format="dimension" />
         <!--icon偏移占比，0:圆心，1.0：边缘-->

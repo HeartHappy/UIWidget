@@ -1,7 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.UIWidget" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!-- 修改按钮的背景颜色 -->
+        <item name="colorButtonNormal">@color/colorPrimary</item>
+        <!-- 修改按钮按下时的颜色 -->
+        <item name="android:colorControlHighlight">@color/colorPrimary</item>
+        <!-- 设置 Switch 开启时的颜色 -->
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <!-- 设置 SeekBar 进度条颜色 -->
+        <item name="android:progressTint">@color/colorPrimary</item>
+        <!-- 设置 SeekBar 滑块颜色 -->
+        <item name="android:thumbTint">@color/colorPrimary</item>
     </style>
 </resources>

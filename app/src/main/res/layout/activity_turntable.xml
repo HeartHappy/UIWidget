@@ -17,10 +17,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tv_angle_offset_array="@array/angle_random_array"
-        app:tv_bgr="@mipmap/bg_turntable_default3"
+        app:tv_bgr="@mipmap/bg_turntable_default2"
         app:tv_bgr_select="@mipmap/bg_select"
         app:tv_equal_number="12"
-        app:tv_icon_position_percent="0.8"
+        app:tv_icon_position_percent="0.85"
         app:tv_is_debug="true"
         app:tv_min_rotation_number="3"
         app:tv_show_highlight="true"
@@ -28,7 +28,7 @@
         app:tv_text_color="@color/white"
         app:tv_text_icon_end="@mipmap/ic_apple"
         app:tv_text_icon_horizontal_spacing="1dp"
-        app:tv_text_offset_y="6dp"
+        app:tv_text_vertical_offset="65dp"
         app:tv_text_outline_color="@color/color_title_outline"
         app:tv_text_outline_width="3dp"
         app:tv_text_size="10sp" />
@@ -108,14 +108,16 @@
 
         <TextView
             android:id="@+id/tvTextColor"
-            android:text="文本颜色"
+            android:text="@string/text_color"
             style="@style/style_text_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/seekbarOutlineText" />
         <View
             android:id="@+id/viewTextColor"
             android:layout_width="60dp"
+            android:elevation="4dp"
             android:background="@color/white"
+            android:layout_marginEnd="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvTextColor"
             app:layout_constraintBottom_toBottomOf="@id/tvTextColor"
@@ -123,7 +125,7 @@
 
         <TextView
             android:id="@+id/tvTextStrokeColor"
-            android:text="文本描边颜色"
+            android:text="@string/text_stroke_color"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvTextColor"
             style="@style/style_text_title" />
@@ -134,7 +136,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvTextStrokeColor"
             app:layout_constraintBottom_toBottomOf="@id/tvTextStrokeColor"
-            android:layout_marginStart="8dp"
+            android:elevation="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_height="20dp"/>
+        <TextView
+            android:id="@+id/tvShowHighlight"
+            android:text="@string/show_highlight"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTextStrokeColor"
+            style="@style/style_text_title" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchShowHighlight"
+            android:layout_width="wrap_content"
+            android:checked="true"
+            app:layout_constraintBottom_toBottomOf="@+id/tvShowHighlight"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvShowHighlight"
+            android:layout_height="wrap_content"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

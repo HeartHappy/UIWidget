@@ -12,7 +12,6 @@ import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.hearthappy.uiwidget.R
@@ -42,10 +41,10 @@ class TurntableView : View {
     private var bgrBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_default)
     private var selectBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_select)
     private var textColor = ContextCompat.getColor(context, R.color.color_title)
-    private var textSize = 12f
+    private var textSize = 12f //文本字体大小
     private var isShowHighlight = true //选中区域高亮
     private var numSectors = 12 //等分数量
-    private var textOffsetY = 0f //文本偏移，根据外圆向内偏移距离
+    private var textVerticalOffset = 0f //文本偏移，根据外圆向内偏移距离
     private var iconPositionPercent = 0.7f //距离圆心位置 1在最外边缘
     private var iconSize = 30f //图标大小
     private var startSpeed = 0.35f // 控制转盘开始速度，值越大开始的速度越快
@@ -61,6 +60,7 @@ class TurntableView : View {
     private var textIconHorizontalSpacing = 0f //小图标水平间距
     private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图 //帮我将以上私有属性添加set方法
 
+    //以上属性增加get方法
 
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
     private val lotteryBoxList = mutableListOf<MultipleLottery>()
@@ -70,7 +70,7 @@ class TurntableView : View {
 
     var onSingleDrawEndListener: ((Int, String?) -> Unit)? = null // 单抽回调，返回：索引，标题
     var onMoreDrawEndListener: ((List<MultipleLottery>) -> Unit)? = null // 多抽回调，返回：索引，和抽中次数的集合
-    var turntableListener: TurntableCallback? = null
+    var onTurntableListener: OnTurntableListener? = null
 
     private var isFinishLottery = false //是否开始抽奖
     private var isMultipleDraw = false //是否连续抽奖
@@ -91,6 +91,7 @@ class TurntableView : View {
     private val mutableSelectMatrix = Matrix()
     private val iconMatrix = Matrix()
     private val textIconMatrix = Matrix()
+    private val scaleMatrix = Matrix()//缩放矩阵
     private var currentAngle = 0f // 当前旋转的角度
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
     private var randomOffsetAngle = 0f
@@ -111,7 +112,7 @@ class TurntableView : View {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        setLayerType(View.LAYER_TYPE_NONE, null)
+        setLayerType(LAYER_TYPE_NONE, null)
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.TurntableView)
         val bgrResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, R.mipmap.bg_turntable_default)
         val bgrSelectResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
@@ -122,7 +123,7 @@ class TurntableView : View {
         outlineColor = attributes.getColor(R.styleable.TurntableView_tv_text_outline_color, outlineColor)
         textSize = attributes.getDimension(R.styleable.TurntableView_tv_text_size, textSize.sp2px())
         outlineWidth = attributes.getDimension(R.styleable.TurntableView_tv_text_outline_width, outlineWidth.sp2px())
-        textOffsetY = attributes.getDimension(R.styleable.TurntableView_tv_text_offset_y, textOffsetY.dp2px())
+        textVerticalOffset = attributes.getDimension(R.styleable.TurntableView_tv_text_vertical_offset, textVerticalOffset.dp2px())
         textIconHorizontalSpacing = attributes.getDimension(R.styleable.TurntableView_tv_text_icon_horizontal_spacing, 0f)
         iconSize = attributes.getDimension(R.styleable.TurntableView_tv_icon_size, iconSize.dp2px())
         iconPositionPercent = attributes.getFloat(R.styleable.TurntableView_tv_icon_position_percent, iconPositionPercent)
@@ -301,7 +302,7 @@ class TurntableView : View {
     }
 
     private fun drawTexts(canvas: Canvas) {
-        val rect = RectF(paddingLeft.toFloat() + textOffsetY, paddingTop.toFloat() + textOffsetY, width.toFloat() - paddingEnd - textOffsetY, height.toFloat() - paddingBottom - textOffsetY) //        val startAngle = -105 //绘制文本
+        val rect = RectF(paddingLeft.toFloat() + textVerticalOffset, paddingTop.toFloat() + textVerticalOffset, width.toFloat() - paddingEnd - textVerticalOffset, height.toFloat() - paddingBottom - textVerticalOffset) //        val startAngle = -105 //绘制文本
         drawTextsOrIndex(canvas, rect)
 
     }
@@ -404,7 +405,7 @@ class TurntableView : View {
         lotteryBoxSet.clear()
         lotteryBoxList.clear()
 
-        for (index in indexList) {
+        for (index in indexList.take(numSectors)) {
             val find = lotteryBoxSet.find { it.index == index }
             find?.apply {
                 val oldNumber = this.number
@@ -412,7 +413,7 @@ class TurntableView : View {
                 this.number = oldNumber + 1
                 lotteryBoxSet.add(this)
             } ?: let {
-                lotteryBoxSet.add(MultipleLottery(index, 1, if (titles.isNotEmpty()) titles[index] else index.toString()))
+                lotteryBoxSet.add(MultipleLottery(index, 1, if (titles.isNotEmpty() && titles.size > index) titles[index] else index.toString()))
             }
         }
 
@@ -450,7 +451,6 @@ class TurntableView : View {
             val turnAngle = calculateTurnAngle(index, sectorAngle) // 生成一个随机的偏移角度，范围在 -10 到 10 度之间
             totalAngle = if (isResultCenter) turnAngle else turnAngle.run { plus(calculateOffsetAngle()) }
             val rotationRadianValue = calculateRotationRadian(totalAngle) // 初始化旋转角度为0，准备开始新的旋转过程
-            Log.d(TAG, "createRotationAnimator: $rotationRadianValue,$totalAngle")
             totalRotationRadian = rotationRadianValue
             rotationRadian = rotationRadianValue
             startRotationTimer(index) { onEndTask(it) }
@@ -460,10 +460,10 @@ class TurntableView : View {
     private fun onEndTask(it: Int) {
         if (isMultipleDraw) {
             onMoreDrawEndListener?.invoke(lotteryBoxList)
-            turntableListener?.onMoreDrawEndListener(lotteryBoxList)
+            onTurntableListener?.onMoreDrawEndListener(lotteryBoxList)
         } else {
             onSingleDrawEndListener?.invoke(it, titles[it])
-            turntableListener?.onSingleDrawEndListener(it, titles[it])
+            onTurntableListener?.onSingleDrawEndListener(it, titles[it])
         }
     }
 
@@ -509,7 +509,7 @@ class TurntableView : View {
         }
         if (rotationRadian < perAngle) {
             stopTimer()
-            turntableListener?.onRotationAngleListener(totalAngle, totalAngle)
+            onTurntableListener?.onRotationAngleListener(totalAngle, totalAngle)
             isFinishLottery = true
             selectIndex = index //选中index,多抽时根据基准设置其他位置
             invalidate()
@@ -520,7 +520,7 @@ class TurntableView : View {
     // 根据每次的角度增量更新转盘的当前旋转角度
     private fun updateRotation(perAngle: Float) {
         currentAngle += perAngle * (180f / PI.toFloat())
-        turntableListener?.onRotationAngleListener(totalAngle,currentAngle)
+        onTurntableListener?.onRotationAngleListener(totalAngle,currentAngle)
         invalidate()
     }
 
@@ -545,7 +545,6 @@ class TurntableView : View {
         val heightRatio = viewHeight.toFloat() / imageHeight
         return minOf(widthRatio, heightRatio)
     }
-
     /**
      * 选中光标缩放后得bitmap
      * @param bitmap Bitmap
@@ -562,25 +561,25 @@ class TurntableView : View {
         val scaleFactor = targetHeight / originalHeight
 
         // 创建缩放矩阵
-        val matrix = Matrix()
-        matrix.postScale(scaleFactor, scaleFactor)
+        scaleMatrix.reset()
+        scaleMatrix.postScale(scaleFactor, scaleFactor)
 
         // 使用缩放矩阵创建新的Bitmap
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, scaleMatrix, true)
     }
 
 
     fun setSourceData(iconBitmaps: List<Bitmap>, titles: List<String> = emptyList(), smallIcons: List<Bitmap> = emptyList()) {
-        this.iconBitmaps = iconBitmaps
-        this.titles = titles
-        this.smallIcons = smallIcons
+        this.iconBitmaps = iconBitmaps.take(numSectors)
+        this.titles = titles.take(numSectors)
+        this.smallIcons = smallIcons.take(numSectors)
         invalidate()
     }
 
     fun setSourceData(turntableImpl: ITurntableSource) {
-        this.iconBitmaps = turntableImpl.icons()
-        this.titles = turntableImpl.titles()
-        this.smallIcons = turntableImpl.smallIcons()
+        this.iconBitmaps = turntableImpl.icons().take(numSectors)
+        this.titles = turntableImpl.titles().take(numSectors)
+        this.smallIcons = turntableImpl.smallIcons().take(numSectors)
         invalidate()
     }
 
@@ -624,7 +623,7 @@ class TurntableView : View {
 
     // 设置文本偏移量
     fun setTextOffsetY(offset: Float) {
-        this.textOffsetY = offset.dp2px()
+        this.textVerticalOffset = offset.dp2px()
         invalidate()
     }
 
@@ -712,6 +711,105 @@ class TurntableView : View {
     fun setDebug(debug: Boolean) {
         this.isDebug = debug
         invalidate()
+    }
+
+    /**
+     * get方法
+     * @return Int
+     */
+    // 获取 textColor 的方法
+    fun getTextColor(): Int {
+        return textColor
+    }
+
+    // 获取 textSize 的方法
+    fun getTextSize(): Float {
+        return textSize
+    }
+
+    // 获取 isShowHighlight 的方法
+    fun isShowHighlight(): Boolean {
+        return isShowHighlight
+    }
+
+    // 获取 numSectors 的方法
+    fun getNumSectors(): Int {
+        return numSectors
+    }
+
+    // 获取 textOffsetY 的方法
+    fun getTextVerticalOffset(): Float {
+        return textVerticalOffset
+    }
+
+    // 获取 iconPositionPercent 的方法
+    fun getIconPositionPercent(): Float {
+        return iconPositionPercent
+    }
+
+    // 获取 iconSize 的方法
+    fun getIconSize(): Float {
+        return iconSize
+    }
+
+    // 获取 startSpeed 的方法
+    fun getStartSpeed(): Float {
+        return startSpeed
+    }
+
+    // 获取 decelerationRate 的方法
+    fun getDecelerationRate(): Float {
+        return decelerationRate
+    }
+
+    // 获取 minRotationNumber 的方法
+    fun getMinRotationNumber(): Int {
+        return minRotationNumber
+    }
+
+    // 获取 isResultCenter 的方法
+    fun isResultCenter(): Boolean {
+        return isResultCenter
+    }
+
+    // 获取 outlineColor 的方法
+    fun getOutlineColor(): Int {
+        return outlineColor
+    }
+
+    // 获取 outlineWidth 的方法
+    fun getOutlineWidth(): Float {
+        return outlineWidth
+    }
+
+    // 获取 angleOffsetArray 的方法
+    fun getAngleOffsetArray(): IntArray {
+        return angleOffsetArray
+    }
+
+    // 获取 angleOffsetRange 的方法
+    fun getAngleOffsetRange(): IntArray {
+        return angleOffsetRange
+    }
+
+    // 获取 bgrRotation 的方法
+    fun getBgrRotation(): Float {
+        return bgrRotation
+    }
+
+    // 获取 contentRotation 的方法
+    fun getContentRotation(): Float {
+        return contentRotation
+    }
+
+    // 获取 textIconHorizontalSpacing 的方法
+    fun getTextIconHorizontalSpacing(): Float {
+        return textIconHorizontalSpacing
+    }
+
+    // 获取 isDebug 的方法
+    fun isDebug(): Boolean {
+        return isDebug
     }
 
     override fun onFinishInflate() {
