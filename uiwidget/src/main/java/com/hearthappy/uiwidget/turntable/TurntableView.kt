@@ -60,8 +60,6 @@ class TurntableView : View {
     private var textIconHorizontalSpacing = 0f //小图标水平间距
     private var isDebug = false //调试模式，默认关闭,开启后可在UI编辑器中看到默认视图 //帮我将以上私有属性添加set方法
 
-    //以上属性增加get方法
-
     private val lotteryBoxSet = mutableSetOf<MultipleLottery>()
     private val lotteryBoxList = mutableListOf<MultipleLottery>()
     private var iconBitmaps = listOf<Bitmap>()

@@ -7,6 +7,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hearthappy.framework.databinding.ActivityMainBinding
 import com.hearthappy.framework.example.calendar.CalendarActivity
+import com.hearthappy.framework.example.pk.PkActivity
 import com.hearthappy.framework.example.turntable.TurntableActivity
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         return mutableListOf<ExampleBean>().apply {
             add(ExampleBean(TurntableActivity::class.java, "Turntable"))
             add(ExampleBean(CalendarActivity::class.java, "Calendar"))
-            add(ExampleBean(CalendarActivity::class.java, "PK"))
+            add(ExampleBean(PkActivity::class.java, "PK"))
         }
     }
 }
