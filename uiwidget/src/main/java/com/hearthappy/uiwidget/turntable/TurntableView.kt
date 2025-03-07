@@ -137,7 +137,6 @@ class TurntableView : View {
         val angleOffsetRangeResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_range, 0)
         if (angleOffsetArrayResId != 0) angleOffsetArray = resources.getIntArray(angleOffsetArrayResId)
         if (angleOffsetRangeResId != 0) angleOffsetRange = resources.getIntArray(angleOffsetRangeResId)
-
         bgrBitmap = BitmapFactory.decodeResource(resources, bgrResId)
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResId)
         textIconStartBitmap = BitmapFactory.decodeResource(resources, textIconStartResId)

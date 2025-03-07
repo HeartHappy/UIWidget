@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.hearthappy.uiwidget.numberroll.DigitScrollView
+        android:id="@+id/numberRollView"
+        android:layout_width="170dp"
+        android:layout_height="24dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:nr_digit_image_height="23dp"
+        app:nr_digit_image_width="17dp"
+        app:nr_digit_images="@array/digit_images"
+        app:nr_text_color="@color/color_title"
+        app:nr_text_outline_color="@color/color_title_outline"
+        app:nr_text_outline_width="3dp"
+        app:nr_text_size="36dp" />
+
+    <Button
+        android:id="@+id/btnChangeValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/change_value"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

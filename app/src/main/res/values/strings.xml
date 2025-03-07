@@ -10,5 +10,17 @@
     <string name="show_highlight">显示高亮</string>
     <string name="text_stroke_color">文本描边颜色</string>
     <string name="text_color">文本颜色</string>
-
+    <string name="change_value">改变值</string>
+    <array name="digit_images">
+        <item>@mipmap/ic_digital_0</item>
+        <item>@mipmap/ic_digital_1</item>
+        <item>@mipmap/ic_digital_2</item>
+        <item>@mipmap/ic_digital_3</item>
+        <item>@mipmap/ic_digital_4</item>
+        <item>@mipmap/ic_digital_5</item>
+        <item>@mipmap/ic_digital_6</item>
+        <item>@mipmap/ic_digital_7</item>
+        <item>@mipmap/ic_digital_8</item>
+        <item>@mipmap/ic_digital_9</item>
+    </array>
 </resources>

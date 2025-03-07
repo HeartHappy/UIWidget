@@ -63,4 +63,27 @@
         <attr name="pk_icon" format="reference" />
         <attr name="pk_round_radius" format="dimension"/>
     </declare-styleable>
+    
+    <declare-styleable name="DigitScrollView">
+        <!--数字滚动图片资源-->
+        <attr name="nr_digit_images" format="reference"/>
+        <!--图片资源宽\高-->
+        <attr name="nr_digit_image_width" format="dimension"/>
+        <attr name="nr_digit_image_height" format="dimension"/>
+        <!--文本字体大小-->
+        <attr name="nr_text_size" format="dimension" />
+        <!--文本颜色-->
+        <attr name="nr_text_color" format="color|reference" />
+        <!--文本描边颜色-->
+        <attr name="nr_text_outline_color" format="color" />
+        <!--描边宽-->
+        <attr name="nr_text_outline_width" format="dimension" />
+        <!--显示数字数量-->
+        <attr name="nr_digit_count" format="integer" />
+        <!--填充模式-->
+        <attr name="nr_fill_mode" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="filling" value="1"/>
+        </attr>
+    </declare-styleable>
 </resources>

@@ -33,6 +33,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.hearthappy.framework.example.numberroll.NumberRollActivity"  android:exported="false"/>
     </application>
 
 </manifest>
