@@ -89,7 +89,7 @@ class TurntableView : View {
     private val mutableSelectMatrix = Matrix()
     private val iconMatrix = Matrix()
     private val textIconMatrix = Matrix()
-    private val scaleMatrix = Matrix()//缩放矩阵
+    private val scaleMatrix = Matrix() //缩放矩阵
     private var currentAngle = 0f // 当前旋转的角度
     private var selectIndex = 0 //记录选中的index，作为角度计算基准
     private var randomOffsetAngle = 0f
@@ -366,9 +366,9 @@ class TurntableView : View {
      * 随机连抽-默认10连
      * @param number Int
      */
-    fun startMultipleDraws(number: Int = 10) {
+    fun startMultipleDraws(number: Int = 10, specifyIndex: Int = -1) {
         handlerMultipleData(number)
-        multipleStart()
+        multipleStart(specifyIndex)
     }
 
     /**
@@ -382,20 +382,29 @@ class TurntableView : View {
     /**
      * 指定抽中多个
      */
-    fun specifyMultipleDraws(indexList: List<Int>) {
+    fun specifyMultipleDraws(indexList: List<Int>, specifyIndex: Int = -1) {
         handlerSpecifyMultipleData(indexList)
-        multipleStart()
+        multipleStart(specifyIndex)
     }
 
-    //根据最大的数量排序
-    private fun multipleStart() {
-        val result = lotteryBoxList.first().title.toIntOrNull() ?: -1
-        if (result != -1) {
-            val multipleLottery = lotteryBoxList.maxBy { it.title.toInt() }
-            singleStart(multipleLottery.index, true)
+    /**
+     * specifyIndex：指定多抽选中的索引,默认为随机，即：-1随机
+     */
+    private fun multipleStart(specifyIndex: Int = -1) {
+        if (specifyIndex == -1) {
+            val result = lotteryBoxList.first().title.toIntOrNull() ?: -1
+            if (result != -1) {
+                val multipleLottery = lotteryBoxList.maxBy { it.title.toInt() }
+                singleStart(multipleLottery.index, true)
+            } else {
+                singleStart(lotteryBoxList.random().index, true)
+            }
+//            singleStart(lotteryBoxList.random().index, true)
         } else {
-            singleStart(lotteryBoxList.random().index, true)
+            singleStart(specifyIndex, true)
         }
+
+
     }
 
     private fun handlerSpecifyMultipleData(indexList: List<Int>) {
@@ -517,7 +526,7 @@ class TurntableView : View {
     // 根据每次的角度增量更新转盘的当前旋转角度
     private fun updateRotation(perAngle: Float) {
         currentAngle += perAngle * (180f / PI.toFloat())
-        onTurntableListener?.onRotationAngleListener(totalAngle,currentAngle)
+        onTurntableListener?.onRotationAngleListener(totalAngle, currentAngle)
         invalidate()
     }
 
@@ -542,6 +551,7 @@ class TurntableView : View {
         val heightRatio = viewHeight.toFloat() / imageHeight
         return minOf(widthRatio, heightRatio)
     }
+
     /**
      * 选中光标缩放后得bitmap
      * @param bitmap Bitmap
@@ -713,8 +723,7 @@ class TurntableView : View {
     /**
      * get方法
      * @return Int
-     */
-    // 获取 textColor 的方法
+     */ // 获取 textColor 的方法
     fun getTextColor(): Int {
         return textColor
     }

@@ -41,7 +41,7 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
             //随机多抽
             //turntableView.startMultipleDraws(12)
             //指定多抽
-            turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8))
+            turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8),11)
             startPlaySoundTask()
         }
         viewTextColor.setOnClickListener {
