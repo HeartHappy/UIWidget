@@ -4,24 +4,30 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
+    id 'signing'
 }
 group("com.hearthappy")
-version("1.0.0")
+version(libraryVersion)
 
-task javadoc(type: Javadoc) {
+tasks.register('javadoc', Javadoc) {
     source = android.sourceSets.main.java.sourceFiles
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
     archiveClassifier.set("javadoc")
     from javadoc.destinationDir
 }
 
-
-task sourceJar(type: Jar) {
+tasks.register('sourceJar', Jar) {
     from android.sourceSets.main.java.srcDirs
     archiveClassifier.set("sources")
+}
+tasks.register('zipRepo', Zip) {
+    from "$buildDir/repo"
+    archiveFileName = 'com.zip'
+    destinationDirectory = file(buildDir)
 }
 afterEvaluate {
     publishing {
@@ -30,13 +36,62 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.hearthappy'
                 artifactId = 'uiwidget'
-                version = '1.1.3'
+                version = libraryVersion
                 artifacts {
-                    archives(javadocJar)
-                    archives(sourceJar)
+                    archives(tasks.named('javadocJar'))
+                    archives(tasks.named('sourceJar'))
+                }
+                pom {
+                    name = 'uiwidget'
+                    description = 'Android basic framework packaging and extension library'
+                    url = 'https://github.com/HeartHappy/UIWidget'
+
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'HeartHappy'
+                            name = 'এ᭄白ຼ龙້໌ᮨꦿ'
+                            email = '1096885636@qq.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'scm:git://github.com/HeartHappy/UIWidget'
+                        developerConnection = 'scm:git:ssh://github.com/HeartHappy/UIWidget'
+                        url = 'https://github.com/HeartHappy/UIWidget'
+                    }
                 }
             }
         }
+        repositories {
+            maven {
+                //打包推送到本地仓库地址
+                url = uri("$buildDir/repo")
+                //推送远程仓库需要认证
+//                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+//                credentials {
+//                    username = project.properties['sonatypeUsername']
+//                    password = project.properties['sonatypePassword']
+//                }
+            }
+        }
+    }
+    signing {
+        //gpg签名认证
+        sign(publishing.publications.release)
+    }
+    // 设置 zipRepo 任务依赖于发布任务
+    tasks.named('zipRepo') { dependsOn(publishReleasePublicationToMavenRepository) }
+
+    // 确保发布任务完成后总是执行 zipRepo 任务，即使发布任务失败
+    tasks.named('publishReleasePublicationToMavenRepository') {
+        finalizedBy(tasks.named('zipRepo'))
     }
 }
 android {
