@@ -26,7 +26,7 @@ tasks.register('sourceJar', Jar) {
 }
 tasks.register('zipRepo', Zip) {
     from "$buildDir/repo"
-    archiveFileName = 'com.zip'
+    archiveFileName = 'io.zip' //
     destinationDirectory = file(buildDir)
 }
 afterEvaluate {
@@ -34,7 +34,7 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.hearthappy'
+                groupId = 'io.github.hearthappy'
                 artifactId = 'uiwidget'
                 version = libraryVersion
                 artifacts {
