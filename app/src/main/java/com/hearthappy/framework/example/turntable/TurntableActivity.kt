@@ -106,7 +106,7 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
         val outlineWidth = turntableView.getOutlineWidth().px2dp().toInt()
         seekbarOutlineText.progress = outlineWidth
         tvOutlineText.text = getString(R.string.text_outline_range).plus(outlineWidth)
-        mediaPlayer = MediaPlayer.create(this@TurntableActivity, R.raw.play_sound)
+        mediaPlayer = MediaPlayer.create(this@TurntableActivity, R.raw.play_turn2)
     }
 
 
@@ -126,12 +126,12 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
             override fun onRotationAngleListener(totalAngle: Float, currentAngle: Float) {
                 if (totalAngle == currentAngle) {
                     mediaPlayer.start()
-                    turntableView.postDelayed({ // 停止音频
-                        if (mediaPlayer.isPlaying) {
-                            mediaPlayer.stop()
-                            mediaPlayer.reset() // 可选，重置 MediaPlayer
-                        }
-                    }, mediaPlayer.duration.toLong())
+//                    turntableView.postDelayed({ // 停止音频
+//                        if (mediaPlayer.isPlaying) {
+//                            mediaPlayer.stop()
+////                            mediaPlayer.reset() // 可选，重置 MediaPlayer
+//                        }
+//                    }, mediaPlayer.duration.toLong())
                 }else if(currentAngle.toInt() % 30 == 0 && isFinish && !mediaPlayer.isPlaying){
                     mediaPlayer.start()
                 }

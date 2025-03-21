@@ -86,4 +86,18 @@
             <enum name="filling" value="1"/>
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="IndicatorView">
+        <attr name="indicatorWidth" format="dimension" />
+        <attr name="indicatorHeight" format="dimension" />
+        <attr name="indicatorCornerRadius" format="dimension" />
+        <attr name="selectedIndicatorWidth" format="dimension" />
+        <attr name="selectedIndicatorHeight" format="dimension" />
+        <attr name="selectedIndicatorCornerRadius" format="dimension" />
+        <attr name="indicatorSpacing" format="dimension" />
+        <attr name="unselectedColor" format="color" />
+        <attr name="selectedColor" format="color" />
+        <attr name="count" format="integer" />
+        <attr name="selectedIndex" format="integer" />
+    </declare-styleable>
 </resources>
