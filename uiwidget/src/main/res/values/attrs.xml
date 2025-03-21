@@ -88,16 +88,15 @@
     </declare-styleable>
 
     <declare-styleable name="IndicatorView">
-        <attr name="indicatorWidth" format="dimension" />
-        <attr name="indicatorHeight" format="dimension" />
-        <attr name="indicatorCornerRadius" format="dimension" />
-        <attr name="selectedIndicatorWidth" format="dimension" />
-        <attr name="selectedIndicatorHeight" format="dimension" />
-        <attr name="selectedIndicatorCornerRadius" format="dimension" />
-        <attr name="indicatorSpacing" format="dimension" />
-        <attr name="unselectedColor" format="color" />
-        <attr name="selectedColor" format="color" />
-        <attr name="count" format="integer" />
-        <attr name="selectedIndex" format="integer" />
+        <attr name="indicator_width" format="dimension" />
+        <attr name="indicator_height" format="dimension" />
+        <attr name="indicator_radius" format="dimension" />
+        <attr name="indicator_selected_width" format="dimension" />
+        <attr name="indicator_selected_height" format="dimension" />
+        <attr name="indicator_selected_radius" format="dimension" />
+        <attr name="indicator_spacing" format="dimension" />
+        <attr name="indicator_color" format="color" />
+        <attr name="indicator_selected_color" format="color" />
+        <attr name="indicator_count" format="integer" />
     </declare-styleable>
 </resources>

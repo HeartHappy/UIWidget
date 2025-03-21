@@ -25,6 +25,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/black"
+        app:indicator_count="10"
+        app:indicator_width="4dp"
+        app:indicator_height="4dp"
+        app:indicator_radius="2dp"
+        app:indicator_selected_radius="2dp"
+        app:indicator_spacing="10dp"
+        app:indicator_selected_width="22dp"
+        app:indicator_selected_height="4dp"
+        app:indicator_color="#EE575757"
+        app:indicator_selected_color="@color/color_today"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

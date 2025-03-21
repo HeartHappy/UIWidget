@@ -1,5 +1,6 @@
 package com.hearthappy.uiwidget.indicator
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,38 +8,48 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Interpolator
 import com.hearthappy.uiwidget.R
-
+import com.hearthappy.uiwidget.utils.dp2px
+/**
+ * Created Date: 2025/3/21
+ * @author ChenRui
+ * ClassDescription：指示器控件
+ */
 class IndicatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
-    private var indicatorWidth = 20f
-    private var indicatorHeight = 20f
-    private var selectedIndicatorWidth = 30f
-    private var selectedIndicatorHeight = 30f
-    private var indicatorRadius = 10f
-    private var selectedIndicatorRadius = 15f
+    private var indicatorWidth = 4f
+    private var indicatorHeight = 4f
+    private var selectedIndicatorWidth = 22f
+    private var selectedIndicatorHeight = 4f
+    private var indicatorRadius = 2f
+    private var selectedIndicatorRadius = 2f
     private var unselectedColor = Color.GRAY
     private var selectedColor = Color.WHITE
     private var indicatorSpacing = 10f
-    private var indicatorCount = 3
+    private var indicatorCount = 10
     private var selectedIndex = 0
+    private var animatorInterpolator: Interpolator = AccelerateDecelerateInterpolator()
+
+    private var animator: ValueAnimator? = null
+    private var offsetX = 0f
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rectF = RectF()
 
     init { // 默认选中第0个指示器
         context.theme.obtainStyledAttributes(attrs, R.styleable.IndicatorView, defStyleAttr, 0).apply {
             try {
-                indicatorWidth = getDimension(R.styleable.IndicatorView_indicatorWidth, indicatorWidth)
-                indicatorHeight = getDimension(R.styleable.IndicatorView_indicatorHeight, indicatorHeight)
-                indicatorRadius = getDimension(R.styleable.IndicatorView_indicatorCornerRadius, indicatorRadius)
-                selectedIndicatorWidth = getDimension(R.styleable.IndicatorView_selectedIndicatorWidth, selectedIndicatorWidth)
-                selectedIndicatorHeight = getDimension(R.styleable.IndicatorView_selectedIndicatorHeight, selectedIndicatorHeight)
-                selectedIndicatorRadius = getDimension(R.styleable.IndicatorView_selectedIndicatorCornerRadius, selectedIndicatorRadius)
-                indicatorSpacing = getDimension(R.styleable.IndicatorView_indicatorSpacing, indicatorSpacing)
-                unselectedColor = getColor(R.styleable.IndicatorView_unselectedColor, unselectedColor)
-                selectedColor = getColor(R.styleable.IndicatorView_selectedColor, selectedColor)
-                indicatorCount = getInteger(R.styleable.IndicatorView_count, indicatorCount)
-                selectedIndex = getInteger(R.styleable.IndicatorView_selectedIndex, selectedIndex)
+                indicatorWidth = getDimension(R.styleable.IndicatorView_indicator_width, indicatorWidth.dp2px())
+                indicatorHeight = getDimension(R.styleable.IndicatorView_indicator_height, indicatorHeight.dp2px())
+                indicatorRadius = getDimension(R.styleable.IndicatorView_indicator_radius, indicatorRadius.dp2px())
+                selectedIndicatorWidth = getDimension(R.styleable.IndicatorView_indicator_selected_width, selectedIndicatorWidth.dp2px())
+                selectedIndicatorHeight = getDimension(R.styleable.IndicatorView_indicator_selected_height, selectedIndicatorHeight.dp2px())
+                selectedIndicatorRadius = getDimension(R.styleable.IndicatorView_indicator_selected_radius, selectedIndicatorRadius.dp2px())
+                indicatorSpacing = getDimension(R.styleable.IndicatorView_indicator_spacing, indicatorSpacing.dp2px())
+                unselectedColor = getColor(R.styleable.IndicatorView_indicator_color, unselectedColor)
+                selectedColor = getColor(R.styleable.IndicatorView_indicator_selected_color, selectedColor)
+                indicatorCount = getInteger(R.styleable.IndicatorView_indicator_count, indicatorCount)
             } finally {
                 recycle()
             }
@@ -51,20 +62,23 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
         invalidate()
     }
 
-    fun setSelectedIndex(index: Int) { //        if (index < 0 || index >= indicatorCount) return
-        //        val startPosition = currentSelectedPosition
-        //        val endPosition = calculateIndicatorPosition(index)
-        //        val animator = ValueAnimator.ofFloat(startPosition, endPosition)
-        //        animator.duration = 300
-        //        animator.interpolator = AccelerateDecelerateInterpolator()
-        //        animator.addUpdateListener { animation ->
-        //            currentSelectedPosition = animation.animatedValue as Float
-        //            invalidate()
-        //        }
-        //        animator.start()
-        selectedIndex = index.coerceIn(0, indicatorCount - 1)
-        invalidate() //        startIndicatorAnimation()
+    fun setSelectedIndex(index: Int) {
+        if (index < 0 || index >= indicatorCount || index == selectedIndex) return
+        animator?.cancel()
+        val startPosition = getIndicatorX(selectedIndex)
+        val endPosition = getIndicatorX(index)
+        animator = ValueAnimator.ofFloat(startPosition, endPosition).apply {
+            duration = 300
+            interpolator = animatorInterpolator
+            addUpdateListener { animation ->
+                offsetX = animation.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
+        selectedIndex = index
     }
+
 
     // 设置属性的方法
     fun setIndicatorWidth(width: Float) {
@@ -117,6 +131,9 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
         invalidate()
     }
 
+    fun setAnimatorInterpolator(interpolator: Interpolator) {
+        animatorInterpolator = interpolator
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val totalWidth = (indicatorCount - 1) * indicatorSpacing + (indicatorCount - 1) * indicatorWidth + selectedIndicatorWidth
@@ -150,8 +167,7 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
         for (i in 0 until indicatorCount) {
             if (i == selectedIndex) {
                 paint.color = selectedColor
-                rectF.set(startX, centerY - selectedIndicatorHeight / 2, startX + selectedIndicatorWidth, centerY + selectedIndicatorHeight / 2)
-                canvas.drawRoundRect(rectF, selectedIndicatorRadius, selectedIndicatorRadius, paint)
+                canvas.drawRoundRect(offsetX, centerY - selectedIndicatorHeight / 2, offsetX + selectedIndicatorWidth, centerY + selectedIndicatorHeight / 2, selectedIndicatorRadius, selectedIndicatorRadius, paint) //                rectF.set(startX, centerY - selectedIndicatorHeight / 2, startX+ selectedIndicatorWidth, centerY + selectedIndicatorHeight / 2)
                 startX += selectedIndicatorWidth + indicatorSpacing
             } else {
                 paint.color = unselectedColor
@@ -160,5 +176,11 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
                 startX += indicatorWidth + indicatorSpacing
             }
         }
+    }
+
+    private fun getIndicatorX(position: Int): Float {
+        val totalWidth = (indicatorCount - 1) * (indicatorWidth + indicatorSpacing) + selectedIndicatorWidth
+        val startX = (width - totalWidth) / 2f
+        return startX + position * (indicatorWidth + indicatorSpacing)
     }
 }
