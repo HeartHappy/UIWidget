@@ -2,7 +2,7 @@
 buildscript {
     ext {
         // 定义全局版本号
-        libraryVersion = "1.1.4"
+        libraryVersion = "1.2.3"
     }
 }
 plugins {
