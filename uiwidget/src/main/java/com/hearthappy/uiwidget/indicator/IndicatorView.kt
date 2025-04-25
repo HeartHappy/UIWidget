@@ -136,8 +136,8 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val totalWidth = (indicatorCount - 1) * indicatorSpacing + (indicatorCount - 1) * indicatorWidth + selectedIndicatorWidth
-        val totalHeight = if (selectedIndicatorHeight > indicatorHeight) selectedIndicatorHeight else indicatorHeight
+        val totalWidth = (indicatorCount - 1) * indicatorSpacing + (indicatorCount - 1) * indicatorWidth + selectedIndicatorWidth + paddingLeft + paddingRight
+        val totalHeight = if (selectedIndicatorHeight > indicatorHeight) selectedIndicatorHeight else indicatorHeight + paddingTop + paddingBottom
 
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
@@ -161,13 +161,13 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        var startX = (width - ((indicatorCount - 1) * indicatorSpacing + (indicatorCount - 1) * indicatorWidth + selectedIndicatorWidth)) / 2f
-        val centerY = height / 2f
+        var startX = paddingLeft + (width - paddingLeft - paddingRight - ((indicatorCount - 1) * indicatorSpacing + (indicatorCount - 1) * indicatorWidth + selectedIndicatorWidth)) / 2f
+        val centerY = paddingTop + (height - paddingTop - paddingBottom) / 2f
 
         for (i in 0 until indicatorCount) {
             if (i == selectedIndex) {
                 paint.color = selectedColor
-                canvas.drawRoundRect(offsetX, centerY - selectedIndicatorHeight / 2, offsetX + selectedIndicatorWidth, centerY + selectedIndicatorHeight / 2, selectedIndicatorRadius, selectedIndicatorRadius, paint) //                rectF.set(startX, centerY - selectedIndicatorHeight / 2, startX+ selectedIndicatorWidth, centerY + selectedIndicatorHeight / 2)
+                canvas.drawRoundRect(offsetX + paddingLeft, centerY - selectedIndicatorHeight / 2, offsetX + selectedIndicatorWidth + paddingLeft, centerY + selectedIndicatorHeight / 2, selectedIndicatorRadius, selectedIndicatorRadius, paint)
                 startX += selectedIndicatorWidth + indicatorSpacing
             } else {
                 paint.color = unselectedColor
@@ -179,8 +179,8 @@ class IndicatorView @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     private fun getIndicatorX(position: Int): Float {
-        val totalWidth = (indicatorCount - 1) * (indicatorWidth + indicatorSpacing) + selectedIndicatorWidth
-        val startX = (width - totalWidth) / 2f
+        val totalWidth = (indicatorCount - 1) * (indicatorWidth + indicatorSpacing) + selectedIndicatorWidth+paddingLeft+paddingRight
+        val startX = paddingLeft + (width - paddingLeft - paddingRight - totalWidth) / 2f
         return startX + position * (indicatorWidth + indicatorSpacing)
     }
 }

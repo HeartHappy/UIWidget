@@ -37,9 +37,13 @@ class NineGridView : RecyclerView {
     private val nineAdapter: NineGridAdapter by lazy { NineGridAdapter(context) }
 
 
-    infix fun display(data: List<String>): NineGridView {
+    infix fun source(data: List<String>): NineGridView {
         initLayout(data)
         return this
+    }
+
+    fun initDataSource(data: List<String>) {
+        initLayout(data)
     }
 
 
@@ -75,6 +79,7 @@ class NineGridView : RecyclerView {
         nineAdapter.itemMargin = margin
         nineAdapter.notifyItemRangeChanged(0, nineAdapter.itemCount)
     }
+
     fun setMarginVertical(margin: Float) {
         nineAdapter.itemMarginVertical = margin
         nineAdapter.notifyItemRangeChanged(0, nineAdapter.itemCount)
