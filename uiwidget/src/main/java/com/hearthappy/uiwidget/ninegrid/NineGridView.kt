@@ -33,23 +33,25 @@ class NineGridView : RecyclerView {
         typedArray.recycle()
     }
 
-    private var data: List<String> = emptyList()
     private val nineAdapter: NineGridAdapter by lazy { NineGridAdapter(context) }
 
 
-    infix fun source(data: List<String>): NineGridView {
+    infix fun initialize(data: List<String>): NineGridView {
         initLayout(data)
         return this
     }
 
-    fun initDataSource(data: List<String>) {
+    fun setDataSource(data: List<String>) {
         initLayout(data)
+    }
+
+    fun addData(data: List<String>) {
+        nineAdapter.addData(data)
     }
 
 
     private fun initLayout(data: List<String>) {
-        this.data = data
-        val spanCount: Int = getSpanCount(this.data.size)
+        val spanCount: Int = getSpanCount(data.size)
         val layoutManager = StaggeredGridLayoutManager(spanCount, GridLayoutManager.VERTICAL)
         setLayoutManager(layoutManager)
         adapter = nineAdapter
@@ -92,6 +94,10 @@ class NineGridView : RecyclerView {
 
     fun setNineGridListener(listener: OnNineGridListener) {
         nineAdapter.setNineGridListener(listener)
+    }
+
+    fun getDataSource(): List<String> {
+        return nineAdapter.list
     }
 
 
