@@ -54,7 +54,7 @@ dependencies {
     implementation libs.lifecycle.runtime.ktx
     implementation libs.lifecycle.viewmodel.ktx
     implementation libs.colorpickerview
-    implementation libs.github.androidbasicktx
+    implementation libs.android.basic.ktx
 //    implementation libs.github.viewmodelautomation.annotation
 //    implementation libs.github.viewmodelautomation.ktx
 //    ksp libs.github.viewmodelautomation.processor

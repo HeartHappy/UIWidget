@@ -126,7 +126,10 @@ android {
         viewBinding true
     }
 }
-
+// 禁用源码打包（避免生成 sources.jar）
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-g:none'] // 移除调试信息
+}
 dependencies {
 
     implementation libs.androidx.core.ktx

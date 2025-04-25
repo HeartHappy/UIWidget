@@ -61,15 +61,15 @@
         <attr name="pk_blue_square_color" format="color" />
         <attr name="pk_progress_height" format="dimension" />
         <attr name="pk_icon" format="reference" />
-        <attr name="pk_round_radius" format="dimension"/>
+        <attr name="pk_round_radius" format="dimension" />
     </declare-styleable>
-    
+
     <declare-styleable name="DigitScrollView">
         <!--数字滚动图片资源-->
-        <attr name="nr_digit_images" format="reference"/>
+        <attr name="nr_digit_images" format="reference" />
         <!--图片资源宽\高-->
-        <attr name="nr_digit_image_width" format="dimension"/>
-        <attr name="nr_digit_image_height" format="dimension"/>
+        <attr name="nr_digit_image_width" format="dimension" />
+        <attr name="nr_digit_image_height" format="dimension" />
         <!--文本字体大小-->
         <attr name="nr_text_size" format="dimension" />
         <!--文本颜色-->
@@ -82,8 +82,8 @@
         <attr name="nr_digit_count" format="integer" />
         <!--填充模式-->
         <attr name="nr_fill_mode" format="enum">
-            <enum name="normal" value="0"/>
-            <enum name="filling" value="1"/>
+            <enum name="normal" value="0" />
+            <enum name="filling" value="1" />
         </attr>
     </declare-styleable>
 
@@ -98,5 +98,20 @@
         <attr name="indicator_color" format="color" />
         <attr name="indicator_selected_color" format="color" />
         <attr name="indicator_count" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="NineGridView">
+        <!--单个时宽度-->
+        <attr name="ngv_row1_column1_width" format="dimension" />
+        <!--单个时高度-->
+        <attr name="ngv_row1_column1_height" format="dimension" />
+        <!--item宽高-->
+        <attr name="ngv_item_size" format="dimension" />
+        <!--边距-->
+        <attr name="ngv_item_margin" format="dimension" />
+        <!--垂直边距-->
+        <attr name="ngv_item_margin_vertical" format="dimension" />
+        <!--水平边距-->
+        <attr name="ngv_item_margin_horizontal" format="dimension" />
     </declare-styleable>
 </resources>

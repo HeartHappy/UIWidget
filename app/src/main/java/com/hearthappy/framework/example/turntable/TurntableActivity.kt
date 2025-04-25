@@ -4,13 +4,13 @@ import android.media.MediaPlayer
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import com.hearthappy.base.AbsBaseActivity
-import com.hearthappy.base.ext.addListener
-import com.hearthappy.base.ext.px2dp
+import com.hearthappy.basic.AbsBaseActivity
+import com.hearthappy.basic.ext.addListener
 import com.hearthappy.framework.R
 import com.hearthappy.framework.databinding.ActivityTurntableBinding
 import com.hearthappy.uiwidget.turntable.MultipleLottery
 import com.hearthappy.uiwidget.turntable.OnTurntableListener
+import com.hearthappy.uiwidget.utils.px2dp
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -41,7 +41,7 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
             //随机多抽
             //turntableView.startMultipleDraws(12)
             //指定多抽
-            turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8),11)
+            turntableView.specifyMultipleDraws(listOf(0, 2, 4, 7, 9, 11, 8), 11)
             startPlaySoundTask()
         }
         viewTextColor.setOnClickListener {
@@ -94,14 +94,12 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
         //图标垂直偏移量
         seekbarIconVerOffset.max = 100
         val iconPositionPercent = turntableView.getIconPositionPercent()
-        seekbarIconVerOffset.progress =(iconPositionPercent* 100).toInt()
-        tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(iconPositionPercent)
-        //文本垂直偏移量
+        seekbarIconVerOffset.progress = (iconPositionPercent * 100).toInt()
+        tvIconVerOffset.text = getString(R.string.icon_ver_offset).plus(iconPositionPercent) //文本垂直偏移量
         seekbarTextVerOffset.max = 100
         val textVerticalOffset = turntableView.getTextVerticalOffset().px2dp().toInt()
         seekbarTextVerOffset.progress = textVerticalOffset
-        tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(textVerticalOffset)
-        //文本描边范围
+        tvTextVerOffset.text = getString(R.string.text_ver_offset).plus(textVerticalOffset) //文本描边范围
         seekbarOutlineText.max = 10
         val outlineWidth = turntableView.getOutlineWidth().px2dp().toInt()
         seekbarOutlineText.progress = outlineWidth
@@ -125,14 +123,13 @@ class TurntableActivity : AbsBaseActivity<ActivityTurntableBinding>() {
 
             override fun onRotationAngleListener(totalAngle: Float, currentAngle: Float) {
                 if (totalAngle == currentAngle) {
-                    mediaPlayer.start()
-//                    turntableView.postDelayed({ // 停止音频
-//                        if (mediaPlayer.isPlaying) {
-//                            mediaPlayer.stop()
-////                            mediaPlayer.reset() // 可选，重置 MediaPlayer
-//                        }
-//                    }, mediaPlayer.duration.toLong())
-                }else if(currentAngle.toInt() % 30 == 0 && isFinish && !mediaPlayer.isPlaying){
+                    mediaPlayer.start() //                    turntableView.postDelayed({ // 停止音频
+                    //                        if (mediaPlayer.isPlaying) {
+                    //                            mediaPlayer.stop()
+                    ////                            mediaPlayer.reset() // 可选，重置 MediaPlayer
+                    //                        }
+                    //                    }, mediaPlayer.duration.toLong())
+                } else if (currentAngle.toInt() % 30 == 0 && isFinish && !mediaPlayer.isPlaying) {
                     mediaPlayer.start()
                 }
             }

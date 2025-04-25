@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.hearthappy.basic.AbsBaseAdapter
 import com.hearthappy.framework.databinding.ItemExampleBinding
-import com.hearthappy.base.AbsBaseAdapter
 
 
 class ExampleAdapter(private val context:Context): AbsBaseAdapter<ItemExampleBinding, ExampleBean>() {

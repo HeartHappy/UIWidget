@@ -1,6 +1,6 @@
 package com.hearthappy.framework.example.numberroll
 
-import com.hearthappy.base.AbsBaseActivity
+import com.hearthappy.basic.AbsBaseActivity
 import com.hearthappy.framework.databinding.ActivityNumberRollBinding
 
 class NumberRollActivity : AbsBaseActivity<ActivityNumberRollBinding>() {
