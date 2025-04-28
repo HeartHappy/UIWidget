@@ -14,5 +14,6 @@
         android:paddingHorizontal="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:ngv_maximum_number_displays="3"
         app:ngv_item_size="120dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

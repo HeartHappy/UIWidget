@@ -19,6 +19,7 @@ import com.hearthappy.uiwidget.R
  * 3、支持自定义属性
  */
 class NineGridView : RecyclerView {
+    private var maxNumberFold = MAX_COUNT
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -30,6 +31,7 @@ class NineGridView : RecyclerView {
         nineAdapter.itemMargin = typedArray.getDimension(R.styleable.NineGridView_ngv_item_margin, nineAdapter.itemMargin)
         nineAdapter.itemMarginVertical = typedArray.getDimension(R.styleable.NineGridView_ngv_item_margin_vertical, nineAdapter.itemMarginVertical)
         nineAdapter.itemMarginHorizontal = typedArray.getDimension(R.styleable.NineGridView_ngv_item_margin_horizontal, nineAdapter.itemMarginHorizontal)
+        maxNumberFold = typedArray.getInteger(R.styleable.NineGridView_ngv_maximum_number_displays, maxNumberFold)
         typedArray.recycle()
     }
 
@@ -51,11 +53,13 @@ class NineGridView : RecyclerView {
 
 
     private fun initLayout(data: List<String>) {
-        val spanCount: Int = getSpanCount(data.size)
+        nineAdapter.isFold = maxNumberFold != MAX_COUNT && data.size > maxNumberFold
+        val images = if (nineAdapter.isFold) data.take(maxNumberFold) else data.take(9)
+        val spanCount: Int = getSpanCount(images.size)
         val layoutManager = StaggeredGridLayoutManager(spanCount, GridLayoutManager.VERTICAL)
         setLayoutManager(layoutManager)
         adapter = nineAdapter
-        nineAdapter.initData(data.take(9))
+        nineAdapter.initData(images)
     }
 
     private fun getSpanCount(itemCount: Int): Int {
@@ -111,5 +115,9 @@ class NineGridView : RecyclerView {
 
     interface OnNineGridListener {
         fun onBindView(root: View, img: ImageView, data: String, position: Int)
+    }
+
+    companion object {
+        private const val MAX_COUNT = 9
     }
 }

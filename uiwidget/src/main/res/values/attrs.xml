@@ -54,14 +54,23 @@
     </declare-styleable>
 
     <declare-styleable name="PkView">
+        <!--文本padding-->
         <attr name="pk_text_horizontal_padding" format="dimension" />
         <attr name="pk_text_size" format="dimension" />
         <attr name="pk_text_color" format="color" />
-        <attr name="pk_red_square_color" format="color" />
-        <attr name="pk_blue_square_color" format="color" />
+        <attr name="pk_red_square_solid_color" format="color" />
+        <attr name="pk_red_gradient_color_start" format="color" />
+        <attr name="pk_red_gradient_color_end" format="color" />
+        <attr name="pk_blue_square_solid_color" format="color" />
+        <attr name="pk_blue_gradient_color_start" format="color" />
+        <attr name="pk_blue_gradient_color_end" format="color" />
         <attr name="pk_progress_height" format="dimension" />
         <attr name="pk_icon" format="reference" />
         <attr name="pk_round_radius" format="dimension" />
+        <!--文本描边颜色-->
+        <attr name="pk_text_outline_color" format="color" />
+        <!--描边宽-->
+        <attr name="pk_text_outline_width" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="DigitScrollView">
@@ -113,5 +122,7 @@
         <attr name="ngv_item_margin_vertical" format="dimension" />
         <!--水平边距-->
         <attr name="ngv_item_margin_horizontal" format="dimension" />
+        <!--最多显示数量，多余折叠-->
+        <attr name="ngv_maximum_number_displays" format="integer" />
     </declare-styleable>
 </resources>

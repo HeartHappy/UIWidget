@@ -2,6 +2,7 @@ package com.hearthappy.uiwidget.ninegrid
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.setMargins
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,7 @@ class NineGridAdapter(val context: Context) : RecyclerView.Adapter<NineGridAdapt
     internal var itemMargin = defaultMargin
     internal var itemMarginVertical = defaultMargin
     internal var itemMarginHorizontal = defaultMargin
+    internal var isFold = false
 
     inner class ViewHolder(val viewBinding: ItemNineGridBinding) : RecyclerView.ViewHolder(viewBinding.root)
 
@@ -98,7 +100,7 @@ class NineGridAdapter(val context: Context) : RecyclerView.Adapter<NineGridAdapt
                     }
                 }
             }
-
+            ivFold.visibility = if (position == itemCount - 1 && isFold) View.VISIBLE else View.GONE
             onNineGridListener?.onBindView(root, ivPicture, data, position)
         }
     }
