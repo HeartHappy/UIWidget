@@ -39,6 +39,7 @@
         <activity
             android:name=".example.numberroll.NumberRollActivity"
             android:exported="false" />
+        <activity android:name="com.hearthappy.framework.example.waveswitch.WaveSwitchImageActivity" />
     </application>
 
 </manifest>
