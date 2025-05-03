@@ -12,12 +12,11 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.util.Log
-import android.util.LruCache
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 import androidx.core.animation.addListener
+import com.hearthappy.uiwidget.layoutmanager.water.BitmapLoader
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import kotlin.random.Random
@@ -28,7 +27,7 @@ import kotlin.random.Random
  * ClassDescription：自定义水波纹切换控件
  */
 class WaterRippleViewer @JvmOverloads constructor(
-    context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
     private var currentPosition = 0 // 当前张的下标
     private var radius = 0f // 圆半径
@@ -60,18 +59,7 @@ class WaterRippleViewer @JvmOverloads constructor(
     private var animatorType = AnimatorType.ANIM_CIRCLE // 动画类型，用于处理动画类型，根据手势动作执行不同动画圆形滑动还是侧滑动画时使用
     private var isEnableSliding = true //默认启用侧滑查看
     private var interval = 5000L //轮播间隔
-
-    // 图片缓存
-    private val imageCache: LruCache<String, Bitmap> by lazy {
-        val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
-        val cacheSize = maxMemory / 8
-        object : LruCache<String, Bitmap>(cacheSize) {
-            override fun sizeOf(key: String, value: Bitmap): Int {
-                return value.byteCount / 1024
-            }
-        }
-    }
-
+    private val bitmapLoader: BitmapLoader by lazy { BitmapLoader(context) }
     private var onImageListener: OnImageListener? = null
     private var onLoadMoreListener: OnLoadMoreListener? = null
     private var scaleType = ScaleType.CENTER_CROP
@@ -125,11 +113,28 @@ class WaterRippleViewer @JvmOverloads constructor(
             if (oldSize < urls.size) {
                 loadImage(newUrls[0], oldSize) { bitmap ->
                     mNextBitmap = bitmap // 新下一张图片
+                    preNextData()
                 }
             }
             onImageListener?.onPreSelected(currentPosition)
             onImageListener?.onSelected(currentPosition)
         }
+    }
+
+    /**
+     * 传入集合,并加载第一张
+     *
+     * @param urls url集合
+     */
+    private fun setAdapter(urls: List<String>) {
+        loadImage(urls[currentPosition], currentPosition) { bitmap ->
+            mBottomBitmap = bitmap
+            mBottomMatrix = getMatrix(mBottomBitmap, scaleType)
+            invalidate() // 请求成功准备下一张
+            preNextData()
+        }
+        onImageListener?.onPreSelected(currentPosition)
+        onImageListener?.onSelected(currentPosition)
     }
 
 
@@ -261,6 +266,7 @@ class WaterRippleViewer @JvmOverloads constructor(
         }
         mCircleAnim?.addListener(onEnd = {
             onImageListener?.onSelected(currentPosition)
+            preNextData()
         }, onStart = {
             onImageListener?.onPreSelected(currentPosition)
         })
@@ -401,13 +407,12 @@ class WaterRippleViewer @JvmOverloads constructor(
             this.animatorType = AnimatorType.ANIM_RIGHT_SLIDE
             --currentPosition // 如果当前这个和上一个相同，说明准备的上一条数据还没好
             if (mCurrentBitmap != null && mCurrentBitmap!!.sameAs(mBottomBitmap)) {
-                Log.i(TAG, "switchPrePosition: 网络加载")
-                loadImage(urls[currentPosition], currentPosition) { bitmap ->
+                val preUrl = urls[currentPosition]
+                loadImage(preUrl, currentPosition, "Switch to previous") { bitmap ->
                     mBottomBitmap = bitmap
                     startSlideAnim(0f, widgetWidth)
                 }
             } else {
-                Log.i(TAG, "switchPrePosition: 本地加载") // 准备上一个
                 startSlideAnim(0f, widgetWidth)
             }
         } else {
@@ -426,12 +431,11 @@ class WaterRippleViewer @JvmOverloads constructor(
         // 加载更多触发时机调整为倒数第一张
         val isNeedLoadMore = currentPosition == urls.size - 2 && urls.isNotEmpty()
 
-        if (currentPosition + 1 < urls.size) {
+        if (++currentPosition < urls.size) {
             this.animatorType = animatorType
             if (mCurrentBitmap != null) {
                 mBottomBitmap = mCurrentBitmap // 保存当前图片为底层
             }
-            ++currentPosition
 
             // 加载更多逻辑：在滑动到倒数第二张时触发
             if (isNeedLoadMore) {
@@ -439,16 +443,16 @@ class WaterRippleViewer @JvmOverloads constructor(
             }
 
             // 获取新的下一张图片（考虑加载更多后的新数据）
-            val nextUrl = urls.getOrNull(currentPosition + 1)
+            val nextUrl = urls.getOrNull(currentPosition)
             if (nextUrl != null) { // 预加载下一张图片（包括加载更多后的新数据）
-                loadImage(nextUrl, currentPosition + 1) { bitmap ->
+                loadImage(nextUrl, currentPosition, "Switch to next") { bitmap ->
                     mNextBitmap = bitmap // 始终预加载下一张
                 }
             }
 
             // 处理当前图片加载
             val currentUrl = urls[currentPosition]
-            loadImage(currentUrl, currentPosition) { bitmap ->
+            loadImage(currentUrl, currentPosition, "Set as Current") { bitmap ->
                 mCurrentBitmap = bitmap
                 selAnimType(animatorType)
             }
@@ -473,28 +477,13 @@ class WaterRippleViewer @JvmOverloads constructor(
         }
     }
 
-    /**
-     * 传入集合,并加载第一张
-     *
-     * @param urls url集合
-     */
-    private fun setAdapter(urls: List<String>) {
-        loadImage(urls[currentPosition], currentPosition) { bitmap ->
-            mBottomBitmap = bitmap
-            mBottomMatrix = getMatrix(mBottomBitmap, scaleType)
-            invalidate() // 请求成功准备下一张
-            preNextData()
-        }
-        onImageListener?.onPreSelected(currentPosition)
-        onImageListener?.onSelected(currentPosition)
-    }
 
     /**
      * 预加载下个数据
      */
     private fun preNextData() {
         if (currentPosition + 1 < urls.size) {
-            loadImage(urls[currentPosition + 1], currentPosition + 1) { bitmap ->
+            loadImage(urls[currentPosition + 1], currentPosition + 1, "Preloading") { bitmap ->
                 mNextBitmap = bitmap
             }
         }
@@ -505,22 +494,27 @@ class WaterRippleViewer @JvmOverloads constructor(
      */
     private fun prePrevData() {
         if (currentPosition - 1 >= 0) {
-            loadImage(urls[currentPosition - 1], currentPosition - 1) { bitmap ->
+            loadImage(urls[currentPosition - 1], currentPosition - 1, "Preloading") { bitmap ->
                 mBottomBitmap = bitmap
             }
         }
     }
 
+
     /**
      * 加载图片，优先从缓存获取，若没有则调用用户自定义的加载器
      */
     private fun loadImage(
-        url: String, position: Int, onFailed: (Exception) -> Unit = {}, onSuccess: (Bitmap) -> Unit
+        url: String, position: Int, tag: String = "未设置", onSuccess: (Bitmap) -> Unit
     ) {
-        val cachedBitmap = imageCache.get(url)
+        Log.d(TAG, "loadImage: $position,$tag,\nurl:$url")
+        bitmapLoader.loadBitmap(url) {
+            it?.let { it1 -> onSuccess(it1) }
+        }/*val cachedBitmap = imageCache.get(url)
         if (cachedBitmap != null) {
             onSuccess(cachedBitmap)
         } else {
+
             onImageListener?.onBindView(url, position, object : ImageLoadCallback {
                 override fun onSuccess(bitmap: Bitmap) {
                     isLoadFailed = false
@@ -537,7 +531,7 @@ class WaterRippleViewer @JvmOverloads constructor(
                     e.printStackTrace()
                 }
             })
-        }
+        }*/
     }
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
@@ -602,7 +596,6 @@ class WaterRippleViewer @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        imageCache.evictAll()
         stopAutoCarouse() //        clearBitmap()
     }
 
