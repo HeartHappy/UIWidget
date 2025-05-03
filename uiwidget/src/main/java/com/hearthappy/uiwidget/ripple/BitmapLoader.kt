@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.layoutmanager.water
+package com.hearthappy.uiwidget.ripple
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -135,7 +135,6 @@ class BitmapLoader(context: Context) {
             }
         }
     } // 需要添加 OkHttp 依赖 // implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-
 
 
     /**
