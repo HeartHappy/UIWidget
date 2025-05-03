@@ -20,13 +20,16 @@ import android.widget.Toast
 import androidx.core.animation.addListener
 import kotlin.math.sqrt
 import kotlin.properties.Delegates
+import kotlin.random.Random
 
 /**
  * Created Date: 2025/4/28
  * @author ChenRui
  * ClassDescription：自定义水波纹切换控件
  */
-class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
+class WaterRippleViewer @JvmOverloads constructor(
+    context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
     private var currentPosition = 0 // 当前张的下标
     private var radius = 0f // 圆半径
     private var mMaxRadius = 0 // 最大半径
@@ -43,16 +46,20 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
     private var mCurrentBitmap: Bitmap? = null  // 当前Bitmap
     private var mNextBitmap: Bitmap? = null // 下一个Bitmap
     private var urls: MutableList<String> = mutableListOf() // Url集合
-    private var isClick = false // 是否点击
 
     private var mCircleAnim: ValueAnimator? = null // 圆形动画
     private var mRightAnim: ValueAnimator? = null // 侧滑动画
-    private var isAlphaShow = true // 显示图片是否执行渐变动画
-    private var waterAnimDuration = 2000L // 圆形动画执行时长
-    private var slideAnimDuration = 1000L // 圆形动画执行时长
     private var scrollX = 0f // 滑动偏移量
+    private var isViewVisible = false
+    private var isLoadFailed = false
+
+    /*自定义属性*/
+    private var isAlphaShow = true // 显示图片是否执行渐变动画
+    private var slideAnimDuration = 1000L // 圆形动画执行时长
+    private var waterAnimDuration = 2000L // 圆形动画执行时长
     private var animatorType = AnimatorType.ANIM_CIRCLE // 动画类型，用于处理动画类型，根据手势动作执行不同动画圆形滑动还是侧滑动画时使用
     private var isEnableSliding = true //默认启用侧滑查看
+    private var interval = 5000L //轮播间隔
 
     // 图片缓存
     private val imageCache: LruCache<String, Bitmap> by lazy {
@@ -116,10 +123,8 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
             val oldSize = urls.size
             urls.addAll(newUrls) // 预加载新添加的第一张图片（原最后一张的下一张）
             if (oldSize < urls.size) {
-                loadImage(newUrls[0], oldSize) { bitmap, e ->
-                    if (e == null && bitmap != null) {
-                        mNextBitmap = bitmap // 新下一张图片
-                    }
+                loadImage(newUrls[0], oldSize) { bitmap ->
+                    mNextBitmap = bitmap // 新下一张图片
                 }
             }
             onImageListener?.onPreSelected(currentPosition)
@@ -147,23 +152,24 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
         when (animatorType) {
             AnimatorType.ANIM_CIRCLE -> {
                 if (mBottomBitmap != null) { // 渐变消失动画
-                    mPaint!!.alpha = computerAlpha()
+                    mPaint?.alpha = computerAlpha()
                     mBottomMatrix = getMatrix(mBottomBitmap, scaleType)
                     canvas.drawBitmap(mBottomBitmap!!, mBottomMatrix, mPaint)
                 }
 
-                if (isClick && mCurrentBitmap != null) {
-                    mPaint!!.reset()
-                    mPath!!.reset()
+                if (mCurrentBitmap != null) {
+                    mPaint?.reset()
+                    mPath?.reset()
                     if (isAlphaShow) {
-                        mPaint!!.alpha = computerAlphaFromScratch()
+                        mPaint?.alpha = computerAlphaFromScratch()
                     }
-                    mPath!!.addCircle(rx, ry, radius, Path.Direction.CW)
+                    mPath?.addCircle(rx, ry, radius, Path.Direction.CW)
                     canvas.clipPath(mPath!!)
                     val currentMatrix = getMatrix(mCurrentBitmap, scaleType)
                     canvas.drawBitmap(mCurrentBitmap!!, currentMatrix, mPaint)
                 }
             }
+
             AnimatorType.ANIM_RIGHT_SLIDE, AnimatorType.ANIM_LEFT_SLIDE -> drawSlideEffect(canvas)
         }
     }
@@ -183,15 +189,23 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
                 val heightRatio = widgetHeight / bitmap.height.toFloat()
                 val scale = if (widthRatio > heightRatio) widthRatio else heightRatio
                 matrix.postScale(scale, scale)
-                matrix.postTranslate((widgetWidth - bitmap.width * scale) / 2, (widgetHeight - bitmap.height * scale) / 2)
+                matrix.postTranslate(
+                    (widgetWidth - bitmap.width * scale) / 2,
+                    (widgetHeight - bitmap.height * scale) / 2
+                )
             }
+
             ScaleType.FIT_CENTER -> {
                 val widthRatio = widgetWidth / bitmap!!.width.toFloat()
                 val heightRatio = widgetHeight / bitmap.height.toFloat()
                 val scale = if (widthRatio < heightRatio) widthRatio else heightRatio
                 matrix.postScale(scale, scale)
-                matrix.postTranslate((widgetWidth - bitmap.width * scale) / 2, (widgetHeight - bitmap.height * scale) / 2)
+                matrix.postTranslate(
+                    (widgetWidth - bitmap.width * scale) / 2,
+                    (widgetHeight - bitmap.height * scale) / 2
+                )
             }
+
             ScaleType.MATRIX -> { // 这里可以根据需要实现自定义矩阵逻辑
             }
         }
@@ -290,62 +304,67 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
         return true
     }
 
-    private var mGestureDetector: GestureDetector = GestureDetector(getContext(), object : GestureDetector.OnGestureListener {
-        override fun onDown(e: MotionEvent): Boolean {
-            mFirstX = e.x
-            mFirstY = e.y
-            return false
-        }
-
-        override fun onShowPress(e: MotionEvent) {
-            Log.i(TAG, "onShowPress: ")
-        }
-
-        override fun onSingleTapUp(e: MotionEvent): Boolean { // 如果向右动画执行完了，才操作下面
-            if (mRightAnim != null && mRightAnim!!.isRunning) {
-                return true
-            } // 如果点击时，动画还在运行则清理动画
-            isRunningClearAnim // 按下，初始化圆心
-            initCenterCoordinates(mFirstX, mFirstY) // 交换上下层
-            switchNextPosition(AnimatorType.ANIM_CIRCLE)
-            return false
-        }
-
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            Log.i(TAG, "onScroll: $distanceX")
-            return false
-        }
-
-        override fun onLongPress(e: MotionEvent) {
-            Log.i(TAG, "onLongPress: ")
-        }
-
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean { // 切换操作时，若果向右动画或圆形动画在执行则不操作下一个
-            if (mRightAnim != null && mRightAnim!!.isRunning || mCircleAnim != null && mCircleAnim!!.isRunning) {
-                return true
+    private var mGestureDetector: GestureDetector =
+        GestureDetector(context, object : GestureDetector.OnGestureListener {
+            override fun onDown(e: MotionEvent): Boolean {
+                mFirstX = e.x
+                mFirstY = e.y
+                return false
             }
 
-            if (e1.x - e2.x > FLIP_DISTANCE && isEnableSliding) {
-                Log.i(TAG, "向左滑...")
-                switchNextPosition(AnimatorType.ANIM_LEFT_SLIDE)
-                return true
+            override fun onShowPress(e: MotionEvent) {
+                Log.i(TAG, "onShowPress: ")
             }
-            if (e2.x - e1.x > FLIP_DISTANCE && isEnableSliding) {
-                switchPrePosition()
-                Log.i(TAG, "向右滑...")
-                return true
+
+            override fun onSingleTapUp(e: MotionEvent): Boolean { // 如果向右动画执行完了，才操作下面
+                if (mRightAnim != null && mRightAnim!!.isRunning) {
+                    return true
+                } // 如果点击时，动画还在运行则清理动画
+                isRunningClearAnim // 按下，初始化圆心
+                initCenterCoordinates(mFirstX, mFirstY) // 交换上下层
+                switchNextPosition(AnimatorType.ANIM_CIRCLE)
+                return false
             }
-            if (e1.y - e2.y > FLIP_DISTANCE) {
-                Log.i(TAG, "向上滑...")
-                return true
+
+            override fun onScroll(
+                e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float
+            ): Boolean {
+                Log.i(TAG, "onScroll: $distanceX")
+                return false
             }
-            if (e2.y - e1.y > FLIP_DISTANCE) {
-                Log.i(TAG, "向下滑...")
-                return true
+
+            override fun onLongPress(e: MotionEvent) {
+                Log.i(TAG, "onLongPress: ")
             }
-            return false
-        }
-    })
+
+            override fun onFling(
+                e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float
+            ): Boolean { // 切换操作时，若果向右动画或圆形动画在执行则不操作下一个
+                if (mRightAnim != null && mRightAnim!!.isRunning || mCircleAnim != null && mCircleAnim!!.isRunning) {
+                    return true
+                }
+
+                if (e1.x - e2.x > FLIP_DISTANCE && isEnableSliding) {
+                    Log.i(TAG, "向左滑...")
+                    switchNextPosition(AnimatorType.ANIM_LEFT_SLIDE)
+                    return true
+                }
+                if (e2.x - e1.x > FLIP_DISTANCE && isEnableSliding) {
+                    switchPrePosition()
+                    Log.i(TAG, "向右滑...")
+                    return true
+                }
+                if (e1.y - e2.y > FLIP_DISTANCE) {
+                    Log.i(TAG, "向上滑...")
+                    return true
+                }
+                if (e2.y - e1.y > FLIP_DISTANCE) {
+                    Log.i(TAG, "向下滑...")
+                    return true
+                }
+                return false
+            }
+        })
 
     init {
         initPaint()
@@ -383,13 +402,9 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
             --currentPosition // 如果当前这个和上一个相同，说明准备的上一条数据还没好
             if (mCurrentBitmap != null && mCurrentBitmap!!.sameAs(mBottomBitmap)) {
                 Log.i(TAG, "switchPrePosition: 网络加载")
-                loadImage(urls[currentPosition], currentPosition) { bitmap, e ->
-                    if (e != null) {
-                        failHandler(e)
-                    } else {
-                        mBottomBitmap = bitmap
-                        startSlideAnim(0f, widgetWidth)
-                    }
+                loadImage(urls[currentPosition], currentPosition) { bitmap ->
+                    mBottomBitmap = bitmap
+                    startSlideAnim(0f, widgetWidth)
                 }
             } else {
                 Log.i(TAG, "switchPrePosition: 本地加载") // 准备上一个
@@ -426,20 +441,14 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
             // 获取新的下一张图片（考虑加载更多后的新数据）
             val nextUrl = urls.getOrNull(currentPosition + 1)
             if (nextUrl != null) { // 预加载下一张图片（包括加载更多后的新数据）
-                loadImage(nextUrl, currentPosition + 1) { bitmap, e ->
-                    if (e == null && bitmap != null) {
-                        mNextBitmap = bitmap // 始终预加载下一张
-                    }
+                loadImage(nextUrl, currentPosition + 1) { bitmap ->
+                    mNextBitmap = bitmap // 始终预加载下一张
                 }
             }
 
             // 处理当前图片加载
             val currentUrl = urls[currentPosition]
-            loadImage(currentUrl, currentPosition) { bitmap, e ->
-                if (e != null) {
-                    failHandler(e)
-                    return@loadImage
-                }
+            loadImage(currentUrl, currentPosition) { bitmap ->
                 mCurrentBitmap = bitmap
                 selAnimType(animatorType)
             }
@@ -456,9 +465,9 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
     private fun selAnimType(animatorType: AnimatorType) {
         when (animatorType) {
             AnimatorType.ANIM_CIRCLE -> {
-                isClick = true
                 startAnim()
             }
+
             AnimatorType.ANIM_LEFT_SLIDE -> startSlideAnim(widgetWidth, 0f)
             else -> Unit
         }
@@ -470,20 +479,14 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
      * @param urls url集合
      */
     private fun setAdapter(urls: List<String>) {
-        loadImage(urls[currentPosition], currentPosition) { bitmap, e ->
-            if (e != null) {
-                failHandler(e)
-            } else {
-                bitmap?.let {
-                    mBottomBitmap = it
-                    mBottomMatrix = getMatrix(mBottomBitmap, scaleType)
-                    invalidate() // 请求成功准备下一张
-                    preNextData()
-                }
-                onImageListener?.onPreSelected(currentPosition)
-                onImageListener?.onSelected(currentPosition)
-            }
+        loadImage(urls[currentPosition], currentPosition) { bitmap ->
+            mBottomBitmap = bitmap
+            mBottomMatrix = getMatrix(mBottomBitmap, scaleType)
+            invalidate() // 请求成功准备下一张
+            preNextData()
         }
+        onImageListener?.onPreSelected(currentPosition)
+        onImageListener?.onSelected(currentPosition)
     }
 
     /**
@@ -491,12 +494,8 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
      */
     private fun preNextData() {
         if (currentPosition + 1 < urls.size) {
-            loadImage(urls[currentPosition + 1], currentPosition + 1) { bitmap, e ->
-                if (e != null) {
-                    clearBitmap()
-                } else {
-                    mNextBitmap = bitmap
-                }
+            loadImage(urls[currentPosition + 1], currentPosition + 1) { bitmap ->
+                mNextBitmap = bitmap
             }
         }
     }
@@ -506,12 +505,8 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
      */
     private fun prePrevData() {
         if (currentPosition - 1 >= 0) {
-            loadImage(urls[currentPosition - 1], currentPosition - 1) { bitmap, e ->
-                if (e != null) {
-                    failHandler(e)
-                } else {
-                    mBottomBitmap = bitmap
-                }
+            loadImage(urls[currentPosition - 1], currentPosition - 1) { bitmap ->
+                mBottomBitmap = bitmap
             }
         }
     }
@@ -519,34 +514,81 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
     /**
      * 加载图片，优先从缓存获取，若没有则调用用户自定义的加载器
      */
-    private fun loadImage(url: String, position: Int, callback: (Bitmap?, Exception?) -> Unit) {
+    private fun loadImage(
+        url: String, position: Int, onFailed: (Exception) -> Unit = {}, onSuccess: (Bitmap) -> Unit
+    ) {
         val cachedBitmap = imageCache.get(url)
         if (cachedBitmap != null) {
-            callback(cachedBitmap, null)
+            onSuccess(cachedBitmap)
         } else {
             onImageListener?.onBindView(url, position, object : ImageLoadCallback {
                 override fun onSuccess(bitmap: Bitmap) {
+                    isLoadFailed = false
                     imageCache.put(url, bitmap)
-                    callback(bitmap, null)
+                    onSuccess(bitmap)
                 }
 
                 override fun onFailed(e: Exception) {
-                    callback(null, e)
+                    isLoadFailed = true
+                    onFailed(e)
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+//                    clearBitmap()
+
+                    e.printStackTrace()
                 }
             })
         }
     }
 
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        isViewVisible = visibility == VISIBLE
+    }
+
     /**
-     * 失败处理
-     *
-     * @param e
+     * 设置轮播间隔和滚动持续时间
+     * @param interval Long 间隔时长
      */
-    private fun failHandler(e: Exception?) {
-        Toast.makeText(context, "网络异常", Toast.LENGTH_SHORT).show()
-        clearBitmap()
-        invalidate()
-        e?.printStackTrace()
+    fun setCarouseInterval(interval: Long) {
+        this.interval = interval
+    }
+
+    fun startAutoCarouse() {
+        postDelayed(carouselTask, interval)
+    }
+
+    private val carouselTask = object : Runnable {
+        override fun run() {
+            if (isViewVisible && !isLoadFailed) {
+                Log.d(TAG, "run: $currentPosition")
+                if (currentPosition >= Int.MAX_VALUE) {
+                    currentPosition = 0
+                }
+                val randomPoint = getRandomPoint(widgetWidth.toInt(), widgetHeight.toInt())
+                initCenterCoordinates(
+                    randomPoint.first.toFloat(), randomPoint.second.toFloat()
+                ) // 交换上下层
+                switchNextPosition(AnimatorType.ANIM_CIRCLE)
+            }
+            postDelayed(this, interval)
+        }
+
+    }
+
+    private fun stopAutoCarouse() {
+        removeCallbacks(carouselTask)
+    }
+
+    /**
+     * 生成随机的 x 和 y 坐标
+     * @param spaceWidth Int
+     * @param spaceHeight Int
+     * @return Pair<Int, Int>
+     */
+    fun getRandomPoint(spaceWidth: Int, spaceHeight: Int): Pair<Int, Int> {
+        val randomX = Random.nextInt(1, spaceWidth - 1)
+        val randomY = Random.nextInt(1, spaceHeight - 1)
+        return Pair(randomX, randomY)
     }
 
     private fun clearBitmap() {
@@ -560,7 +602,8 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        imageCache.evictAll() //        clearBitmap()
+        imageCache.evictAll()
+        stopAutoCarouse() //        clearBitmap()
     }
 
 
@@ -571,6 +614,7 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
         //动画结束时回调
         fun onSelected(position: Int)
 
+        //预选中时回调
         fun onPreSelected(position: Int)
     }
 
@@ -584,7 +628,7 @@ class WaterRippleViewer @JvmOverloads constructor(context: Context?, attrs: Attr
     }
 
     companion object {
-        const val TAG: String = "WaveImageView"
-        private const val FLIP_DISTANCE: Float = 100f // 滑动距离
+        const val TAG: String = "WaterRippleViewer"
+        private const val FLIP_DISTANCE: Int = 100 // 滑动距离
     }
 }
