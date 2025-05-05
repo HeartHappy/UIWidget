@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.hearthappy.uiwidget.utils.AdvancedAdapter
 
 /**
  * @Author ChenRui
@@ -25,7 +26,7 @@ class SlideCardsRecyclerView : RecyclerView {
      * @param cycleMode CycleMode 循环模式
      * @param onCallback OnCallback
      */
-    fun <T> initialization(adapter: SlideCardsCallback.AdvancedAdapter<*, T>, cycleMode: CycleMode, onCallback: OnCallback) {
+    fun <T> initialization(adapter: AdvancedAdapter<*, T>, cycleMode: CycleMode, onCallback: OnCallback) {
         CardConfig.initConfig(this.context)
         this.layoutManager = SlideCardsLayoutManager()
         this.adapter = adapter

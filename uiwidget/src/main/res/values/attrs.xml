@@ -125,4 +125,74 @@
         <!--最多显示数量，多余折叠-->
         <attr name="ngv_maximum_number_displays" format="integer" />
     </declare-styleable>
+
+    <!--圆角、边框ImageView-->
+    <declare-styleable name="RoundImageView">
+        <!-- 统一圆角 -->
+        <attr name="radius" format="dimension"/>
+
+        <!-- 独立圆角 -->
+        <attr name="radiusTopLeft" format="dimension"/>
+        <attr name="radiusTopRight" format="dimension"/>
+        <attr name="radiusBottomRight" format="dimension"/>
+        <attr name="radiusBottomLeft" format="dimension"/>
+
+        <!-- 边框 -->
+        <attr name="borderWidth" format="dimension"/>
+        <attr name="borderColor" format="color"/>
+        <!-- 新增外边框 -->
+        <attr name="outerBorderWidth" format="dimension" />
+        <attr name="outerBorderColor" format="color" />
+
+        <!-- 内发光 -->
+        <attr name="innerGlowColor" format="color" />
+        <attr name="innerGlowRadius" format="dimension" />
+        <!-- 颜色滤镜 -->
+        <attr name="colorFilter" format="color" />
+        <!-- 灰度模式 -->
+        <attr name="grayscale" format="boolean" />
+        <!--混合模式-->
+        <attr name="porterDuffMode" format="enum">
+            <enum name="CLEAR" value="0" />
+            <enum name="SRC" value="1" />
+            <enum name="DST" value="2" />
+            <enum name="SRC_OVER" value="3" />
+            <enum name="DST_OVER" value="4" />
+            <enum name="SRC_IN" value="5" />
+            <enum name="DST_IN" value="6" />
+            <enum name="SRC_OUT" value="7" />
+            <enum name="DST_OUT" value="8" />
+            <enum name="SRC_ATOP" value="9" />
+            <enum name="DST_ATOP" value="10" />
+            <enum name="XOR" value="11" />
+            <enum name="DARKEN" value="16" />
+            <enum name="LIGHTEN" value="17" />
+            <enum name="MULTIPLY" value="13" />
+            <enum name="SCREEN" value="14" />
+            <enum name="ADD" value="12" />
+            <enum name="OVERLAY" value="15" />
+        </attr>
+    </declare-styleable>
+
+    <!--水波纹控件-->
+    <declare-styleable name="WaterRippleView">
+        <attr name="wrv_corner_radius" format="dimension"/>
+        <!--内边框-->
+        <attr name="wrv_border_color" format="color" />
+        <attr name="wrv_border_width" format="dimension"/>
+        <!-- 新增外边框 -->
+        <attr name="wrv_outer_border_width" format="dimension" />
+        <attr name="wrv_outer_border_color" format="color" />
+
+        <!-- 内发光 -->
+        <attr name="wrv_inner_glow_color" format="color" />
+        <attr name="wrv_inner_glow_radius" format="dimension" />
+
+        <attr name="wrv_carousel_interval" format="integer"/>
+        <attr name="wrv_ripple_duration" format="integer"/>
+        <attr name="wrv_enable_swipe" format="boolean"/>
+        <attr name="wrv_enable_loop_model" format="boolean"/>
+        <attr name="wrv_enable_ripple_effect" format="boolean"/>
+        <attr name="wrv_enable_auto_carousel" format="boolean"/>
+    </declare-styleable>
 </resources>

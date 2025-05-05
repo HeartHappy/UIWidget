@@ -11,7 +11,7 @@ import com.hearthappy.framework.example.ninegrid.NineGridActivity
 import com.hearthappy.framework.example.numberroll.NumberRollActivity
 import com.hearthappy.framework.example.pk.PkActivity
 import com.hearthappy.framework.example.turntable.TurntableActivity
-import com.hearthappy.framework.example.waveswitch.WaveSwitchImageActivity
+import com.hearthappy.framework.example.ripple.WaveSwitchImageActivity
 
 class MainActivity : AppCompatActivity() {
 

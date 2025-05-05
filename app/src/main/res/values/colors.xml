@@ -7,6 +7,10 @@
     <color name="gray">#626161</color>
     <color name="color_today">#F44336</color>
     <color name="color_blue">#03A9F4</color>
+    <!--紫色-->
+    <color name="color_purple">#DC67F0</color>
+    <!--黄色-->
+    <color name="color_yellow">#F8EB7A</color>
 
 
     <!-- 白色 -->
@@ -28,5 +32,4 @@
     <color name="black_60">#99000000</color>
     <color name="black_70">#B3000000</color>
     <color name="black_80">#CC000000</color>
-    <color name="fj">#5DEEF0</color>
 </resources>

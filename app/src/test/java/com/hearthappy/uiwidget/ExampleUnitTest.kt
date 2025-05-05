@@ -13,4 +13,8 @@ class ExampleUnitTest {
     @Test fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test fun test() {
+        println("test:${20%29}")
+    }
 }

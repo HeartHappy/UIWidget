@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <com.hearthappy.uiwidget.ripple.WaterRippleView
+        android:id="@+id/rvWaterRipple"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="36dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:wrv_corner_radius="12dp"
+        app:wrv_enable_auto_carousel="true"
+        app:wrv_enable_loop_model="true"
+        app:wrv_inner_glow_color="@color/color_yellow"
+        app:wrv_inner_glow_radius="4dp"
+         />
+
+    <com.hearthappy.uiwidget.image.RoundImageView
+        android:id="@+id/rivImage"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_margin="16dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/bg_turntable_default2"
+        app:colorFilter="@color/color_purple"
+        app:innerGlowColor="@color/color_yellow"
+        app:innerGlowRadius="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/rvWaterRipple"
+        app:outerBorderColor="@color/color_blue"
+        app:outerBorderWidth="8dp"
+        app:porterDuffMode="MULTIPLY"
+        app:radius="12dp" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
