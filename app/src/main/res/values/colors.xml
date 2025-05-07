@@ -43,11 +43,18 @@
         <item>#ED3875</item>
         <item>#41B9EF</item>
         <item>#FFEB3B</item>
+        <item>#ED3875</item>
     </array>
 
     <array name="gradient_positions">
         <item>0.0</item>
+        <item>0.5</item>
+        <item>1</item>
+    </array>
+    <array name="inner_gradient_positions">
+        <item>0.0</item>
         <item>0.2</item>
+        <item>0.99</item>
         <item>1.0</item>
     </array>
 </resources>

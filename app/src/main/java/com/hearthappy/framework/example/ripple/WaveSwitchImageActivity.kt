@@ -1,10 +1,13 @@
 package com.hearthappy.framework.example.ripple
 
+import android.animation.ValueAnimator
+import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.hearthappy.basic.AbsBaseActivity
 import com.hearthappy.framework.databinding.ActivityWaterRippleViewerBinding
 import com.hearthappy.framework.example.tools.ImageUtil
+import com.hearthappy.uiwidget.image.setGradientBorderAnger
 
 class WaveSwitchImageActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() {
 
@@ -39,8 +42,28 @@ class WaveSwitchImageActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding
             }
         }
         Glide.with(this@WaveSwitchImageActivity).load(ImageUtil.urlsData[0]).into(rivImage)
+
+        rivImage.setOnClickListener {
+
+            animateGradientAngle(0f, 360f, 10000) {
+                rivImage.setGradientBorderAnger(it)
+//                rivImage.setGradientInnerBorderAnger(it)
+            }
+        }
     }
 
+    fun animateGradientAngle(start: Float, end: Float, duration: Long, value: (Float) -> Unit) {
+        ValueAnimator.ofFloat(start, end).apply {
+            interpolator = LinearInterpolator()
+            this.duration = duration
+            addUpdateListener {
+                value(it.animatedValue as Float)
+            }
+            this.repeatCount = ValueAnimator.INFINITE
+            this.repeatMode = ValueAnimator.RESTART
+            start()
+        }
+    }
 
     override fun ActivityWaterRippleViewerBinding.initViewModelListener() {
     }

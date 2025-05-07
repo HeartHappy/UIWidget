@@ -218,15 +218,21 @@
         <attr name="layersVerSpacing" format="dimension" />
 
         <!-- 新增渐变边框属性 -->
-        <attr name="gradientBorderColors" format="reference" />
-        <attr name="gradientBorderPositions" format="reference" />
-        <attr name="gradientBorderAngle" format="float" />
-        <attr name="gradientInnerBorderColors" format="reference" />
-        <attr name="gradientInnerBorderPositions" format="reference" />
-        <attr name="gradientInnerBorderAngle" format="float" />
-        <attr name="gradientType" format="enum">
+        <attr name="borderGradientColors" format="reference" />
+        <attr name="borderGradientPositions" format="reference" />
+        <attr name="borderGradientAngle" format="float" />
+        <attr name="innerBorderGradientColors" format="reference" />
+        <attr name="innerBorderGradientPositions" format="reference" />
+        <attr name="innerBorderGradientAngle" format="float" />
+        <attr name="borderGradientType" format="enum">
             <enum name="LinearGradient" value="0" />
             <enum name="SweepGradient" value="1" />
+            <enum name="RadialGradient" value="2" />
+        </attr>
+        <attr name="innerBorderGradientType" format="enum">
+            <enum name="LinearGradient" value="0" />
+            <enum name="SweepGradient" value="1" />
+            <enum name="RadialGradient" value="2" />
         </attr>
 
     </declare-styleable>
