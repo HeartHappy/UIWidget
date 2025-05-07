@@ -128,21 +128,22 @@
 
     <!--圆角、边框ImageView-->
     <declare-styleable name="RoundImageView">
+        <attr name="isCircle" format="boolean"/>
         <!-- 统一圆角 -->
         <attr name="radius" format="dimension" />
-
         <!-- 独立圆角 -->
         <attr name="radiusTopLeft" format="dimension" />
         <attr name="radiusTopRight" format="dimension" />
         <attr name="radiusBottomRight" format="dimension" />
         <attr name="radiusBottomLeft" format="dimension" />
 
+
         <!-- 边框 -->
+        <attr name="innerBorderWidth" format="dimension" />
+        <attr name="innerBorderColor" format="color" />
+        <!-- 新增外边框 -->
         <attr name="borderWidth" format="dimension" />
         <attr name="borderColor" format="color" />
-        <!-- 新增外边框 -->
-        <attr name="outerBorderWidth" format="dimension" />
-        <attr name="outerBorderColor" format="color" />
 
         <!-- 内发光 -->
         <attr name="innerGlowColor" format="color" />

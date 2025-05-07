@@ -11,10 +11,10 @@
         android:scaleType="centerCrop"
         app:innerGlowColor="@color/color_yellow"
         app:innerGlowRadius="8dp"
-        app:borderColor="@color/color_blue"
+        app:innerBorderColor="@color/color_blue"
+        app:innerBorderWidth="8dp"
         app:borderWidth="8dp"
-        app:outerBorderWidth="8dp"
-        app:outerBorderColor="@color/color_purple"
+        app:borderColor="@color/color_purple"
         app:radius="8dp" />
 
     <TextView

@@ -15,7 +15,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatImageView
@@ -32,19 +31,20 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     // 圆角半径（左上、右上、右下、左下）
     private val radii = FloatArray(8)
     private val clipPath = Path()
+    private var isCircle = false
     private var blendDrawable: Drawable? = null
 
     //内边框
-    private var borderWidth = 0f
-    private var borderColor = Color.TRANSPARENT
+    private var innerBorderWidth = 0f
+    private var innerBorderColor = Color.TRANSPARENT
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
     }
 
 
     // 新增：外边框
-    private var outerBorderWidth = 0f
-    private var outerBorderColor = Color.TRANSPARENT
+    private var borderWidth = 0f
+    private var borderColor = Color.TRANSPARENT
     private val outerBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
     }
@@ -79,17 +79,18 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
 
 
     init { // 从XML属性初始化
-        context.obtainStyledAttributes(attrs, R.styleable.RoundImageView).apply { // 统一圆角
+        context.obtainStyledAttributes(attrs, R.styleable.RoundImageView).apply {
+            isCircle = getBoolean(R.styleable.RoundImageView_isCircle, false) // 统一圆角
             val radius = getDimension(R.styleable.RoundImageView_radius, 0f)
             if (radius > 0) {
                 setRadiusPx(radius, radius, radius, radius)
             } else { // 独立圆角
                 setRadiusPx(topLeft = getDimension(R.styleable.RoundImageView_radiusTopLeft, 0f), topRight = getDimension(R.styleable.RoundImageView_radiusTopRight, 0f), bottomRight = getDimension(R.styleable.RoundImageView_radiusBottomRight, 0f), bottomLeft = getDimension(R.styleable.RoundImageView_radiusBottomLeft, 0f))
             }
+            innerBorderWidth = getDimensionPixelSize(R.styleable.RoundImageView_innerBorderWidth, 0).toFloat()
+            innerBorderColor = getColor(R.styleable.RoundImageView_innerBorderColor, Color.TRANSPARENT) // 解析外边框
             borderWidth = getDimensionPixelSize(R.styleable.RoundImageView_borderWidth, 0).toFloat()
-            borderColor = getColor(R.styleable.RoundImageView_borderColor, Color.TRANSPARENT) // 解析外边框
-            outerBorderWidth = getDimensionPixelSize(R.styleable.RoundImageView_outerBorderWidth, 0).toFloat()
-            outerBorderColor = getColor(R.styleable.RoundImageView_outerBorderColor, Color.TRANSPARENT)
+            borderColor = getColor(R.styleable.RoundImageView_borderColor, Color.TRANSPARENT)
             innerGlowColor = getColor(R.styleable.RoundImageView_innerGlowColor, Color.TRANSPARENT)
             innerGlowRadius = getDimensionPixelSize(R.styleable.RoundImageView_innerGlowRadius, 0).toFloat()
             colorFilterColor = getColor(R.styleable.RoundImageView_colorFilter, Color.TRANSPARENT)
@@ -110,22 +111,22 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
         // 边框画笔配置
-        if (isReasonable(borderWidth, borderColor)) {
-            borderPaint.strokeWidth = outerBorderWidth + borderWidth
-            borderPaint.color = borderColor
+        if (isReasonable(innerBorderWidth, innerBorderColor)) {
+            borderPaint.strokeWidth = borderWidth + innerBorderWidth
+            borderPaint.color = innerBorderColor
         }
 
         // 配置外边框画笔
-        if (isReasonable(outerBorderWidth, outerBorderColor)) {
-            outerBorderPaint.strokeWidth = outerBorderWidth
-            outerBorderPaint.color = outerBorderColor
+        if (isReasonable(borderWidth, borderColor)) {
+            outerBorderPaint.strokeWidth = borderWidth
+            outerBorderPaint.color = borderColor
         }
 
         // 配置内发光画笔（模糊效果）
         if (isReasonable(innerGlowRadius, innerGlowColor)) {
             innerGlowPaint.maskFilter = BlurMaskFilter(innerGlowRadius, BlurMaskFilter.Blur.NORMAL)
             innerGlowPaint.color = innerGlowColor
-            innerGlowPaint.strokeWidth = outerBorderWidth + borderWidth + innerGlowRadius
+            innerGlowPaint.strokeWidth = borderWidth + innerBorderWidth + innerGlowRadius
         } //图层混合
         blendDrawable?.let { layersPaint.xfermode = PorterDuffXfermode(colorBlendMode) } // 应用初始滤镜和灰度
         updateColorFilter() // 优化设置（必须关闭硬件加速）
@@ -142,8 +143,8 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         super.draw(canvas)
         drawBlendImage(canvas)
         if (isReasonable(innerGlowRadius, innerGlowColor)) canvas.drawPath(clipPath, innerGlowPaint)
-        if (isReasonable(borderWidth, borderColor)) canvas.drawPath(clipPath, borderPaint)
-        if (isReasonable(outerBorderWidth, outerBorderColor)) canvas.drawPath(clipPath, outerBorderPaint)
+        if (isReasonable(innerBorderWidth, innerBorderColor)) canvas.drawPath(clipPath, borderPaint)
+        if (isReasonable(borderWidth, borderColor)) canvas.drawPath(clipPath, outerBorderPaint)
     }
 
     private fun drawBlendImage(canvas: Canvas) {
@@ -242,7 +243,12 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     // 更新裁剪路径
     private fun updateClipPath() {
         clipPath.reset() // 计算总偏移量（取最大边框宽度）
-        clipPath.addRoundRect(RectF(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingEnd).toFloat(), (height - paddingBottom).toFloat()), radii, Path.Direction.CW)
+        if (isCircle) {
+            clipPath.addCircle(width / 2f, height / 2f, width / 2f, Path.Direction.CW)
+        } else {
+            clipPath.addRoundRect(RectF(paddingLeft.toFloat(), paddingTop.toFloat(), (width - paddingEnd).toFloat(), (height - paddingBottom).toFloat()), radii, Path.Direction.CW)
+        }
+
     }
 
     // 新增：统一更新颜色滤镜
@@ -277,22 +283,22 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         invalidate()
     }
 
-    // 动态设置边框
-    fun setBorder(width: Float, @ColorInt color: Int) {
+    // 动态设置内边框
+    fun setInnerBorder(width: Float, @ColorInt color: Int) {
         if (isReasonable(width, color)) {
-            borderWidth = width.dp2px()
-            borderColor = color
-            borderPaint.strokeWidth = outerBorderWidth + borderWidth
+            innerBorderWidth = width.dp2px()
+            innerBorderColor = color
+            borderPaint.strokeWidth = borderWidth + innerBorderWidth
             borderPaint.color = color
             invalidate()
         }
     }
-
-    fun setOuterBorder(width: Float, @ColorInt color: Int) {
+    //设置外边框
+    fun setBorder(width: Float, @ColorInt color: Int) {
         if (isReasonable(width, color)) {
-            outerBorderWidth = width.dp2px()
-            outerBorderColor = color
-            outerBorderPaint.strokeWidth = outerBorderWidth
+            borderWidth = width.dp2px()
+            borderColor = color
+            outerBorderPaint.strokeWidth = borderWidth
             outerBorderPaint.color = color
             invalidate()
         }
@@ -304,7 +310,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
             innerGlowColor = color
             innerGlowPaint.maskFilter = BlurMaskFilter(innerGlowRadius, BlurMaskFilter.Blur.NORMAL)
             innerGlowPaint.color = innerGlowColor
-            innerGlowPaint.strokeWidth = outerBorderWidth + borderWidth + innerGlowRadius // 动态调整描边宽度
+            innerGlowPaint.strokeWidth = borderWidth + innerBorderWidth + innerGlowRadius // 动态调整描边宽度
             invalidate()
         }
     }
@@ -340,7 +346,6 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     // 新增设置方法
     fun setBlendSize(width: Int, height: Int) {
         blendWidth = width.dp2px()
-        Log.d(TAG, "setBlendSize: $blendWidth")
         blendHeight = height.dp2px()
         invalidate()
     }
@@ -436,9 +441,5 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         radii[5] = bottomRight
         radii[6] = bottomLeft
         radii[7] = bottomLeft
-    }
-
-    companion object {
-        private const val TAG = "RoundImageView"
     }
 }
