@@ -26,6 +26,7 @@ class NineGridAdapter(val context: Context) : RecyclerView.Adapter<NineGridAdapt
     inner class ViewHolder(val viewBinding: ItemNineGridBinding) : RecyclerView.ViewHolder(viewBinding.root)
 
     fun initData(list: List<String>) {
+        this.list.clear()
         this.list.addAll(list)
         notifyItemRangeChanged(0, list.size)
     }

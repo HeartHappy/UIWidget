@@ -7,13 +7,22 @@
     android:layout_height="match_parent"
     tools:context=".example.ninegrid.NineGridActivity">
 
-    <com.hearthappy.uiwidget.ninegrid.NineGridView
-        android:id="@+id/ngv"
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNgv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <!-- <com.hearthappy.uiwidget.ninegrid.NineGridView
+         android:id="@+id/ngv"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:paddingHorizontal="16dp"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent"
+         app:ngv_item_size="120dp" />-->
+    <Button
+        android:id="@+id/btnTest"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:ngv_maximum_number_displays="3"
-        app:ngv_item_size="120dp" />
+        android:text="刷新列表数据"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

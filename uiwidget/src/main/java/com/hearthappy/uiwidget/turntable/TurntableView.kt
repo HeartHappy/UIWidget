@@ -38,7 +38,7 @@ import kotlin.random.nextInt
  */
 class TurntableView : View {
 
-    private var bgrBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_default)
+    private var bgrBitmap: Bitmap? = null
     private var selectBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.mipmap.bg_turntable_select)
     private var textColor = ContextCompat.getColor(context, R.color.color_title)
     private var textSize = 12f //文本字体大小
@@ -112,7 +112,7 @@ class TurntableView : View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         setLayerType(LAYER_TYPE_NONE, null)
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.TurntableView)
-        val bgrResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, R.mipmap.bg_turntable_default)
+        val bgrResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr, -1)
         val bgrSelectResId = attributes.getResourceId(R.styleable.TurntableView_tv_bgr_select, R.mipmap.bg_turntable_select)
         val textIconStartResId = attributes.getResourceId(R.styleable.TurntableView_tv_text_icon_start, -1)
         val textIconEndResId = attributes.getResourceId(R.styleable.TurntableView_tv_text_icon_end, -1)
@@ -137,7 +137,8 @@ class TurntableView : View {
         val angleOffsetRangeResId = attributes.getResourceId(R.styleable.TurntableView_tv_angle_offset_range, 0)
         if (angleOffsetArrayResId != 0) angleOffsetArray = resources.getIntArray(angleOffsetArrayResId)
         if (angleOffsetRangeResId != 0) angleOffsetRange = resources.getIntArray(angleOffsetRangeResId)
-        bgrBitmap = BitmapFactory.decodeResource(resources, bgrResId)
+        if (bgrResId != -1) bgrBitmap = BitmapFactory.decodeResource(resources, bgrResId)
+
         selectBitmap = BitmapFactory.decodeResource(resources, bgrSelectResId)
         textIconStartBitmap = BitmapFactory.decodeResource(resources, textIconStartResId)
         textIconEndBitmap = BitmapFactory.decodeResource(resources, textIconEndResId)
@@ -183,10 +184,13 @@ class TurntableView : View {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        scaleFactor = calculateScaleFactor(bgrBitmap.width, bgrBitmap.height, width, height)
-        selectBitmap = scaleBitmapToCircleRadius(selectBitmap, (width / 2).toFloat())
-        scaledWidth = (bgrBitmap.width * scaleFactor)
-        scaledHeight = (bgrBitmap.height * scaleFactor)
+        bgrBitmap?.let {
+            scaleFactor = calculateScaleFactor(it.width, it.height, width, height)
+            selectBitmap = scaleBitmapToCircleRadius(selectBitmap, (width / 2).toFloat())
+            scaledWidth = (it.width * scaleFactor)
+            scaledHeight = (it.height * scaleFactor)
+        }
+
 
         // 将图片绘制到中心
         centerX = width / 2f
@@ -200,7 +204,7 @@ class TurntableView : View {
         //绘制背景
         bgrMatrix.setScale(scaleFactor, scaleFactor)
         bgrMatrix.postRotate(currentAngle + bgrRotation, centerX, centerY)
-        canvas.drawBitmap(bgrBitmap, bgrMatrix, null)
+        bgrBitmap?.let { canvas.drawBitmap(it, bgrMatrix, null) }
 
 
         //绘制文本标题
@@ -398,8 +402,7 @@ class TurntableView : View {
                 singleStart(multipleLottery.index, true)
             } else {
                 singleStart(lotteryBoxList.random().index, true)
-            }
-//            singleStart(lotteryBoxList.random().index, true)
+            } //            singleStart(lotteryBoxList.random().index, true)
         } else {
             singleStart(specifyIndex, true)
         }

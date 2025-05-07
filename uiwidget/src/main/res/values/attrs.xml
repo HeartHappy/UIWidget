@@ -129,17 +129,17 @@
     <!--圆角、边框ImageView-->
     <declare-styleable name="RoundImageView">
         <!-- 统一圆角 -->
-        <attr name="radius" format="dimension"/>
+        <attr name="radius" format="dimension" />
 
         <!-- 独立圆角 -->
-        <attr name="radiusTopLeft" format="dimension"/>
-        <attr name="radiusTopRight" format="dimension"/>
-        <attr name="radiusBottomRight" format="dimension"/>
-        <attr name="radiusBottomLeft" format="dimension"/>
+        <attr name="radiusTopLeft" format="dimension" />
+        <attr name="radiusTopRight" format="dimension" />
+        <attr name="radiusBottomRight" format="dimension" />
+        <attr name="radiusBottomLeft" format="dimension" />
 
         <!-- 边框 -->
-        <attr name="borderWidth" format="dimension"/>
-        <attr name="borderColor" format="color"/>
+        <attr name="borderWidth" format="dimension" />
+        <attr name="borderColor" format="color" />
         <!-- 新增外边框 -->
         <attr name="outerBorderWidth" format="dimension" />
         <attr name="outerBorderColor" format="color" />
@@ -149,10 +149,8 @@
         <attr name="innerGlowRadius" format="dimension" />
         <!-- 颜色滤镜 -->
         <attr name="colorFilter" format="color" />
-        <!-- 灰度模式 -->
-        <attr name="grayscale" format="boolean" />
-        <!--混合模式-->
-        <attr name="porterDuffMode" format="enum">
+        <!--颜色混合模式-->
+        <attr name="colorBlendMode" format="enum">
             <enum name="CLEAR" value="0" />
             <enum name="SRC" value="1" />
             <enum name="DST" value="2" />
@@ -172,14 +170,59 @@
             <enum name="ADD" value="12" />
             <enum name="OVERLAY" value="15" />
         </attr>
+        <!-- 灰度模式 -->
+        <attr name="grayscale" format="boolean" />
+        <!--混合模式-->
+        <attr name="blendSrc" format="reference" />
+        <!--图层混合模式-->
+        <attr name="layersBlendMode" format="enum">
+            <enum name="CLEAR" value="0" />
+            <enum name="SRC" value="1" />
+            <enum name="DST" value="2" />
+            <enum name="SRC_OVER" value="3" />
+            <enum name="DST_OVER" value="4" />
+            <enum name="SRC_IN" value="5" />
+            <enum name="DST_IN" value="6" />
+            <enum name="SRC_OUT" value="7" />
+            <enum name="DST_OUT" value="8" />
+            <enum name="SRC_ATOP" value="9" />
+            <enum name="DST_ATOP" value="10" />
+            <enum name="XOR" value="11" />
+            <enum name="DARKEN" value="16" />
+            <enum name="LIGHTEN" value="17" />
+            <enum name="MULTIPLY" value="13" />
+            <enum name="SCREEN" value="14" />
+            <enum name="ADD" value="12" />
+            <enum name="OVERLAY" value="15" />
+        </attr>
+        <attr name="blendWidth" format="dimension" />
+        <attr name="blendHeight" format="dimension" />
+        <attr name="blendGravity" format="flags">
+            <flag name="top" value="0x30" />
+            <flag name="bottom" value="0x50" />
+            <flag name="left" value="0x03" />
+            <flag name="right" value="0x05" />
+            <flag name="center_vertical" value="0x10" />
+            <flag name="center_horizontal" value="0x01" />
+            <flag name="center" value="0x11" />
+        </attr>
+        <attr name="blendMargin" format="dimension" />
+        <attr name="blendMarginLeft" format="dimension" />
+        <attr name="blendMarginTop" format="dimension" />
+        <attr name="blendMarginRight" format="dimension" />
+        <attr name="blendMarginBottom" format="dimension" />
+        <!--启用图层水印-->
+        <attr name="layersWatermarkOn" format="boolean" />
+        <attr name="layersHorSpacing" format="dimension" />
+        <attr name="layersVerSpacing" format="dimension" />
     </declare-styleable>
 
     <!--水波纹控件-->
     <declare-styleable name="WaterRippleView">
-        <attr name="wrv_corner_radius" format="dimension"/>
+        <attr name="wrv_corner_radius" format="dimension" />
         <!--内边框-->
         <attr name="wrv_border_color" format="color" />
-        <attr name="wrv_border_width" format="dimension"/>
+        <attr name="wrv_border_width" format="dimension" />
         <!-- 新增外边框 -->
         <attr name="wrv_outer_border_width" format="dimension" />
         <attr name="wrv_outer_border_color" format="color" />
@@ -188,11 +231,11 @@
         <attr name="wrv_inner_glow_color" format="color" />
         <attr name="wrv_inner_glow_radius" format="dimension" />
 
-        <attr name="wrv_carousel_interval" format="integer"/>
-        <attr name="wrv_ripple_duration" format="integer"/>
-        <attr name="wrv_enable_swipe" format="boolean"/>
-        <attr name="wrv_enable_loop_model" format="boolean"/>
-        <attr name="wrv_enable_ripple_effect" format="boolean"/>
-        <attr name="wrv_enable_auto_carousel" format="boolean"/>
+        <attr name="wrv_carousel_interval" format="integer" />
+        <attr name="wrv_ripple_duration" format="integer" />
+        <attr name="wrv_enable_swipe" format="boolean" />
+        <attr name="wrv_enable_loop_model" format="boolean" />
+        <attr name="wrv_enable_ripple_effect" format="boolean" />
+        <attr name="wrv_enable_auto_carousel" format="boolean" />
     </declare-styleable>
 </resources>

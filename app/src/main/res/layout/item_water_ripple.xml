@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.hearthappy.uiwidget.image.RoundImageView
+        android:id="@+id/rivImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        app:innerGlowColor="@color/color_yellow"
+        app:innerGlowRadius="8dp"
+        app:borderColor="@color/color_blue"
+        app:borderWidth="8dp"
+        app:outerBorderWidth="8dp"
+        app:outerBorderColor="@color/color_purple"
+        app:radius="8dp" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
