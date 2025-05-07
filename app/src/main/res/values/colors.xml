@@ -32,4 +32,22 @@
     <color name="black_60">#99000000</color>
     <color name="black_70">#B3000000</color>
     <color name="black_80">#CC000000</color>
+
+    <array name="gradient_colors">
+        <item>#FF00FF00</item>
+        <item>#FF0000FF</item>
+        <item>#FFFF0000</item>
+    </array>
+
+    <array name="inner_gradient_colors">
+        <item>#ED3875</item>
+        <item>#41B9EF</item>
+        <item>#FFEB3B</item>
+    </array>
+
+    <array name="gradient_positions">
+        <item>0.0</item>
+        <item>0.2</item>
+        <item>1.0</item>
+    </array>
 </resources>
