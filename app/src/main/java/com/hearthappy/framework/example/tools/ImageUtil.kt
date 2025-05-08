@@ -23,9 +23,9 @@ object ImageUtil {
          */
         get() {
             val objects: MutableList<String> = ArrayList()
-//            objects.add("http://e.hiphotos.baidu.com/image/pic/item/a1ec08fa513d2697e542494057fbb2fb4316d81e.jpg")
-//            objects.add("http://c.hiphotos.baidu.com/image/pic/item/30adcbef76094b36de8a2fe5a1cc7cd98d109d99.jpg")
-//            objects.add("http://h.hiphotos.baidu.com/image/pic/item/7c1ed21b0ef41bd5f2c2a9e953da81cb39db3d1d.jpg")
+            objects.add("http://e.hiphotos.baidu.com/image/pic/item/a1ec08fa513d2697e542494057fbb2fb4316d81e.jpg")
+            objects.add("http://c.hiphotos.baidu.com/image/pic/item/30adcbef76094b36de8a2fe5a1cc7cd98d109d99.jpg")
+            objects.add("http://h.hiphotos.baidu.com/image/pic/item/7c1ed21b0ef41bd5f2c2a9e953da81cb39db3d1d.jpg")
 //            objects.add("http://g.hiphotos.baidu.com/image/pic/item/55e736d12f2eb938d5277fd5d0628535e5dd6f4a.jpg")
 //            objects.add("http://e.hiphotos.baidu.com/image/pic/item/4e4a20a4462309f7e41f5cfe760e0cf3d6cad6ee.jpg")
 //            objects.add("http://b.hiphotos.baidu.com/image/pic/item/9d82d158ccbf6c81b94575cfb93eb13533fa40a2.jpg")
@@ -46,17 +46,17 @@ object ImageUtil {
 //            objects.add("https://i.loli.net/2019/09/09/wsUAxSIMtXfVh5W.jpg")
 //            objects.add("https://i.loli.net/2019/09/09/eHfs1vYJDtMzyNP.jpg")
 //            objects.add("https://i.loli.net/2019/09/09/1gktxsnzqJLSaVm.jpg")
-
-
-            objects.add("https://i.loli.net/2019/09/09/fS4r1aKhVvbz5JF.jpg")
-            objects.add("https://i.loli.net/2019/09/09/AQRoOnbycmTgwWF.jpg")
-            objects.add("https://i.loli.net/2019/09/09/Ekba7zI95TywMNK.jpg")
-            objects.add("https://i.loli.net/2019/09/09/CSi1tkGJYonBMxV.jpg")
-            objects.add("https://i.loli.net/2019/09/09/Up1IvFCJPhmwHed.jpg")
-            objects.add("https://i.loli.net/2019/09/09/E7goR89IqH4wxiK.jpg")
-            objects.add("https://i.loli.net/2019/09/09/zqvDRAUk2jKhZfT.jpg")
-            objects.add("https://i.loli.net/2019/09/09/tQ9gwTiJMR1bq5s.jpg")
-            objects.add("https://i.loli.net/2019/09/09/u5NMgOH8jkEa6Xw.jpg")
+//
+//
+//            objects.add("https://i.loli.net/2019/09/09/fS4r1aKhVvbz5JF.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/AQRoOnbycmTgwWF.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/Ekba7zI95TywMNK.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/CSi1tkGJYonBMxV.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/Up1IvFCJPhmwHed.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/E7goR89IqH4wxiK.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/zqvDRAUk2jKhZfT.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/tQ9gwTiJMR1bq5s.jpg")
+//            objects.add("https://i.loli.net/2019/09/09/u5NMgOH8jkEa6Xw.jpg")
             return objects
         }
 

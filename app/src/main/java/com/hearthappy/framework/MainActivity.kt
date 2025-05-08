@@ -11,7 +11,7 @@ import com.hearthappy.framework.example.ninegrid.NineGridActivity
 import com.hearthappy.framework.example.numberroll.NumberRollActivity
 import com.hearthappy.framework.example.pk.PkActivity
 import com.hearthappy.framework.example.turntable.TurntableActivity
-import com.hearthappy.framework.example.ripple.WaveSwitchImageActivity
+import com.hearthappy.framework.example.ripple.WaterRippleActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
             add(ExampleBean(PkActivity::class.java, "PK"))
             add(ExampleBean(NumberRollActivity::class.java, "NumberRoll"))
             add(ExampleBean(NineGridActivity::class.java, "NineGrid"))
-            add(ExampleBean(WaveSwitchImageActivity::class.java, "WaveSwitchImage"))
+            add(ExampleBean(WaterRippleActivity::class.java, "WaveSwitchImage"))
         }
     }
 }

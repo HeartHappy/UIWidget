@@ -15,6 +15,7 @@
         app:wrv_corner_radius="12dp"
         app:wrv_enable_auto_carousel="true"
         app:wrv_enable_loop_model="true"
+        app:wrv_carousel_interval="3000"
         app:wrv_inner_glow_color="@color/color_yellow"
         app:wrv_inner_glow_radius="4dp" />
 
@@ -34,7 +35,7 @@
         app:innerBorderGradientType="SweepGradient"
         app:innerBorderWidth="8dp"
         app:isCircle="true"
-        app:grayscale="true"
+        app:isGrayscale="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rvWaterRipple" />
