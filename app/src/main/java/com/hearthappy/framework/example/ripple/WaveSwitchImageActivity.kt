@@ -7,7 +7,6 @@ import com.bumptech.glide.Glide
 import com.hearthappy.basic.AbsBaseActivity
 import com.hearthappy.framework.databinding.ActivityWaterRippleViewerBinding
 import com.hearthappy.framework.example.tools.ImageUtil
-import com.hearthappy.uiwidget.image.setGradientBorderAnger
 
 class WaveSwitchImageActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() {
 
@@ -45,9 +44,8 @@ class WaveSwitchImageActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding
 
         rivImage.setOnClickListener {
 
-            animateGradientAngle(0f, 360f, 10000) {
-                rivImage.setGradientBorderAnger(it)
-//                rivImage.setGradientInnerBorderAnger(it)
+            animateGradientAngle(0f, 360f, 5000) { //                rivImage.setGradientBorderAnger(it)
+                rivImage.setGradientInnerBorderAnger(it)
             }
         }
     }

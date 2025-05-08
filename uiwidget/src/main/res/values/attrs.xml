@@ -172,7 +172,7 @@
             <enum name="OVERLAY" value="15" />
         </attr>
         <!-- 灰度模式 -->
-        <attr name="grayscale" format="boolean" />
+        <attr name="isGrayscale" format="boolean" />
         <!--混合模式-->
         <attr name="blendSrc" format="reference" />
         <!--图层混合模式-->
@@ -227,12 +227,12 @@
         <attr name="borderGradientType" format="enum">
             <enum name="LinearGradient" value="0" />
             <enum name="SweepGradient" value="1" />
-            <enum name="RadialGradient" value="2" />
+<!--            <enum name="RadialGradient" value="2" />-->
         </attr>
         <attr name="innerBorderGradientType" format="enum">
             <enum name="LinearGradient" value="0" />
             <enum name="SweepGradient" value="1" />
-            <enum name="RadialGradient" value="2" />
+<!--            <enum name="RadialGradient" value="2" />-->
         </attr>
 
     </declare-styleable>

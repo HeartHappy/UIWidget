@@ -54,7 +54,7 @@
     <array name="inner_gradient_positions">
         <item>0.0</item>
         <item>0.2</item>
-        <item>0.99</item>
+        <item>0.8</item>
         <item>1.0</item>
     </array>
 </resources>

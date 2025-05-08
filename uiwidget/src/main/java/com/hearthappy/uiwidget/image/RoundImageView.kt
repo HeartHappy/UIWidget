@@ -21,10 +21,11 @@ import android.graphics.SweepGradient
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.Gravity
+import androidx.annotation.ColorInt
 import androidx.appcompat.widget.AppCompatImageView
 import com.hearthappy.uiwidget.R
+import com.hearthappy.uiwidget.utils.dp2px
 import com.hearthappy.uiwidget.utils.ext.getFloatArray
-import kotlin.math.tan
 
 /**
  * Created Date: 5/4/25
@@ -37,55 +38,55 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var centerY = 0f
 
     // 圆角半径（左上、右上、右下、左下）
-    internal val radii = FloatArray(8)
-    internal var isCircle = false
-    internal var blendDrawable: Drawable? = null
+    private val radii = FloatArray(8)
+    private var isCircle = false
+    private var blendDrawable: Drawable? = null
 
     //外边框
-    internal var borderWidth = 0f
-    internal var borderColor = Color.TRANSPARENT
-    internal val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
-    internal var borderGradientColors: IntArray? = null
-    internal var borderGradientPositions: FloatArray? = null
-    internal var borderGradientAngle: Float = 0f
-    internal val borderMatrix by lazy { Matrix() }
-    internal var borderGradientType = GradientType.Linear.value()
+    private var borderWidth = 0f
+    private var borderColor = Color.TRANSPARENT
+    private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private var borderGradientColors: IntArray? = null
+    private var borderGradientPositions: FloatArray? = null
+    private var borderGradientAngle: Float = 0f
+    private val borderMatrix by lazy { Matrix() }
+    private var borderGradientType = GradientType.Linear.value()
 
     //内边框
-    internal var innerBorderWidth = 0f
-    internal var innerBorderColor = Color.TRANSPARENT
-    internal val innerBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
-    internal var innerBorderGradientColors: IntArray? = null
-    internal var innerBorderGradientPositions: FloatArray? = null
-    internal var innerBorderGradientAngle: Float = 0f
-    internal val innerBorderMatrix by lazy { Matrix() }
-    internal var innerBorderGradientType = GradientType.Linear.value()
+    private var innerBorderWidth = 0f
+    private var innerBorderColor = Color.TRANSPARENT
+    private val innerBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private var innerBorderGradientColors: IntArray? = null
+    private var innerBorderGradientPositions: FloatArray? = null
+    private var innerBorderGradientAngle: Float = 0f
+    private val innerBorderMatrix by lazy { Matrix() }
+    private var innerBorderGradientType = GradientType.Linear.value()
 
     //内发光
-    internal var innerGlowColor = Color.TRANSPARENT
-    internal var innerGlowRadius = 0f
-    internal val innerGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private var innerGlowColor = Color.TRANSPARENT
+    private var innerGlowRadius = 0f
+    private val innerGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
 
     // 新增：颜色滤镜和灰度,饱和度设为0实现灰度
-    internal var colorFilterColor = Color.TRANSPARENT
-    internal var isGrayscale = false
+    private var colorFilterColor = Color.TRANSPARENT
+    private var isGrayscale = false
     private val grayscaleMatrix by lazy { ColorMatrix().apply { setSaturation(0f) } }
 
     //混合模式
-    internal var colorBlendMode = PorterDuff.Mode.MULTIPLY
-    internal var layersBlendModel = PorterDuff.Mode.SRC_OVER
+    private var colorBlendMode = PorterDuff.Mode.MULTIPLY
+    private var layersBlendModel = PorterDuff.Mode.SRC_OVER
 
     // 新增混合图层布局参数
-    internal var blendWidth = 0
-    internal var blendHeight = 0
-    internal var blendGravity = Gravity.START or Gravity.TOP
-    internal val blendMargin = Rect()
-    internal val layersPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var blendWidth = 0
+    private var blendHeight = 0
+    private var blendGravity = Gravity.START or Gravity.TOP
+    private val blendMargin = Rect()
+    private val layersPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     //图层水印
-    internal var layersWatermarkOn = false
-    internal var layersHorSpacing = 40
-    internal var layersVerSpacing = 50
+    private var layersWatermarkOn = false
+    private var layersHorSpacing = 40
+    private var layersVerSpacing = 50
 
 
     init { // 从XML属性初始化
@@ -99,7 +100,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
             innerGlowColor = getColor(R.styleable.RoundImageView_innerGlowColor, Color.TRANSPARENT)
             innerGlowRadius = getDimensionPixelSize(R.styleable.RoundImageView_innerGlowRadius, 0).toFloat()
             colorFilterColor = getColor(R.styleable.RoundImageView_colorFilter, Color.TRANSPARENT)
-            isGrayscale = getBoolean(R.styleable.RoundImageView_grayscale, false)
+            isGrayscale = getBoolean(R.styleable.RoundImageView_isGrayscale, false)
             colorBlendMode = convertPorterDuffMode(getInt(R.styleable.RoundImageView_colorBlendMode, PorterDuff.Mode.MULTIPLY.ordinal))
             blendDrawable = getDrawable(R.styleable.RoundImageView_blendSrc)
             layersBlendModel = convertPorterDuffMode(getInt(R.styleable.RoundImageView_layersBlendMode, PorterDuff.Mode.SRC_OVER.ordinal))
@@ -127,19 +128,19 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
         // 边框画笔配置
-        if (isReasonable(innerBorderWidth, innerBorderColor)) {
+        if (isReasonable(innerBorderWidth)) {
             innerBorderPaint.strokeWidth = borderWidth + innerBorderWidth
-            innerBorderPaint.color = innerBorderColor
+            innerBorderPaint.color = if (isGradientColor(innerBorderGradientColors)) Color.WHITE else innerBorderColor
         }
 
         // 配置外边框画笔
-        if (isReasonable(borderWidth, borderColor)) {
+        if (isReasonable(borderWidth)) {
             borderPaint.strokeWidth = borderWidth
-            borderPaint.color = borderColor
+            borderPaint.color = if (isGradientColor(borderGradientColors)) Color.WHITE else borderColor
         }
 
         // 配置内发光画笔（模糊效果）
-        if (isReasonable(innerGlowRadius, innerGlowColor)) {
+        if (isReasonable(innerGlowRadius)) {
             innerGlowPaint.maskFilter = BlurMaskFilter(innerGlowRadius, BlurMaskFilter.Blur.NORMAL)
             innerGlowPaint.color = innerGlowColor
             innerGlowPaint.strokeWidth = borderWidth + innerBorderWidth + innerGlowRadius
@@ -159,12 +160,12 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     override fun draw(canvas: Canvas) {
-        canvas.clipPath(clipPath) // 3. 绘制原始内容
+        canvas.clipPath(clipPath)
         super.draw(canvas)
         drawBlendImage(canvas)
-        if (isReasonable(innerGlowRadius, innerGlowColor)) canvas.drawPath(clipPath, innerGlowPaint)
-        if (isReasonable(innerBorderWidth, innerBorderColor)) canvas.drawPath(clipPath, innerBorderPaint)
-        if (isReasonable(borderWidth, borderColor)) canvas.drawPath(clipPath, borderPaint)
+        if (isReasonable(innerGlowRadius)) canvas.drawPath(clipPath, innerGlowPaint)
+        if (isReasonable(innerBorderWidth)) canvas.drawPath(clipPath, innerBorderPaint)
+        if (isReasonable(borderWidth)) canvas.drawPath(clipPath, borderPaint)
     }
 
     private fun drawBlendImage(canvas: Canvas) {
@@ -256,14 +257,13 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         return Rect(left, top, right, bottom)
     }
 
-    internal fun updateGradient(colors: IntArray?, positions: FloatArray?, angle: Float, matrix: Matrix, borderWidth: Float, paint: Paint, gradientType: Int) {
-        colors?.takeIf { it.size >= 2 }?.let { cs ->
-//            val halfBorder = borderWidth / 2
-//            val rect = RectF(halfBorder, halfBorder, width - halfBorder, height - halfBorder)
+    private fun updateGradient(colors: IntArray?, positions: FloatArray?, angle: Float, matrix: Matrix, borderWidth: Float, paint: Paint, gradientType: Int) {
+        colors?.takeIf { it.size >= 2 }?.let { cs -> //            val halfBorder = borderWidth / 2
+            //            val rect = RectF(halfBorder, halfBorder, width - halfBorder, height - halfBorder)
             val shader = when (gradientType) {
                 GradientType.Linear.value() -> { // 计算渐变起止点（关键修改）
 
-//                    val (startX, startY, endX, endY) = calculateGradientPoints(rect, angle)
+                    //                    val (startX, startY, endX, endY) = calculateGradientPoints(rect, angle)
                     LinearGradient(0f, 0f, width.toFloat(), height.toFloat(), cs, positions, Shader.TileMode.CLAMP).apply { // 通过Matrix旋转角度
                         matrix.reset()
                         matrix.preRotate(angle, centerX, centerY)
@@ -278,7 +278,6 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
                         setLocalMatrix(matrix)
                     }
                 }
-
                 else -> {
                     RadialGradient(centerX, centerY, borderWidth, cs, positions, Shader.TileMode.REPEAT)
                 }
@@ -287,38 +286,18 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
     }
 
-    /**
-     * 根据角度计算渐变起止点坐标
-     * @param rect 边框区域
-     * @param angleDegrees 角度（0-360）
-     */
-    private fun calculateGradientPoints(rect: RectF, angleDegrees: Float): FloatArray {
-        val angleRad = Math.toRadians(angleDegrees.toDouble()) // 根据角度调整坐标系（强制类型转换）
-        val (dx, dy) = when {
-            angleDegrees % 180 == 0f -> Pair(rect.width() / 2f, 0f) // 添加f后缀声明Float
-            angleDegrees % 180 == 90f -> Pair(0f, rect.height() / 2f)
-            else -> {
-                val tan = tan(angleRad).toFloat() // Double转Float
-                Pair(rect.width() / 2f, (rect.width() / (2 * tan)).coerceIn(-rect.height() / 2f, rect.height() / 2f))
-            }
-        }
 
-        // 显式转换为Float类型
-        val startX = rect.centerX() - dx
-        val startY = rect.centerY() - dy
-        val endX = rect.centerX() + dx
-        val endY = rect.centerY() + dy
-
-        return floatArrayOf(startX, startY, endX, endY)
+    private fun isReasonable(width: Float): Boolean {
+        return width > 0f
     }
 
-
-    internal fun isReasonable(width: Float, color: Int): Boolean {
-        return width > 0f && color != Color.TRANSPARENT
+    private fun isGradientColor(colors: IntArray?): Boolean {
+        return colors?.takeIf { it.size >= 2 }?.let { true } ?: false
     }
+
 
     // 更新裁剪路径
-    internal fun updateClipPath() {
+    private fun updateClipPath() {
         clipPath.reset() // 计算总偏移量（取最大边框宽度）
         if (isCircle) {
             clipPath.addCircle(width / 2f, height / 2f, width / 2f, Path.Direction.CW)
@@ -328,13 +307,10 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     // 新增：统一更新颜色滤镜
-    internal fun updateColorFilter() {
-        colorFilter = when {
-            // 灰度优先于颜色滤镜
-            isGrayscale -> ColorMatrixColorFilter(grayscaleMatrix)
-            // 叠加颜色滤镜（PorterDuff.MODE_SRC_ATOP）
+    private fun updateColorFilter() {
+        colorFilter = when { // 灰度优先于颜色滤镜
+            isGrayscale -> ColorMatrixColorFilter(grayscaleMatrix) // 叠加颜色滤镜（PorterDuff.MODE_SRC_ATOP）
             colorFilterColor != Color.TRANSPARENT -> PorterDuffColorFilter(colorFilterColor, colorBlendMode)
-
             else -> null
         }
     }
@@ -394,7 +370,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     // 扩展函数，用于设置四个角的半径
-    internal fun setCorners(topLeft: Float, topRight: Float, bottomRight: Float, bottomLeft: Float) {
+    private fun setCorners(topLeft: Float, topRight: Float, bottomRight: Float, bottomLeft: Float) {
         radii[0] = topLeft
         radii[1] = topLeft
         radii[2] = topRight
@@ -419,5 +395,177 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
         object Radial : GradientType() {
             override fun value(): Int = 2
         }
+    }
+
+
+    fun setBorderGradientType(type: GradientType) {
+        updateGradient(borderGradientColors, borderGradientPositions, borderGradientAngle, borderMatrix, borderWidth, borderPaint, type.value())
+        invalidate()
+    }
+
+    fun setInnerBorderGradientType(type: GradientType) {
+        updateGradient(innerBorderGradientColors, innerBorderGradientPositions, innerBorderGradientAngle, innerBorderMatrix, innerBorderWidth, innerBorderPaint, type.value())
+        invalidate()
+    }
+
+    fun setGradientInnerBorderAnger(angle: Float) {
+        innerBorderGradientAngle = angle
+        updateGradient(innerBorderGradientColors, innerBorderGradientPositions, innerBorderGradientAngle, innerBorderMatrix, innerBorderWidth, innerBorderPaint, borderGradientType)
+        invalidate()
+    }
+
+    fun setGradientInnerBorderColors(colors: IntArray, positions: FloatArray? = null) {
+        innerBorderGradientColors = colors
+        innerBorderGradientPositions = positions
+        updateGradient(innerBorderGradientColors, innerBorderGradientPositions, innerBorderGradientAngle, innerBorderMatrix, innerBorderWidth, innerBorderPaint, innerBorderGradientType)
+        invalidate()
+    }
+
+    fun setGradientBorderAnger(angle: Float) {
+        borderGradientAngle = angle
+        updateGradient(borderGradientColors, borderGradientPositions, borderGradientAngle, borderMatrix, borderWidth, borderPaint, borderGradientType)
+        invalidate()
+    }
+
+    // 动态设置渐变
+    fun setGradientBorderColors(colors: IntArray, positions: FloatArray? = null) {
+        borderGradientColors = colors
+        borderGradientPositions = positions
+        updateGradient(borderGradientColors, borderGradientPositions, borderGradientAngle, borderMatrix, borderWidth, borderPaint, borderGradientType)
+        invalidate()
+    }
+
+
+    // 动态设置颜色滤镜
+    fun setViewColorFilter(@ColorInt color: Int) {
+        colorFilterColor = color
+        isGrayscale = false // 关闭灰度
+        updateColorFilter()
+        invalidate()
+    }
+
+    // 动态设置灰度模式
+    fun setGrayscale(enabled: Boolean) {
+        isGrayscale = enabled
+        updateColorFilter()
+        invalidate()
+    }
+
+    // 动态设置内边框
+    fun setInnerBorder(width: Float, @ColorInt color: Int) {
+        if (isReasonable(width)) {
+            innerBorderWidth = width.dp2px()
+            innerBorderColor = color
+            innerBorderPaint.strokeWidth = borderWidth + innerBorderWidth
+            innerBorderPaint.color = color
+            invalidate()
+        }
+    }
+
+    //设置外边框
+    fun setBorder(width: Float, @ColorInt color: Int) {
+        if (isReasonable(width)) {
+            borderWidth = width.dp2px()
+            borderColor = color
+            borderPaint.strokeWidth = borderWidth
+            borderPaint.color = color
+            invalidate()
+        }
+    }
+
+    //注释分割线
+
+
+    fun setInnerGlow(radius: Float, @ColorInt color: Int) {
+        if (isReasonable(radius)) {
+            innerGlowRadius = radius.dp2px()
+            innerGlowColor = color
+            innerGlowPaint.maskFilter = BlurMaskFilter(innerGlowRadius, BlurMaskFilter.Blur.NORMAL)
+            innerGlowPaint.color = innerGlowColor
+            innerGlowPaint.strokeWidth = borderWidth + innerBorderWidth + innerGlowRadius // 动态调整描边宽度
+            invalidate()
+        }
+    }
+
+    fun setColorBlendMode(mode: PorterDuff.Mode) {
+        colorBlendMode = mode
+        updateColorFilter()
+        invalidate()
+    }
+
+    fun setLayersBlendMode(mode: PorterDuff.Mode) {
+        layersBlendModel = mode
+        layersPaint.xfermode = PorterDuffXfermode(colorBlendMode)
+        invalidate()
+    }
+
+    // 新增设置方法
+    fun setBlendSize(width: Int, height: Int) {
+        blendWidth = width.dp2px()
+        blendHeight = height.dp2px()
+        invalidate()
+    }
+
+    fun setBlendGravity(gravity: Int) {
+        blendGravity = gravity
+        invalidate()
+    }
+
+    fun setBlendMargin(margin: Int) {
+        setBlendMargin(margin, margin, margin, margin)
+        invalidate()
+    }
+
+    fun setBlendMargin(left: Int, top: Int, right: Int, bottom: Int) {
+        blendMargin.set(left.dp2px(), top.dp2px(), right.dp2px(), bottom.dp2px())
+        invalidate()
+    }
+
+    fun setRadius(radius: Float) = setRadius(radius, radius, radius, radius)
+
+    // 动态设置圆角（支持动画）
+    fun setRadius(topLeft: Float = radii[0], topRight: Float = radii[2], bottomRight: Float = radii[4], bottomLeft: Float = radii[6]) {
+        setCorners(topLeft.dp2px(), topRight.dp2px(), bottomRight.dp2px(), bottomLeft.dp2px())
+        updateClipPath()
+        invalidate()
+    }
+
+
+    fun setBlendResource(drawable: Drawable) {
+        blendDrawable = drawable
+        invalidate()
+    }
+
+    fun setLayersHorSpacing(spacing: Int) {
+        layersHorSpacing = spacing
+        invalidate()
+    }
+
+    fun setLayersVerSpacing(spacing: Int) {
+        layersVerSpacing = spacing
+        invalidate()
+    }
+
+    fun setLayersWatermarkOn(enable: Boolean) {
+        layersWatermarkOn = enable
+        invalidate()
+    }
+
+    fun setIsCircle(enable: Boolean) {
+        isCircle = enable
+        updateClipPath()
+        invalidate()
+    }
+
+    fun getBorderGradientAngle(): Float {
+        return borderGradientAngle
+    }
+
+    fun getInnerBorderGradientAngle(): Float = innerBorderGradientAngle
+
+    fun getGrayscale() = isGrayscale
+
+    companion object {
+        private const val TAG = "RoundImageView"
     }
 }
