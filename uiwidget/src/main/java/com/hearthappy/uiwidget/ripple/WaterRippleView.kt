@@ -15,6 +15,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -194,9 +195,10 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             preloadNextViewHolder = null
         }
         preloadAdjacentViews()
-        invalidate()
+        Log.d(TAG, "notifyDataSetChanged: $newCount$onSelectedStartListener,$onSelectedEndListener")
         onSelectedStartListener?.invoke(currentPosition, newCount)
         onSelectedEndListener?.invoke(currentPosition, newCount)
+//        invalidate()
     }
 
 
@@ -264,13 +266,13 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     swapImages()
-                    onSelectedEndListener?.invoke(targetPos, itemCount)
+                    onSelectedEndListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
                     carouselController.resume()
                 }
 
                 override fun onAnimationStart(animation: Animator?) {
                     currentPosition = targetPos
-                    onSelectedStartListener?.invoke(targetPos, itemCount)
+                    onSelectedStartListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
                     preloadAdjacentViews()
                     carouselController.pause()
                 }
