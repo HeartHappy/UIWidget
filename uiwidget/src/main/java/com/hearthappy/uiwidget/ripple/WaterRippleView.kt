@@ -15,7 +15,6 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -81,6 +80,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private val ripplePath = Path()
+    private val combinedPaint by lazy { Paint(Paint.ANTI_ALIAS_FLAG) }
 
     // 状态变量
     private var currentPosition = 0
@@ -88,7 +88,6 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var rippleCenterX = 0f
     private var rippleCenterY = 0f
     private var maxRadius = 0f
-    private var animType = AnimType.RIPPLE
 
     // 动画控制
     private val clipPath = Path()
@@ -98,7 +97,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     // 配置参数
     private var rippleDuration = 2000L
     private var carouselInterval = 5000L
-    private var enableSwipe = true
+    private var enableSwipe = false
     private var enableLoopModel = false // 启用无限循环
     private var enableRippleEffect = true //启用水波纹增强效果
     private var enableAutoCarousel = false //启动自动轮播
@@ -165,11 +164,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun calculatePosition(position: Int, itemCount: Int): Int {
-        return if (enableLoopModel) {
-            (position + itemCount) % itemCount
-        } else {
-            position.takeIf { it in 0 until itemCount } ?: -1
-        }
+        return if (enableLoopModel) (position + itemCount) % itemCount else position.takeIf { it in 0 until itemCount } ?: -1
     }
 
     private fun onCreateViewHolder(): ViewHolder {
@@ -220,39 +215,30 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     fun switchToNext() {
         val itemCount = waterRippleAdapter.getItemCount()
-        if (itemCount > 0) {
-            val nextPos = if (enableLoopModel) (currentPosition + 1) % itemCount else {
-                if (currentPosition + 1 >= itemCount) return
-                currentPosition + 1
-            }
+        if (itemCount == 0) return
+        val nextPos = calculatePosition(currentPosition + 1, itemCount)
+        if (nextPos == -1) return
 
-            if (nextPos >= itemCount - 1) {
-                onWaterRippleListener?.onLoadMore()
-            }
-            startTransition(nextPos, AnimType.RIPPLE)
-        }
+        if (nextPos >= itemCount - 1) onWaterRippleListener?.onLoadMore()
+        startTransition(nextPos, itemCount)
     }
 
     fun switchToPrevious() {
         val itemCount = waterRippleAdapter.getItemCount()
-        if (itemCount > 0) {
-            val prevPos = if (enableLoopModel) (currentPosition - 1) % itemCount else {
-                if (currentPosition - 1 < 0) return
-                currentPosition - 1
-            }
-            startTransition(prevPos, AnimType.SLIDE_RIGHT)
-        }
+        if (itemCount == 0) return
+        val prevPos = calculatePosition(currentPosition - 1, itemCount)
+        if (prevPos == -1) return
+        startTransition(prevPos, itemCount)
 
     }
 
-    private fun startTransition(targetPos: Int, type: AnimType) {
+    private fun startTransition(targetPos: Int, itemCount: Int) {
         cancelRunningAnimations()
-        animType = type // 优先使用预加载视图
         nextViewHolder = when (targetPos) {
-            calculatePosition(currentPosition + 1, waterRippleAdapter.getItemCount()) -> {
+            calculatePosition(currentPosition + 1, itemCount) -> {
                 preloadNextViewHolder.also { preloadNextViewHolder = null }
             }
-            calculatePosition(currentPosition - 1, waterRippleAdapter.getItemCount()) -> {
+            calculatePosition(currentPosition - 1, itemCount) -> {
                 preloadPreviousViewHolder.also { preloadPreviousViewHolder = null }
             }
             else -> null
@@ -261,13 +247,10 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             addView(itemView)
             waterRippleAdapter.onBindViewHolder(this, targetPos)
         }
-        when (type) {
-            AnimType.RIPPLE -> startRippleAnimation(targetPos)
-            else -> return // 其他动画类型暂不处理
-        }
+        startRippleAnimation(targetPos, itemCount)
     }
 
-    private fun startRippleAnimation(targetPos: Int) {
+    private fun startRippleAnimation(targetPos: Int, itemCount: Int) {
         rippleAnimator = ValueAnimator.ofFloat(0f, maxRadius).apply {
             duration = rippleDuration
             interpolator = LinearInterpolator()
@@ -281,13 +264,13 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     swapImages()
-                    onSelectedEndListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
-                    carouselController.resume() //                    preloadAdjacentViews()
+                    onSelectedEndListener?.invoke(targetPos, itemCount)
+                    carouselController.resume()
                 }
 
                 override fun onAnimationStart(animation: Animator?) {
                     currentPosition = targetPos
-                    onSelectedStartListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
+                    onSelectedStartListener?.invoke(targetPos, itemCount)
                     preloadAdjacentViews()
                     carouselController.pause()
                 }
@@ -299,7 +282,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas) // 确保子View正常绘制
-        if (animType == AnimType.RIPPLE && rippleAnimator?.isRunning == true) {
+        if (rippleAnimator?.isRunning == true) {
             onDrawChild(canvas)
         }
     }
@@ -329,20 +312,17 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     private fun drawRippleEffect(canvas: Canvas) {
         if (rippleRadius <= 1f) return
 
-        val saveCount = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
-
-        // 第一步：绘制当前图片（带透明度）
+        val saveCount = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null) // 第一步：绘制当前图片（带透明度）
         nextViewHolder?.itemView?.draw(canvas)
 
         // 第二步：创建组合蒙版（裁剪+渐变）
-        val combinedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        combinedPaint.apply {
             shader = RadialGradient(rippleCenterX, rippleCenterY, rippleRadius, intArrayOf(Color.TRANSPARENT, Color.TRANSPARENT, Color.BLACK), floatArrayOf(0f, 0.75f, 1f), // 渐变范围调整
                 Shader.TileMode.CLAMP)
             xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
         }
 
         // 第三步：绘制下一张图片（带双重效果）
-        canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
         currentViewHolder?.itemView?.draw(canvas) // 应用组合蒙版
         canvas.drawPath(createClipPath(), combinedPaint)
 
@@ -373,8 +353,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
 
     private fun swapImages() {
-        currentViewHolder?.let {
-            onRecycleViewHolder(it) }
+        currentViewHolder?.let { onRecycleViewHolder(it) }
         currentViewHolder = nextViewHolder
         nextViewHolder = null
         currentViewHolder?.itemView?.alpha = 1f
@@ -397,7 +376,6 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private val gestureDetector by lazy {
         GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-
             override fun onDoubleTap(e: MotionEvent?): Boolean {
                 onDoubleClickListener?.invoke(currentPosition)
                 return true
@@ -414,31 +392,20 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             }
 
             override fun onSingleTapUp(e: MotionEvent): Boolean = false
-
-            override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
-                if (!enableSwipe) return false
-                val deltaX = e2.x - e1.x
-                return when {
-                    deltaX > SWIPE_THRESHOLD -> {
-                        switchToNext()
-                        true
-                    }
-
-                    deltaX < -SWIPE_THRESHOLD -> {
-                        switchToPrevious()
-                        true
-                    }
-
-                    else -> false
-                }
-            }
         })
     }
 
+
     private fun handleTap(x: Float, y: Float) {
-        rippleCenterX = x.coerceIn(0f, width.toFloat())
+        val isRightClick = x > width * SPLIT_THRESHOLD
+        val isLeftClick = x < width * (1 - SPLIT_THRESHOLD)
+        rippleCenterX = if (isRightClick) width * 0.8f else width * 0.2f
         rippleCenterY = y.coerceIn(0f, height.toFloat())
-        switchToNext()
+        when {
+            isRightClick -> switchToNext()
+            isLeftClick -> switchToPrevious()
+            else -> return // 中间区域不响应
+        }
     }
 
     private fun getRandomPoint(): PointF {
@@ -472,9 +439,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     fun onLoadMoreListener(listener: () -> Unit) {
         onWaterRippleListener = object : WaterRippleListener {
-            override fun onLoadMore() {
-                listener.invoke()
-            }
+            override fun onLoadMore() = listener.invoke()
         }
     }
 
@@ -520,8 +485,6 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         if (enableAutoCarousel) startCarousel()
         else carouselController.cancel()
     }
-
-    private enum class AnimType { RIPPLE, SLIDE_LEFT, SLIDE_RIGHT }
 
     interface WaterRippleListener {
         fun onLoadMore()
@@ -576,7 +539,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
 
     companion object {
-        private const val SWIPE_THRESHOLD = 100
+        private var SPLIT_THRESHOLD = 0.3f // 左右区域划分比例
         private const val TAG = "WaterRippleView"
     }
 }

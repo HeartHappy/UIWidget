@@ -28,18 +28,18 @@ class WaterRippleActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() 
             onSelectedStartListener { position, itemCount ->
                 tvTitle.text = String.format("${position + 1}/${itemCount}")
             }
-            onLoadMoreListener {
-                Toast.makeText(this@WaterRippleActivity, "加载更多数据...", Toast.LENGTH_SHORT).show()
-                showLoadingDialog(root)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    delay(2000)
-                    withContext(Dispatchers.Main) {
-                        dismissLoadingDialog()
-                        waterRippleAdapter.addData(ImageUtil.getUrls2())
-//                        rvWaterRipple.notifyDataSetChanged()
-                    }
-                }
-            }
+            onSelectedEndListener { position, itemCount -> tvTitle.text = String.format("${position + 1}/${itemCount}") }
+//            onLoadMoreListener {
+//                Toast.makeText(this@WaterRippleActivity, "加载更多数据...", Toast.LENGTH_SHORT).show()
+//                showLoadingDialog(root)
+//                lifecycleScope.launch(Dispatchers.IO) {
+//                    delay(2000)
+//                    withContext(Dispatchers.Main) {
+//                        dismissLoadingDialog()
+//                        waterRippleAdapter.addData(ImageUtil.getUrls2())
+//                    }
+//                }
+//            }
             setAdapter(waterRippleAdapter)
             setOnLongPressListener { pos ->
                 Toast.makeText(this@WaterRippleActivity, "长按：$pos", Toast.LENGTH_SHORT).show()
