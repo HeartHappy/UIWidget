@@ -27,12 +27,8 @@ class WaterRippleActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() 
         waterRippleAdapter = WaterRippleAdapter(this@WaterRippleActivity, ImageUtil.urlsData)
         rvWaterRipple.apply {
             onSelectedStartListener { position, itemCount ->
-                Log.d(TAG, "initView onSelectedStartListener: $itemCount")
                 tvTitle.text = String.format("${position + 1}/${itemCount}")
             }
-//            onSelectedEndListener { position, itemCount ->
-//                Log.d(TAG, "initView onSelectedEndListener: $itemCount")
-//                tvTitle.text = String.format("${position + 1}/${itemCount}") }
             onLoadMoreListener {
                 Toast.makeText(this@WaterRippleActivity, "加载更多数据...", Toast.LENGTH_SHORT).show()
                 showLoadingDialog(root)

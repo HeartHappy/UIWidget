@@ -15,13 +15,13 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
+import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -33,15 +33,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import java.util.LinkedList
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
 class WaterRippleView @JvmOverloads constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr), LifecycleEventObserver {
     private var currentViewHolder: ViewHolder? = null
-    private var nextViewHolder: ViewHolder? = null
+    private var targetViewHolder: ViewHolder? = null
     private var preloadPreviousViewHolder: ViewHolder? = null
     private var preloadNextViewHolder: ViewHolder? = null
     private var waterRippleAdapter: Adapter by Delegates.notNull()
@@ -85,10 +87,13 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     // 状态变量
     private var currentPosition = 0
+    private var targetPosition = 1
     private var rippleRadius = 0f
     private var rippleCenterX = 0f
     private var rippleCenterY = 0f
     private var maxRadius = 0f
+    private var isClickDistrict: Pair<Boolean, Boolean> by Delegates.notNull()
+    private var isSliding = false
 
     // 动画控制
     private val clipPath = Path()
@@ -195,10 +200,8 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
             preloadNextViewHolder = null
         }
         preloadAdjacentViews()
-        Log.d(TAG, "notifyDataSetChanged: $newCount$onSelectedStartListener,$onSelectedEndListener")
         onSelectedStartListener?.invoke(currentPosition, newCount)
-        onSelectedEndListener?.invoke(currentPosition, newCount)
-//        invalidate()
+        onSelectedEndListener?.invoke(currentPosition, newCount) //        invalidate()
     }
 
 
@@ -215,64 +218,61 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
 
-    fun switchToNext() {
+    private fun prepareToNext(onReady: (Int) -> Unit = {}) {
         val itemCount = waterRippleAdapter.getItemCount()
         if (itemCount == 0) return
-        val nextPos = calculatePosition(currentPosition + 1, itemCount)
-        if (nextPos == -1) return
-
-        if (nextPos >= itemCount - 1) onWaterRippleListener?.onLoadMore()
-        startTransition(nextPos, itemCount)
+        targetPosition = calculatePosition(currentPosition + 1, itemCount)
+        if (targetPosition == -1) return
+        if (targetPosition >= itemCount - 1) onWaterRippleListener?.onLoadMore()
+        startTransition(true, onReady)
     }
 
-    fun switchToPrevious() {
+    private fun prepareToPrevious(onReady: (Int) -> Unit = {}) {
         val itemCount = waterRippleAdapter.getItemCount()
         if (itemCount == 0) return
-        val prevPos = calculatePosition(currentPosition - 1, itemCount)
-        if (prevPos == -1) return
-        startTransition(prevPos, itemCount)
+        targetPosition = calculatePosition(currentPosition - 1, itemCount)
+        if (targetPosition == -1) return
+        startTransition(false, onReady)
 
     }
 
-    private fun startTransition(targetPos: Int, itemCount: Int) {
+    private fun startTransition(toNext: Boolean, onReady: (Int) -> Unit) {
         cancelRunningAnimations()
-        nextViewHolder = when (targetPos) {
-            calculatePosition(currentPosition + 1, itemCount) -> {
-                preloadNextViewHolder.also { preloadNextViewHolder = null }
-            }
-            calculatePosition(currentPosition - 1, itemCount) -> {
-                preloadPreviousViewHolder.also { preloadPreviousViewHolder = null }
-            }
-            else -> null
-        } ?: onCreateViewHolder().apply {
+        targetViewHolder = if (toNext) preloadNextViewHolder.also { preloadNextViewHolder = null } else preloadPreviousViewHolder.also { preloadPreviousViewHolder = null } ?: onCreateViewHolder().apply {
             itemView.alpha = 0f
             addView(itemView)
-            waterRippleAdapter.onBindViewHolder(this, targetPos)
+            waterRippleAdapter.onBindViewHolder(this, targetPosition)
         }
-        startRippleAnimation(targetPos, itemCount)
+        onReady(targetPosition)
     }
 
-    private fun startRippleAnimation(targetPos: Int, itemCount: Int) {
-        rippleAnimator = ValueAnimator.ofFloat(0f, maxRadius).apply {
+    /**
+     * 创建水波纹动画
+     * @param rippleDuration Long
+     * @param startValue Float
+     * @param endValue Float
+     */
+    private fun rippleAnimator(rippleDuration: Long, startValue: Float, endValue: Float) {
+        rippleAnimator = ValueAnimator.ofFloat(startValue, endValue).apply {
             duration = rippleDuration
             interpolator = LinearInterpolator()
             addUpdateListener { anim ->
                 rippleRadius = anim.animatedValue as Float
-                val progress = rippleRadius / maxRadius // 同步更新透明度 // 计算淡入阶段的局部进度（0~1）
+                val progress = rippleRadius / endValue // 同步更新透明度 // 计算淡入阶段的局部进度（0~1）
                 currentViewHolder?.itemView?.alpha = 1 - progress
-                nextViewHolder?.itemView?.alpha = progress.coerceIn(0f, 1f)
+                targetViewHolder?.itemView?.alpha = progress.coerceIn(0f, 1f)
                 invalidate()
             }
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     swapImages()
-                    onSelectedEndListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
+                    onSelectedEndListener?.invoke(targetPosition, waterRippleAdapter.getItemCount())
                     carouselController.resume()
                 }
 
                 override fun onAnimationStart(animation: Animator?) {
-                    currentPosition = targetPos
-                    onSelectedStartListener?.invoke(targetPos, waterRippleAdapter.getItemCount())
+                    currentPosition = targetPosition
+                    onSelectedStartListener?.invoke(targetPosition, waterRippleAdapter.getItemCount())
                     preloadAdjacentViews()
                     carouselController.pause()
                 }
@@ -281,12 +281,44 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
+    /**
+     * 重置视图动画
+     */
+    private fun resetViewAnimator() {
+        ValueAnimator.ofFloat(rippleRadius, 0f).apply {
+            duration = 200
+            addUpdateListener {
+                rippleRadius = it.animatedValue as Float
+                val progress = rippleRadius / maxRadius
+                currentViewHolder?.itemView?.alpha = 1 - progress
+                targetViewHolder?.itemView?.alpha = progress
+                invalidate()
+            }
+            doOnEnd { preloadAdjacentViews() }
+            start()
+        }
+    }
+
+    /**
+     * 侧滑更新视图
+     * @param e1 MotionEvent
+     * @param e2 MotionEvent
+     */
+    private fun slideUpdate(e1: MotionEvent, e2: MotionEvent) {
+        val distance = calculateStraightLineDistance(e1, e2)
+        if (distance > SWIPE_DISTANCE_THRESHOLD) {
+            isSliding = true
+            rippleRadius = distance.toFloat()
+            val progress = rippleRadius / maxRadius // 同步更新透明度 // 计算淡入阶段的局部进度（0~1）
+            currentViewHolder?.itemView?.alpha = 1 - progress
+            targetViewHolder?.itemView?.alpha = progress //                        Log.d(TAG, "onScroll: $progress")
+            invalidate()
+        }
+    }
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas) // 确保子View正常绘制
-        if (rippleAnimator?.isRunning == true) {
-            onDrawChild(canvas)
-        }
+        onDrawChild(canvas)
     }
 
 
@@ -303,7 +335,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         ripplePath.reset()
         ripplePath.addCircle(rippleCenterX, rippleCenterY, rippleRadius, Path.Direction.CW)
         canvas.clipPath(ripplePath)
-        nextViewHolder?.itemView?.draw(canvas)
+        targetViewHolder?.itemView?.draw(canvas)
         canvas.restoreToCount(saveCount)
     }
 
@@ -315,7 +347,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         if (rippleRadius <= 1f) return
 
         val saveCount = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null) // 第一步：绘制当前图片（带透明度）
-        nextViewHolder?.itemView?.draw(canvas)
+        targetViewHolder?.itemView?.draw(canvas)
 
         // 第二步：创建组合蒙版（裁剪+渐变）
         combinedPaint.apply {
@@ -356,8 +388,8 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private fun swapImages() {
         currentViewHolder?.let { onRecycleViewHolder(it) }
-        currentViewHolder = nextViewHolder
-        nextViewHolder = null
+        currentViewHolder = targetViewHolder
+        targetViewHolder = null
         currentViewHolder?.itemView?.alpha = 1f
         rippleRadius = 0f
     }
@@ -369,27 +401,42 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     // 手势处理
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        val handlerTouchEvent = gestureDetector.onTouchEvent(event)
         when (event.action) {
             MotionEvent.ACTION_DOWN -> carouselController.pause()
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> carouselController.resume()
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                onSwipeUp()
+                carouselController.resume()
+            }
         }
-        return gestureDetector.onTouchEvent(event) || super.onTouchEvent(event)
+        return handlerTouchEvent || super.onTouchEvent(event)
     }
+
 
     private val gestureDetector by lazy {
         GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+
             override fun onDoubleTap(e: MotionEvent?): Boolean {
                 onDoubleClickListener?.invoke(currentPosition)
                 return true
             }
 
-            override fun onDown(e: MotionEvent): Boolean = true
+            override fun onDown(e: MotionEvent): Boolean {
+                onSingleTapDown(e)
+                return true
+            }
+
             override fun onLongPress(e: MotionEvent?) {
                 onLongPressListener?.invoke(currentPosition)
             }
 
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                handleTap(e.x, e.y)
+                if (!isSliding) onSingleTapUp(e.x)
+                return true
+            }
+
+            override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+                if (isReasonable(targetPosition)) slideUpdate(e1, e2)
                 return true
             }
 
@@ -397,17 +444,74 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         })
     }
 
-
-    private fun handleTap(x: Float, y: Float) {
-        val isRightClick = x > width * SPLIT_THRESHOLD
-        val isLeftClick = x < width * (1 - SPLIT_THRESHOLD)
-        rippleCenterX = if (isRightClick) width * 0.8f else width * 0.2f
-        rippleCenterY = y.coerceIn(0f, height.toFloat())
+    /**
+     * 单击按下或侧滑按下
+     * @param e MotionEvent
+     */
+    private fun onSingleTapDown(e: MotionEvent) {
+        rippleCenterX = e.x
+        rippleCenterY = e.y.coerceIn(0f, height.toFloat())
+        isClickDistrict = isClickDistrict(e.x)
+        carouselController.pause()
         when {
-            isRightClick -> switchToNext()
-            isLeftClick -> switchToPrevious()
-            else -> return // 中间区域不响应
+            isClickDistrict.first -> prepareToNext()
+            isClickDistrict.second -> prepareToPrevious()
         }
+    }
+
+
+    /**
+     * 处理滑动松开
+     */
+    private fun onSwipeUp() {
+        if (isSliding) {
+            if (isRippleOverOneThird(rippleRadius, maxRadius)) {
+                rippleAnimator(200, rippleRadius, maxRadius)
+            } else {
+                resetViewAnimator()
+            }
+            isSliding = false
+        }
+    }
+
+
+    /**
+     * 单击松开
+     * @param x Float
+     */
+    private fun onSingleTapUp(x: Float) {
+        if (isReasonable(targetPosition)) {
+            val district = isClickDistrict(x)
+            when {
+                district.first -> rippleAnimator(rippleDuration, 0f, maxRadius)
+                district.second -> rippleAnimator(rippleDuration, 0f, maxRadius)
+                else -> return // 中间区域不响应
+            }
+        }
+    }
+
+    /**
+     * 判断水波纹半径是否超过最大半径的三分之一
+     * @param rippleRadius 当前水波纹半径
+     * @param maxRadius 水波纹最大半径
+     * @return true：rippleRadius > maxRadius/3；false：未超过
+     */
+    private fun isRippleOverOneThird(rippleRadius: Float, maxRadius: Float): Boolean { // 避免maxRadius为0导致除零错误（可选防御性判断）
+        if (maxRadius <= 0) return false
+        return rippleRadius > (maxRadius / 3f)
+    }
+
+    private fun isReasonable(targetPosition: Int): Boolean {
+        return targetPosition in 0 until waterRippleAdapter.getItemCount()
+    }
+
+    /**
+     * 判断点击区域
+     * @param x Float
+     * @return Pair<Boolean, Boolean> 右侧点击、左侧点击
+     */
+    private fun isClickDistrict(x: Float): Pair<Boolean, Boolean> {
+        return (x > width * SPLIT_THRESHOLD) to (x < width * (1 - SPLIT_THRESHOLD))
     }
 
     private fun getRandomPoint(): PointF {
@@ -433,7 +537,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
                 val point = getRandomPoint()
                 rippleCenterX = point.x
                 rippleCenterY = point.y
-                switchToNext()
+                prepareToNext { rippleAnimator(rippleDuration, 0f, maxRadius) }
             }
         }
     }
@@ -539,9 +643,40 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-
     companion object {
-        private var SPLIT_THRESHOLD = 0.3f // 左右区域划分比例
+        private var SPLIT_THRESHOLD = 0.5f // 左右区域划分比例
+        private const val SWIPE_DISTANCE_THRESHOLD = 100f
+        private const val SWIPE_RIGHT = 0
+        private const val SWIPE_LEFT = 1
+        private const val SWIPE_DOWN = 2
+        private const val SWIPE_UP = 3
         private const val TAG = "WaterRippleView"
+
+
+        /**
+         * 计算手势滑动的水平和垂直距离
+         * @param e1 手势起点事件（按下时的 MotionEvent）
+         * @param e2 手势终点事件（抬起时的 MotionEvent）
+         * @return 包含水平距离（x）和垂直距离（y）的 Pair（绝对值）
+         */
+        fun calculateSwipeDistance(e1: MotionEvent, e2: MotionEvent): Pair<Float, Float> {
+            val horizontalDistance = e2.x - e1.x  // 水平方向实际差值（可能为负）
+            val verticalDistance = e2.y - e1.y    // 垂直方向实际差值（可能为负）
+
+            // 返回绝对值（实际滑动长度）
+            return abs(horizontalDistance) to abs(verticalDistance)
+        }
+
+        /**
+         * 计算手势滑动的直线距离（欧几里得距离）
+         * @param e1 手势起点事件
+         * @param e2 手势终点事件
+         * @return 直线滑动距离（像素）
+         */
+        fun calculateStraightLineDistance(e1: MotionEvent, e2: MotionEvent): Double {
+            val dx = e2.x - e1.x
+            val dy = e2.y - e1.y
+            return sqrt((dx * dx + dy * dy).toDouble())
+        }
     }
 }
