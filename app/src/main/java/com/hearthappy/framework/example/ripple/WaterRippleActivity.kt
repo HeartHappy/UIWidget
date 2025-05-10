@@ -1,7 +1,6 @@
 package com.hearthappy.framework.example.ripple
 
 import android.animation.ValueAnimator
-import android.util.Log
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -48,28 +47,8 @@ class WaterRippleActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() 
                 Toast.makeText(this@WaterRippleActivity, "双击：$pos", Toast.LENGTH_SHORT).show()
             }
         }
-        Glide.with(this@WaterRippleActivity).load(ImageUtil.urlsData[0]).into(rivImage)
-
-        rivImage.setOnClickListener {
-
-            animateGradientAngle(0f, 360f, 5000) { //                rivImage.setGradientBorderAnger(it)
-                rivImage.setGradientInnerBorderAnger(it)
-            }
-        }
     }
 
-    fun animateGradientAngle(start: Float, end: Float, duration: Long, value: (Float) -> Unit) {
-        ValueAnimator.ofFloat(start, end).apply {
-            interpolator = LinearInterpolator()
-            this.duration = duration
-            addUpdateListener {
-                value(it.animatedValue as Float)
-            }
-            this.repeatCount = ValueAnimator.INFINITE
-            this.repeatMode = ValueAnimator.RESTART
-            start()
-        }
-    }
 
     override fun ActivityWaterRippleViewerBinding.initViewModelListener() {
     }

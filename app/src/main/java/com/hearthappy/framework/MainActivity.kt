@@ -7,11 +7,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hearthappy.framework.databinding.ActivityMainBinding
 import com.hearthappy.framework.example.calendar.CalendarActivity
+import com.hearthappy.framework.example.image.RoundImageActivity
 import com.hearthappy.framework.example.ninegrid.NineGridActivity
 import com.hearthappy.framework.example.numberroll.NumberRollActivity
 import com.hearthappy.framework.example.pk.PkActivity
-import com.hearthappy.framework.example.turntable.TurntableActivity
 import com.hearthappy.framework.example.ripple.WaterRippleActivity
+import com.hearthappy.framework.example.turntable.TurntableActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,7 +41,8 @@ class MainActivity : AppCompatActivity() {
             add(ExampleBean(PkActivity::class.java, "PK"))
             add(ExampleBean(NumberRollActivity::class.java, "NumberRoll"))
             add(ExampleBean(NineGridActivity::class.java, "NineGrid"))
-            add(ExampleBean(WaterRippleActivity::class.java, "WaveSwitchImage"))
+            add(ExampleBean(WaterRippleActivity::class.java, "WaterRipple"))
+            add(ExampleBean(RoundImageActivity::class.java, "RoundImage"))
         }
     }
 }

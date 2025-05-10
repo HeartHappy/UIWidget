@@ -20,7 +20,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
-import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -41,7 +40,7 @@ import kotlin.math.sqrt
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class WaterRippleView @JvmOverloads constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr), LifecycleEventObserver {
+class WaterRippleView @JvmOverloads constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int = 0) : ViewGroup(context, attrs, defStyleAttr), LifecycleEventObserver {
     private var currentViewHolder: ViewHolder? = null
     private var targetViewHolder: ViewHolder? = null
     private var preloadPreviousViewHolder: ViewHolder? = null
@@ -66,6 +65,10 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
+    private fun destroyScope() {
+        lifecycleScope.cancel()
+    }
+
     //协程域生命周期监听
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         when (event) {
@@ -73,14 +76,10 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
                 source.lifecycle.removeObserver(this)
                 destroyScope()
             }
-
             else -> {}
         }
     }
 
-    private fun destroyScope() {
-        lifecycleScope.cancel()
-    }
 
     private val ripplePath = Path()
     private val combinedPaint by lazy { Paint(Paint.ANTI_ALIAS_FLAG) }
@@ -108,6 +107,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
     private var enableRippleEffect = true //启用水波纹增强效果
     private var enableAutoCarousel = false //启动自动轮播
 
+    //监听
     private var onWaterRippleListener: WaterRippleListener? = null
     private var onSelectedEndListener: ((position: Int, itemCount: Int) -> Unit)? = null
     private var onSelectedStartListener: ((position: Int, itemCount: Int) -> Unit)? = null
@@ -166,7 +166,6 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         } else {
             waterRippleAdapter.onBindViewHolder(currentHolder, position)
         }
-
     }
 
     private fun calculatePosition(position: Int, itemCount: Int): Int {
@@ -316,11 +315,43 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) { // 测量所有子视图为相同大小
+        measureChildren(widthMeasureSpec, heightMeasureSpec)
+
+        // 设置自身尺寸为第一个可见子视图的尺寸（或默认）
+        val (width, height) = if (childCount > 0) {
+            val firstChild = getChildAt(0)
+            firstChild.measuredWidth to firstChild.measuredHeight
+        } else {
+            val minWidth = suggestedMinimumWidth
+            val minHeight = suggestedMinimumHeight
+            resolveSize(minWidth, widthMeasureSpec) to resolveSize(minHeight, heightMeasureSpec)
+        }
+        setMeasuredDimension(width, height)
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) { // 所有子视图铺满容器
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            child.layout(0, 0, width, height)
+        }
+    }
+
+    // 控制子视图绘制顺序,确保后添加的视图绘制在上层
+    override fun getChildDrawingOrder(childCount: Int, i: Int): Int {
+        return childCount - 1 - i
+    }
+
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas) // 确保子View正常绘制
         onDrawChild(canvas)
     }
 
+    override fun generateDefaultLayoutParams() = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+
+    override fun generateLayoutParams(attrs: AttributeSet?) = LayoutParams(context, attrs)
+
+    override fun generateLayoutParams(p: LayoutParams?) = LayoutParams(p)
 
     private fun onDrawChild(canvas: Canvas) {
         if (enableRippleEffect) drawRippleEffect(canvas) else drawRipple(canvas)
@@ -465,11 +496,7 @@ class WaterRippleView @JvmOverloads constructor(context: Context, attrs: Attribu
      */
     private fun onSwipeUp() {
         if (isSliding) {
-            if (isRippleOverOneThird(rippleRadius, maxRadius)) {
-                rippleAnimator(200, rippleRadius, maxRadius)
-            } else {
-                resetViewAnimator()
-            }
+            if (isRippleOverOneThird(rippleRadius, maxRadius)) rippleAnimator(200, rippleRadius, maxRadius) else resetViewAnimator()
             isSliding = false
         }
     }

@@ -1,6 +1,7 @@
 package com.hearthappy.uiwidget.image
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
@@ -81,12 +82,12 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     private var blendHeight = 0
     private var blendGravity = Gravity.START or Gravity.TOP
     private val blendMargin = Rect()
-    private val layersPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val layersPaint by lazy { Paint(Paint.ANTI_ALIAS_FLAG) }
 
     //图层水印
     private var layersWatermarkOn = false
-    private var layersHorSpacing = 40
-    private var layersVerSpacing = 50
+    private var layersHorSpacing = 20
+    private var layersVerSpacing = 0
 
 
     init { // 从XML属性初始化
@@ -145,7 +146,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
             innerGlowPaint.color = innerGlowColor
             innerGlowPaint.strokeWidth = borderWidth + innerBorderWidth + innerGlowRadius
         } //图层混合
-        blendDrawable?.let { layersPaint.xfermode = PorterDuffXfermode(colorBlendMode) } // 应用初始滤镜和灰度
+        blendDrawable?.let { layersPaint.xfermode = PorterDuffXfermode(layersBlendModel) } // 应用初始滤镜和灰度
         updateColorFilter() // 优化设置（必须关闭硬件加速）
         setLayerType(LAYER_TYPE_SOFTWARE, null)
     }
@@ -175,9 +176,22 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
                 drawLayersWatermark(dw, dh, drawable, canvas)
             } else {
                 val destRect = getLayersBlendRect(dw, dh)
-                drawable.bounds = destRect
-                drawable.draw(canvas)
+                drawDrawable(dw, dh, drawable, canvas, destRect)
             }
+        }
+    }
+
+    private fun drawDrawable(dw: Int, dh: Int, drawable: Drawable, canvas: Canvas, destRect: Rect) {
+        if (layersBlendModel != PorterDuff.Mode.SRC_OVER) { // 创建与 Drawable 尺寸一致的 Bitmap（ARGB_8888 支持透明和混合模式）
+            val bitmap = Bitmap.createBitmap(dw, dh, Bitmap.Config.ARGB_8888)
+            val tempCanvas = Canvas(bitmap)
+            drawable.bounds = Rect(0, 0, dw, dh)
+            drawable.draw(tempCanvas)
+            canvas.drawBitmap(bitmap, null, destRect, layersPaint)
+            bitmap.recycle()
+        } else {
+            drawable.bounds = destRect
+            drawable.draw(canvas)
         }
     }
 
@@ -195,8 +209,9 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
             var currentLeft = if (isEvenRow) layersHorSpacing else 0
             while (currentLeft < width) {
                 val destRect = getRectWithOffset(currentLeft, currentTop, dw, dh)
-                drawable.bounds = destRect
-                drawable.draw(canvas)
+                drawDrawable(dw, dh, drawable, canvas, destRect)
+//                drawable.bounds = destRect
+//                drawable.draw(canvas)
                 currentLeft += dw + layersHorSpacing
             }
             currentTop += dh + layersVerSpacing
@@ -495,7 +510,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     fun setLayersBlendMode(mode: PorterDuff.Mode) {
         layersBlendModel = mode
-        layersPaint.xfermode = PorterDuffXfermode(colorBlendMode)
+        layersPaint.xfermode = PorterDuffXfermode(layersBlendModel)
         invalidate()
     }
 
@@ -517,7 +532,7 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun setBlendMargin(left: Int, top: Int, right: Int, bottom: Int) {
-        blendMargin.set(left.dp2px(), top.dp2px(), right.dp2px(), bottom.dp2px())
+        blendMargin.set(left, top.dp2px(), right.dp2px(), bottom.dp2px())
         invalidate()
     }
 
