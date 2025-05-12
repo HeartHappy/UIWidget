@@ -1,10 +1,7 @@
 package com.hearthappy.framework.example.ripple
 
-import android.animation.ValueAnimator
-import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
 import com.hearthappy.basic.AbsBaseActivity
 import com.hearthappy.framework.databinding.ActivityWaterRippleViewerBinding
 import com.hearthappy.framework.example.tools.ImageUtil
@@ -14,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class WaterRippleActivity : AbsBaseActivity<ActivityWaterRippleViewerBinding>() {
-    private lateinit var waterRippleAdapter:WaterRippleAdapter
+    private lateinit var waterRippleAdapter: WaterRippleAdapter
 
     override fun ActivityWaterRippleViewerBinding.initData() {
     }

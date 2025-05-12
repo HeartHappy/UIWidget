@@ -18,6 +18,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/tvTitle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="圆形"
+        app:layout_constraintEnd_toEndOf="@id/rivImage1"
+        app:layout_constraintStart_toStartOf="@+id/rivImage1"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage1" />
+
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage2"
@@ -32,6 +41,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/tvTitle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="外边框"
+        app:layout_constraintEnd_toEndOf="@id/rivImage2"
+        app:layout_constraintStart_toStartOf="@+id/rivImage2"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage2" />
+
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage3"
         android:layout_width="100dp"
@@ -45,6 +63,15 @@
         app:isCircle="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTitle3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="内、外边框"
+        app:layout_constraintEnd_toEndOf="@id/rivImage3"
+        app:layout_constraintStart_toStartOf="@+id/rivImage3"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage3" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage4"
@@ -64,8 +91,17 @@
         app:innerBorderWidth="8dp"
         app:isCircle="true"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage1"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle1"
         app:radius="20dp" />
+
+    <TextView
+        android:id="@+id/tvTitle4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="渐变"
+        app:layout_constraintEnd_toEndOf="@id/rivImage4"
+        app:layout_constraintStart_toStartOf="@+id/rivImage4"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage4" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage5"
@@ -84,8 +120,17 @@
         app:innerBorderGradientType="SweepGradient"
         app:innerBorderWidth="8dp"
         app:layout_constraintStart_toStartOf="@+id/rivImage2"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage1"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle1"
         app:radius="20dp" />
+
+    <TextView
+        android:id="@+id/tvTitle5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="圆角"
+        app:layout_constraintEnd_toEndOf="@id/rivImage5"
+        app:layout_constraintStart_toStartOf="@+id/rivImage5"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage5" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage6"
@@ -104,9 +149,18 @@
         app:innerBorderGradientType="SweepGradient"
         app:innerBorderWidth="8dp"
         app:layout_constraintStart_toStartOf="@+id/rivImage3"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage1"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle1"
         app:radiusBottomLeft="60dp"
         app:radiusTopRight="60dp" />
+
+    <TextView
+        android:id="@+id/tvTitle6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="指定圆角"
+        app:layout_constraintEnd_toEndOf="@id/rivImage6"
+        app:layout_constraintStart_toStartOf="@+id/rivImage6"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage6" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage7"
@@ -127,9 +181,18 @@
         app:innerGlowColor="@color/color_yellow"
         app:innerGlowRadius="8dp"
         app:layout_constraintStart_toStartOf="@+id/rivImage1"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage4"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle4"
         app:radiusBottomLeft="60dp"
         app:radiusTopRight="60dp" />
+
+    <TextView
+        android:id="@+id/tvTitle7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="内发光"
+        app:layout_constraintEnd_toEndOf="@id/rivImage7"
+        app:layout_constraintStart_toStartOf="@+id/rivImage7"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage7" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage8"
@@ -149,9 +212,18 @@
         app:innerBorderWidth="8dp"
         app:isGrayscale="true"
         app:layout_constraintStart_toStartOf="@+id/rivImage2"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage5"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle4"
         app:radiusBottomLeft="60dp"
         app:radiusTopRight="60dp" />
+
+    <TextView
+        android:id="@+id/tvTitle8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="灰度"
+        app:layout_constraintEnd_toEndOf="@id/rivImage8"
+        app:layout_constraintStart_toStartOf="@+id/rivImage8"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage8" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage9"
@@ -171,9 +243,18 @@
         app:innerBorderGradientType="SweepGradient"
         app:innerBorderWidth="8dp"
         app:layout_constraintStart_toStartOf="@+id/rivImage3"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage6"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle4"
         app:radiusBottomLeft="60dp"
         app:radiusTopRight="60dp" />
+
+    <TextView
+        android:id="@+id/tvTitle9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="颜色滤镜"
+        app:layout_constraintEnd_toEndOf="@id/rivImage9"
+        app:layout_constraintStart_toStartOf="@+id/rivImage9"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage9" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage10"
@@ -194,9 +275,18 @@
         app:innerBorderGradientType="SweepGradient"
         app:innerBorderWidth="8dp"
         app:layout_constraintStart_toStartOf="@+id/rivImage1"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage7"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle7"
         app:radiusBottomLeft="60dp"
         app:radiusTopRight="60dp" />
+
+    <TextView
+        android:id="@+id/tvTitle10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="颜色滤镜混合模式"
+        app:layout_constraintEnd_toEndOf="@id/rivImage10"
+        app:layout_constraintStart_toStartOf="@+id/rivImage10"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage10" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage11"
@@ -205,10 +295,11 @@
         android:layout_marginTop="16dp"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher"
-        app:blendHeight="30dp"
+        app:blendHeight="20dp"
         app:blendMarginLeft="4dp"
-        app:blendSrc="@mipmap/ic_watermark2"
-        app:blendWidth="30dp"
+        app:blendMarginTop="8dp"
+        app:blendSrc="@mipmap/ic_watermark"
+        app:blendWidth="40dp"
         app:borderGradientColors="@array/gradient_colors"
         app:borderGradientPositions="@array/gradient_positions"
         app:borderGradientType="LinearGradient"
@@ -216,8 +307,17 @@
         app:colorFilter="@color/color_yellow_60"
         app:layersBlendMode="DARKEN"
         app:layout_constraintStart_toStartOf="@+id/rivImage2"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage7"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle7"
         app:radius="8dp" />
+
+    <TextView
+        android:id="@+id/tvTitle11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="水印"
+        app:layout_constraintEnd_toEndOf="@id/rivImage11"
+        app:layout_constraintStart_toStartOf="@+id/rivImage11"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage11" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage12"
@@ -226,34 +326,53 @@
         android:layout_marginTop="16dp"
         android:scaleType="centerCrop"
         android:src="@mipmap/ic_launcher"
-        app:blendHeight="30dp"
+        app:blendHeight="20dp"
         app:blendMarginLeft="4dp"
-        app:blendSrc="@mipmap/ic_watermark2"
-        app:blendWidth="30dp"
+        app:blendSrc="@mipmap/ic_watermark"
+        app:blendWidth="40dp"
         app:borderGradientColors="@array/gradient_colors"
         app:borderGradientPositions="@array/gradient_positions"
         app:borderGradientType="LinearGradient"
         app:borderWidth="8dp"
         app:colorFilter="@color/color_yellow_60"
         app:layersBlendMode="DARKEN"
+        app:layersHorSpacing="10dp"
+        app:layersVerSpacing="20dp"
         app:layersWatermarkOn="true"
         app:layout_constraintStart_toStartOf="@+id/rivImage3"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage7"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle7"
         app:radius="8dp" />
+
+    <TextView
+        android:id="@+id/tvTitle12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="全屏水印模式"
+        app:layout_constraintEnd_toEndOf="@id/rivImage12"
+        app:layout_constraintStart_toStartOf="@+id/rivImage12"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage12" />
 
     <com.hearthappy.uiwidget.image.RoundImageView
         android:id="@+id/rivImage13"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="16dp"
-        android:scaleType="centerCrop"
-        android:src="@mipmap/ic_watermark2"
+        android:src="@mipmap/ic_watermark"
         app:borderGradientColors="@array/gradient_colors"
         app:borderGradientPositions="@array/gradient_positions"
         app:borderWidth="8dp"
         app:colorFilter="@color/color_yellow_60"
         app:layout_constraintStart_toStartOf="@+id/rivImage1"
-        app:layout_constraintTop_toBottomOf="@+id/rivImage10" />
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle10" />
+
+    <TextView
+        android:id="@+id/tvTitle13"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="水印原图"
+        app:layout_constraintEnd_toEndOf="@id/rivImage13"
+        app:layout_constraintStart_toStartOf="@+id/rivImage13"
+        app:layout_constraintTop_toBottomOf="@+id/rivImage13" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
