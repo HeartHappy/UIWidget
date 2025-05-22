@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".example.carouse.CarouseViewActivity"
+            android:exported="false" />
+        <activity
             android:name=".example.ninegrid.NineGridActivity"
             android:exported="false" />
         <activity
@@ -39,8 +42,8 @@
         <activity
             android:name=".example.numberroll.NumberRollActivity"
             android:exported="false" />
-        <activity android:name="com.hearthappy.framework.example.ripple.WaterRippleActivity" />
-        <activity android:name="com.hearthappy.framework.example.image.RoundImageActivity" />
+        <activity android:name=".example.ripple.WaterRippleActivity" />
+        <activity android:name=".example.image.RoundImageActivity" />
     </application>
 
 </manifest>

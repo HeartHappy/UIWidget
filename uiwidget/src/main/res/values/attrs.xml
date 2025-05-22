@@ -227,12 +227,12 @@
         <attr name="borderGradientType" format="enum">
             <enum name="LinearGradient" value="0" />
             <enum name="SweepGradient" value="1" />
-<!--            <enum name="RadialGradient" value="2" />-->
+            <!--            <enum name="RadialGradient" value="2" />-->
         </attr>
         <attr name="innerBorderGradientType" format="enum">
             <enum name="LinearGradient" value="0" />
             <enum name="SweepGradient" value="1" />
-<!--            <enum name="RadialGradient" value="2" />-->
+            <!--            <enum name="RadialGradient" value="2" />-->
         </attr>
 
     </declare-styleable>
@@ -257,5 +257,17 @@
         <attr name="wrv_enable_loop_model" format="boolean" />
         <attr name="wrv_enable_ripple_effect" format="boolean" />
         <attr name="wrv_enable_auto_carousel" format="boolean" />
+    </declare-styleable>
+
+
+    <!--轮播控件-->
+    <declare-styleable name="CarouselView">
+        <attr name="carousel_interval" format="integer" />
+        <attr name="carousel_duration" format="integer" />
+        <attr name="carousel_orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="isUserInputEnabled" format="boolean" />
     </declare-styleable>
 </resources>

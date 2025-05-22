@@ -7,6 +7,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hearthappy.framework.databinding.ActivityMainBinding
 import com.hearthappy.framework.example.calendar.CalendarActivity
+import com.hearthappy.framework.example.carouse.CarouseViewActivity
 import com.hearthappy.framework.example.image.RoundImageActivity
 import com.hearthappy.framework.example.ninegrid.NineGridActivity
 import com.hearthappy.framework.example.numberroll.NumberRollActivity
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
             add(ExampleBean(NineGridActivity::class.java, "NineGrid"))
             add(ExampleBean(WaterRippleActivity::class.java, "WaterRipple"))
             add(ExampleBean(RoundImageActivity::class.java, "RoundImage"))
+            add(ExampleBean(CarouseViewActivity::class.java, "CarouseView"))
         }
     }
 }
