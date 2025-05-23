@@ -33,7 +33,7 @@ import com.hearthappy.uiwidget.utils.ext.getFloatArray
  * @author ChenRui
  * ClassDescription：自定义圆角ImageView
  */
-class RoundImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AppCompatImageView(context, attrs, defStyleAttr) {
+class SpecialImageView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : AppCompatImageView(context, attrs, defStyleAttr) {
     private val clipPath = Path()
     private var centerX = 0f
     private var centerY = 0f
@@ -91,39 +91,39 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
 
 
     init { // 从XML属性初始化
-        context.obtainStyledAttributes(attrs, R.styleable.RoundImageView).apply {
-            isCircle = getBoolean(R.styleable.RoundImageView_isCircle, false)
-            getDimension(R.styleable.RoundImageView_radius, 0f).takeIf { it > 0 }?.let { setRadiusPx(it, it, it, it) } ?: setRadiusPx(topLeft = getDimension(R.styleable.RoundImageView_radiusTopLeft, 0f), topRight = getDimension(R.styleable.RoundImageView_radiusTopRight, 0f), bottomRight = getDimension(R.styleable.RoundImageView_radiusBottomRight, 0f), bottomLeft = getDimension(R.styleable.RoundImageView_radiusBottomLeft, 0f))
-            innerBorderWidth = getDimensionPixelSize(R.styleable.RoundImageView_innerBorderWidth, 0).toFloat()
-            innerBorderColor = getColor(R.styleable.RoundImageView_innerBorderColor, Color.TRANSPARENT)
-            borderWidth = getDimensionPixelSize(R.styleable.RoundImageView_borderWidth, 0).toFloat()
-            borderColor = getColor(R.styleable.RoundImageView_borderColor, Color.TRANSPARENT)
-            innerGlowColor = getColor(R.styleable.RoundImageView_innerGlowColor, Color.TRANSPARENT)
-            innerGlowRadius = getDimensionPixelSize(R.styleable.RoundImageView_innerGlowRadius, 0).toFloat()
-            colorFilterColor = getColor(R.styleable.RoundImageView_colorFilter, Color.TRANSPARENT)
-            isGrayscale = getBoolean(R.styleable.RoundImageView_isGrayscale, false)
-            colorBlendMode = convertPorterDuffMode(getInt(R.styleable.RoundImageView_colorBlendMode, PorterDuff.Mode.MULTIPLY.ordinal))
-            blendDrawable = getDrawable(R.styleable.RoundImageView_blendSrc)
-            layersBlendModel = convertPorterDuffMode(getInt(R.styleable.RoundImageView_layersBlendMode, PorterDuff.Mode.SRC_OVER.ordinal))
-            blendWidth = getDimensionPixelSize(R.styleable.RoundImageView_blendWidth, blendWidth)
-            blendHeight = getDimensionPixelSize(R.styleable.RoundImageView_blendHeight, blendHeight)
-            blendGravity = getInteger(R.styleable.RoundImageView_blendGravity, Gravity.START or Gravity.TOP)
+        context.obtainStyledAttributes(attrs, R.styleable.SpecialImageView).apply {
+            isCircle = getBoolean(R.styleable.SpecialImageView_isCircle, false)
+            getDimension(R.styleable.SpecialImageView_radius, 0f).takeIf { it > 0 }?.let { setRadiusPx(it, it, it, it) } ?: setRadiusPx(topLeft = getDimension(R.styleable.SpecialImageView_radiusTopLeft, 0f), topRight = getDimension(R.styleable.SpecialImageView_radiusTopRight, 0f), bottomRight = getDimension(R.styleable.SpecialImageView_radiusBottomRight, 0f), bottomLeft = getDimension(R.styleable.SpecialImageView_radiusBottomLeft, 0f))
+            innerBorderWidth = getDimensionPixelSize(R.styleable.SpecialImageView_innerBorderWidth, 0).toFloat()
+            innerBorderColor = getColor(R.styleable.SpecialImageView_innerBorderColor, Color.TRANSPARENT)
+            borderWidth = getDimensionPixelSize(R.styleable.SpecialImageView_borderWidth, 0).toFloat()
+            borderColor = getColor(R.styleable.SpecialImageView_borderColor, Color.TRANSPARENT)
+            innerGlowColor = getColor(R.styleable.SpecialImageView_innerGlowColor, Color.TRANSPARENT)
+            innerGlowRadius = getDimensionPixelSize(R.styleable.SpecialImageView_innerGlowRadius, 0).toFloat()
+            colorFilterColor = getColor(R.styleable.SpecialImageView_colorFilter, Color.TRANSPARENT)
+            isGrayscale = getBoolean(R.styleable.SpecialImageView_isGrayscale, false)
+            colorBlendMode = convertPorterDuffMode(getInt(R.styleable.SpecialImageView_colorBlendMode, PorterDuff.Mode.MULTIPLY.ordinal))
+            blendDrawable = getDrawable(R.styleable.SpecialImageView_blendSrc)
+            layersBlendModel = convertPorterDuffMode(getInt(R.styleable.SpecialImageView_layersBlendMode, PorterDuff.Mode.SRC_OVER.ordinal))
+            blendWidth = getDimensionPixelSize(R.styleable.SpecialImageView_blendWidth, blendWidth)
+            blendHeight = getDimensionPixelSize(R.styleable.SpecialImageView_blendHeight, blendHeight)
+            blendGravity = getInteger(R.styleable.SpecialImageView_blendGravity, Gravity.START or Gravity.TOP)
 
-            val marginAll = getDimensionPixelSize(R.styleable.RoundImageView_blendMargin, 0)
-            blendMargin.set(getDimensionPixelSize(R.styleable.RoundImageView_blendMarginLeft, marginAll), getDimensionPixelSize(R.styleable.RoundImageView_blendMarginTop, marginAll), getDimensionPixelSize(R.styleable.RoundImageView_blendMarginRight, marginAll), getDimensionPixelSize(R.styleable.RoundImageView_blendMarginBottom, marginAll))
-            layersWatermarkOn = getBoolean(R.styleable.RoundImageView_layersWatermarkOn, false)
-            layersHorSpacing = getDimensionPixelSize(R.styleable.RoundImageView_layersHorSpacing, layersHorSpacing)
-            layersVerSpacing = getDimensionPixelSize(R.styleable.RoundImageView_layersVerSpacing, layersVerSpacing)
+            val marginAll = getDimensionPixelSize(R.styleable.SpecialImageView_blendMargin, 0)
+            blendMargin.set(getDimensionPixelSize(R.styleable.SpecialImageView_blendMarginLeft, marginAll), getDimensionPixelSize(R.styleable.SpecialImageView_blendMarginTop, marginAll), getDimensionPixelSize(R.styleable.SpecialImageView_blendMarginRight, marginAll), getDimensionPixelSize(R.styleable.SpecialImageView_blendMarginBottom, marginAll))
+            layersWatermarkOn = getBoolean(R.styleable.SpecialImageView_layersWatermarkOn, false)
+            layersHorSpacing = getDimensionPixelSize(R.styleable.SpecialImageView_layersHorSpacing, layersHorSpacing)
+            layersVerSpacing = getDimensionPixelSize(R.styleable.SpecialImageView_layersVerSpacing, layersVerSpacing)
 
-            getResourceId(R.styleable.RoundImageView_borderGradientColors, 0).takeIf { it != 0 }?.let { borderGradientColors = resources.getIntArray(it) }
-            getResourceId(R.styleable.RoundImageView_borderGradientPositions, 0).takeIf { it != 0 }?.let { resId -> borderGradientPositions = resources.getFloatArray(resId) }
-            borderGradientAngle = getFloat(R.styleable.RoundImageView_borderGradientAngle, 0f)
-            borderGradientType = getInt(R.styleable.RoundImageView_borderGradientType, 0)
+            getResourceId(R.styleable.SpecialImageView_borderGradientColors, 0).takeIf { it != 0 }?.let { borderGradientColors = resources.getIntArray(it) }
+            getResourceId(R.styleable.SpecialImageView_borderGradientPositions, 0).takeIf { it != 0 }?.let { resId -> borderGradientPositions = resources.getFloatArray(resId) }
+            borderGradientAngle = getFloat(R.styleable.SpecialImageView_borderGradientAngle, 0f)
+            borderGradientType = getInt(R.styleable.SpecialImageView_borderGradientType, 0)
 
-            getResourceId(R.styleable.RoundImageView_innerBorderGradientColors, 0).takeIf { it != 0 }?.let { innerBorderGradientColors = resources.getIntArray(it) }
-            getResourceId(R.styleable.RoundImageView_innerBorderGradientPositions, 0).takeIf { it != 0 }?.let { resId -> innerBorderGradientPositions = resources.getFloatArray(resId) }
-            innerBorderGradientAngle = getFloat(R.styleable.RoundImageView_innerBorderGradientAngle, 0f)
-            innerBorderGradientType = getInt(R.styleable.RoundImageView_innerBorderGradientType, 0)
+            getResourceId(R.styleable.SpecialImageView_innerBorderGradientColors, 0).takeIf { it != 0 }?.let { innerBorderGradientColors = resources.getIntArray(it) }
+            getResourceId(R.styleable.SpecialImageView_innerBorderGradientPositions, 0).takeIf { it != 0 }?.let { resId -> innerBorderGradientPositions = resources.getFloatArray(resId) }
+            innerBorderGradientAngle = getFloat(R.styleable.SpecialImageView_innerBorderGradientAngle, 0f)
+            innerBorderGradientType = getInt(R.styleable.SpecialImageView_innerBorderGradientType, 0)
 
             recycle()
         }
@@ -209,9 +209,8 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
             var currentLeft = if (isEvenRow) layersHorSpacing else 0
             while (currentLeft < width) {
                 val destRect = getRectWithOffset(currentLeft, currentTop, dw, dh)
-                drawDrawable(dw, dh, drawable, canvas, destRect)
-//                drawable.bounds = destRect
-//                drawable.draw(canvas)
+                drawDrawable(dw, dh, drawable, canvas, destRect) //                drawable.bounds = destRect
+                //                drawable.draw(canvas)
                 currentLeft += dw + layersHorSpacing
             }
             currentTop += dh + layersVerSpacing
@@ -581,6 +580,6 @@ class RoundImageView @JvmOverloads constructor(context: Context, attrs: Attribut
     fun getGrayscale() = isGrayscale
 
     companion object {
-        private const val TAG = "RoundImageView"
+        private const val TAG = "SpecialImageView"
     }
 }

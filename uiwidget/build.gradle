@@ -43,7 +43,7 @@ afterEvaluate {
                 }
                 pom {
                     name = 'uiwidget'
-                    description = 'Android basic framework packaging and extension library'
+                    description = '1:新增轮播控件 2：自定义的RoundImageView重命名为SpecialImageView'
                     url = 'https://github.com/HeartHappy/UIWidget'
 
                     licenses {

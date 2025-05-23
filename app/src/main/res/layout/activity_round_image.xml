@@ -8,7 +8,7 @@
     android:padding="16dp">
 
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage1"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -28,7 +28,7 @@
         app:layout_constraintTop_toBottomOf="@+id/rivImage1" />
 
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage2"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -50,7 +50,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage2"
         app:layout_constraintTop_toBottomOf="@+id/rivImage2" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage3"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -73,7 +73,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage3"
         app:layout_constraintTop_toBottomOf="@+id/rivImage3" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage4"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -103,7 +103,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage4"
         app:layout_constraintTop_toBottomOf="@+id/rivImage4" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage5"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -132,7 +132,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage5"
         app:layout_constraintTop_toBottomOf="@+id/rivImage5" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage6"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -162,7 +162,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage6"
         app:layout_constraintTop_toBottomOf="@+id/rivImage6" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage7"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -194,7 +194,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage7"
         app:layout_constraintTop_toBottomOf="@+id/rivImage7" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage8"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -225,7 +225,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage8"
         app:layout_constraintTop_toBottomOf="@+id/rivImage8" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage9"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -256,7 +256,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage9"
         app:layout_constraintTop_toBottomOf="@+id/rivImage9" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage10"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -288,7 +288,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage10"
         app:layout_constraintTop_toBottomOf="@+id/rivImage10" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage11"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -319,7 +319,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage11"
         app:layout_constraintTop_toBottomOf="@+id/rivImage11" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage12"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -352,7 +352,7 @@
         app:layout_constraintStart_toStartOf="@+id/rivImage12"
         app:layout_constraintTop_toBottomOf="@+id/rivImage12" />
 
-    <com.hearthappy.uiwidget.image.RoundImageView
+    <com.hearthappy.uiwidget.image.SpecialImageView
         android:id="@+id/rivImage13"
         android:layout_width="100dp"
         android:layout_height="100dp"

@@ -127,7 +127,7 @@
     </declare-styleable>
 
     <!--自定义ImageView：圆形，圆角，内、外边框、内发光，线性渐变，灰度，颜色滤镜、图层水印、图层混合-->
-    <declare-styleable name="RoundImageView">
+    <declare-styleable name="SpecialImageView">
         <attr name="isCircle" format="boolean" />
         <!-- 统一圆角 -->
         <attr name="radius" format="dimension" />
