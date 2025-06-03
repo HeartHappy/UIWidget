@@ -12,14 +12,24 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginVertical="36dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:wrv_carousel_interval="3000"
         app:wrv_corner_radius="12dp"
         app:wrv_enable_auto_carousel="false"
         app:wrv_enable_loop_model="false"
-        app:wrv_carousel_interval="3000"
         app:wrv_inner_glow_color="@color/color_yellow"
         app:wrv_inner_glow_radius="4dp" />
 
 
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vp"
+        android:layout_marginTop="10dp"
+        android:clipToPadding="false"
+        android:padding="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="200dp"
+        android:layout_height="400dp"
+        app:layout_constraintTop_toBottomOf="@+id/rvWaterRipple" />
 
     <TextView
         android:id="@+id/tvTitle"

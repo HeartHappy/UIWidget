@@ -15,6 +15,6 @@ class ExampleUnitTest {
     }
 
     @Test fun test() {
-        println("test:${20%29}")
+        println("test:${6%180}")
     }
 }

@@ -1,13 +1,12 @@
 package com.hearthappy.framework.example.carouse
 
-import com.hearthappy.basic.AbsSpecialAdapter
-import com.hearthappy.basic.ext.loadUrl
+import com.hearthappy.basic.AbsBaseAdapter
 import com.hearthappy.framework.databinding.FragmentCarouseBinding
 
-class CarouselAdapter : AbsSpecialAdapter<FragmentCarouseBinding, String>() {
+class CarouselAdapter : AbsBaseAdapter<FragmentCarouseBinding, String>() {
 
     override fun FragmentCarouseBinding.bindViewHolder(data: String, position: Int) {
-        tvTitle.loadUrl(data)
+        tvTitle.text = position.toString()
     }
 
     override fun getItemCount(): Int {

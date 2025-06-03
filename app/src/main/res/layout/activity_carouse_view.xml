@@ -6,10 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".example.carouse.CarouseViewActivity">
-    <com.hearthappy.uiwidget.carouse.CarouselView
+    <com.hearthappy.uiwidget.viewpager.CarouselView
         android:id="@+id/vp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        app:carousel_interval="2000"
+        app:carousel_duration="500"
+        app:isUserInputEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

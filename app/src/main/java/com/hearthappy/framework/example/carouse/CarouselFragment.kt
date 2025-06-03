@@ -6,7 +6,8 @@ import com.hearthappy.framework.databinding.FragmentCarouseBinding
 
 class CarouselFragment : AbsBaseFragment<FragmentCarouseBinding>() {
     override fun FragmentCarouseBinding.initView(savedInstanceState: Bundle?) {
-        arguments?.getInt("index")?.let { //            tvTitle.text = "$it"
+        arguments?.getInt("index")?.let {
+            tvTitle.text = "$it"
         }
     }
 

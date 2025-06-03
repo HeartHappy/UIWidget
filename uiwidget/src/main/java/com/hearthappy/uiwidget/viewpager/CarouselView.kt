@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.carouse
+package com.hearthappy.uiwidget.viewpager
 
 import android.animation.Animator
 import android.animation.TimeInterpolator
@@ -6,7 +6,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -18,11 +18,19 @@ import kotlin.Int.Companion.MAX_VALUE
  * @author ChenRui
  * ClassDescription：基于ViewPager2封装的无限轮播控件
  */
-class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(
+    context, attrs, defStyleAttr
+) {
     private val viewPager2 = ViewPager2(context)
     private var isViewVisible = false
     private var interval: Long = 3000
     private var duration: Long = 1000
+
+    var isUserInputEnabled = false
+        set(value) {
+            field = value
+            viewPager2.isUserInputEnabled = value
+        }
 
 
     override fun onVisibilityChanged(changedView: View, visibility: Int) {
@@ -32,19 +40,27 @@ class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     init {
         addView(viewPager2)
-
+        setLayerType(View.LAYER_TYPE_HARDWARE, null)
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarouselView)
         if (typedArray.hasValue(R.styleable.CarouselView_carousel_interval)) {
-            interval = typedArray.getInteger(R.styleable.CarouselView_carousel_interval, interval.toInt()).toLong()
+            interval = typedArray.getInteger(
+                R.styleable.CarouselView_carousel_interval, interval.toInt()
+            ).toLong()
         }
         if (typedArray.hasValue(R.styleable.CarouselView_carousel_duration)) {
-            duration = typedArray.getInteger(R.styleable.CarouselView_carousel_duration, duration.toInt()).toLong()
+            duration = typedArray.getInteger(
+                R.styleable.CarouselView_carousel_duration, duration.toInt()
+            ).toLong()
         }
         if (typedArray.hasValue(R.styleable.CarouselView_carousel_orientation)) {
-            viewPager2.orientation = typedArray.getInt(R.styleable.CarouselView_carousel_orientation, ViewPager2.ORIENTATION_HORIZONTAL)
+            viewPager2.orientation = typedArray.getInt(
+                R.styleable.CarouselView_carousel_orientation, ViewPager2.ORIENTATION_HORIZONTAL
+            )
         }
         if (typedArray.hasValue(R.styleable.CarouselView_isUserInputEnabled)) {
-            isUserInputEnabled(typedArray.getBoolean(R.styleable.CarouselView_isUserInputEnabled, true))
+            isUserInputEnabled = typedArray.getBoolean(
+                R.styleable.CarouselView_isUserInputEnabled, true
+            )
         }
 
         typedArray.recycle()
@@ -70,16 +86,10 @@ class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeS
         viewPager2.setPageTransformer(transformer)
     }
 
-    fun isUserInputEnabled(enabled: Boolean) {
-        viewPager2.isUserInputEnabled = enabled
-    }
-
     fun addListener(onPageSelected: (Int) -> Unit, onPageScrolled: (Int, Float, Int) -> Unit = { p, po, pop -> }, onPageScrollStateChanged: (Int) -> Unit = {}) {
-        val absSpecialAdapter = viewPager2.adapter
-        val itemRealCount = absSpecialAdapter?.itemCount ?: -1
         viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                onPageSelected(itemRealCount.takeIf { it == -1 }?.run { position } ?: (position % itemRealCount))
+                onPageSelected(position)
             }
 
             override fun onPageScrollStateChanged(state: Int) {
@@ -87,7 +97,9 @@ class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                onPageScrolled(itemRealCount.takeIf { it == -1 }?.run { position } ?: (position % itemRealCount), positionOffset, positionOffsetPixels)
+                onPageScrolled(
+                    position, positionOffset, positionOffsetPixels
+                )
             }
         })
     }
@@ -105,11 +117,10 @@ class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val carouselTask = object : Runnable {
         override fun run() {
             if (isViewVisible) {
-                var currentItem = viewPager2.currentItem
-                val itemCount=viewPager2.adapter?.itemCount?: MAX_VALUE
-
-                if (++currentItem >= itemCount) currentItem = 0
-                scrollAnimator(currentItem, duration)
+                var targetItem = viewPager2.currentItem
+                val itemCount = viewPager2.adapter?.itemCount ?: MAX_VALUE
+                if (++targetItem >= itemCount) targetItem = 0
+                scrollAnimator(targetItem, duration)
             }
             postDelayed(this, interval)
         }
@@ -130,13 +141,13 @@ class CarouselView @JvmOverloads constructor(context: Context, attrs: AttributeS
         stopAutoScroll()
     }
 
-    private fun scrollAnimator(item: Int, duration: Long, interpolator: TimeInterpolator = AccelerateDecelerateInterpolator()) {
+    private fun scrollAnimator(item: Int, duration: Long, interpolator: TimeInterpolator = LinearInterpolator()) {
         viewPager2.apply {
-            if(item<currentItem){
-                setCurrentItem(item,false)
+            if (item < currentItem) { //                setCurrentItem(item,false)
                 return
             }
-            val offsetDistance: Int = if (orientation == ViewPager2.ORIENTATION_VERTICAL) height else width
+            val offsetDistance: Int =
+                if (orientation == ViewPager2.ORIENTATION_VERTICAL) height else width
             val pxToDrag: Int = offsetDistance * (item - currentItem)
             val animator = ValueAnimator.ofInt(0, pxToDrag)
             var previousValue = 0

@@ -1,4 +1,4 @@
-package com.hearthappy.uiwidget.carouse
+package com.hearthappy.uiwidget.viewpager
 
 import android.content.Context
 import android.util.AttributeSet
